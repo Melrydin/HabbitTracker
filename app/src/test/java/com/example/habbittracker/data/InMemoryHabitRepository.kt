@@ -2,6 +2,7 @@ package com.example.habbittracker.data
 
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
 import com.example.habbittracker.domain.DayEvaluator
+import com.example.habbittracker.domain.DayHabits
 import com.example.habbittracker.domain.StreakCalculator
 import com.example.habbittracker.domain.model.Day
 import com.example.habbittracker.domain.model.GoalType
@@ -16,12 +17,12 @@ import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
 
 /**
- * Placeholder repository with sample data so the screens run and can be used in
- * the emulator without a database.
+ * An in-memory test double for [HabitRepository], seeded with sample habits.
  *
- * TODO(Room): replace with a Room implementation. The rules for `passed` and the
- *  streak already live in [DayEvaluator] and [StreakCalculator] and carry over
- *  unchanged.
+ * Production uses [com.example.habbittracker.data.RoomHabitRepository]; this fake
+ * exists so repository behavior can be exercised without a database. Both share the
+ * rules in [DayEvaluator], [DayHabits] and [StreakCalculator], so the two cannot
+ * drift apart on the parts that matter.
  */
 class InMemoryHabitRepository(
     today: LocalDate = LocalDate.now(),
