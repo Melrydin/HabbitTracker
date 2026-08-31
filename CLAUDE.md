@@ -36,10 +36,20 @@ Tests:
 ./gradlew :app:testDebugUnitTest
 ```
 
-Beides zusammen, so wird vor jedem Commit geprüft:
+Codestil prüfen und automatisch korrigieren:
 
 ```bash
-./gradlew :app:assembleDebug :app:testDebugUnitTest
+./gradlew ktlintCheck
+```
+
+```bash
+./gradlew ktlintFormat
+```
+
+Alles zusammen, genau das fährt auch die CI:
+
+```bash
+./gradlew ktlintCheck :app:lintDebug :app:assembleDebug :app:testDebugUnitTest
 ```
 
 ## Aufbau
@@ -114,6 +124,12 @@ Farben nie direkt im Composable literalisieren — immer über `MaterialTheme.co
   öffentlichen Funktionen, kein `Any`, keine Plattformtypen aus Java-Interop ungeprüft
   weiterreichen.
 
+Die Formatierung erzwingt **ktlint** (`ktlint_official`), konfiguriert in `.editorconfig`.
+Zwei Regeln sind dort bewusst abgeschaltet: `function-signature` und `class-signature`
+brechen jede Signatur ab zwei Parametern auf eigene Zeilen, auch wenn sie bequem in 120
+Zeichen passt. Das verlängert Funktionen um etwa ein Drittel und arbeitet damit direkt
+gegen die 20-Zeilen-Regel; die Zeilenlänge deckt `max_line_length` ohnehin ab.
+
 [dry]: https://de.wikipedia.org/wiki/Don%E2%80%99t_repeat_yourself
 [srp]: https://en.wikipedia.org/wiki/Single-responsibility_principle
 
@@ -133,8 +149,10 @@ Ein-Personen-Projekt, deshalb Trunk-Based Development:
 
 * Alle Arbeit wird **direkt auf `main`** committet, in kleinen, fokussierten Commits (siehe
   Commit-Nachrichten unten).
-* Die CI-Pipeline (Format, Lint, Rechtschreibung) läuft bei jedem Push und hält `main`
-  gesund.
+* Die CI-Pipeline läuft bei jedem Push und hält `main` gesund:
+  `.github/workflows/ci.yml` prüft Codestil (ktlint), Android Lint, Build und Unit-Tests
+  auf einem **self-hosted Runner**. Bei rotem Lauf landen die Reports als Artefakt am Job.
+  Eine Rechtschreibprüfung ist noch nicht dabei, siehe *Stand*.
 * Kommen weitere Mitwirkende dazu, lässt sich ein Feature-Branch- und Pull-Request-Workflow
   wieder einführen.
 
@@ -264,6 +282,9 @@ Offen:
 * Verlauf und Einstellungen sind im `HabitNavHost` noch leere Callbacks.
 * `Habit.colorTag` steckt im Datenmodell, aber bewusst nicht im Editor — ein Farbwähler pro
   Habit steht gegen die Ein-Farb-Regel oben.
+* Die **Rechtschreibprüfung** in der CI fehlt noch. Ein englischsprachiger Checker würde
+  bei deutschen Kommentaren und Bezeichnern fast nur Fehlalarme liefern — sinnvoll wäre er
+  erst mit einem deutschen Wörterbuch und einer gepflegten Projekt-Wortliste.
 * `material-icons-extended` bläht das Debug-APK auf ~19 MB. Für Release entweder R8
   anlassen (steht im Template auf `enable = false`) oder den Katalog auf handverlesene
   Vektoren eindampfen.
