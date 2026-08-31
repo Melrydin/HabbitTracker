@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -57,6 +58,8 @@ import java.util.Locale
 fun TodayRoute(
     viewModel: TodayViewModel,
     onAddHabit: () -> Unit,
+    onEditHabit: (Long) -> Unit,
+    onOpenHabits: () -> Unit,
     onOpenHistory: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
@@ -81,6 +84,8 @@ fun TodayRoute(
         onIncrement = viewModel::onIncrement,
         onDecrement = viewModel::onDecrement,
         onAddHabit = onAddHabit,
+        onEditHabit = onEditHabit,
+        onOpenHabits = onOpenHabits,
         onOpenHistory = onOpenHistory,
         onOpenSettings = onOpenSettings,
         modifier = modifier,
@@ -96,6 +101,8 @@ fun TodayScreen(
     onIncrement: (HabitItem) -> Unit,
     onDecrement: (HabitItem) -> Unit,
     onAddHabit: () -> Unit,
+    onEditHabit: (Long) -> Unit,
+    onOpenHabits: () -> Unit,
     onOpenHistory: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
@@ -131,6 +138,7 @@ fun TodayScreen(
                 TodayHeader(
                     date = state.date,
                     currentStreak = state.currentStreak,
+                    onOpenHabits = onOpenHabits,
                     onOpenHistory = onOpenHistory,
                     onOpenSettings = onOpenSettings,
                 )
@@ -164,6 +172,7 @@ fun TodayScreen(
                         onToggle = onToggleCheck,
                         onIncrement = onIncrement,
                         onDecrement = onDecrement,
+                        onEdit = { onEditHabit(it.id) },
                     )
                 }
             }
@@ -175,6 +184,7 @@ fun TodayScreen(
 private fun TodayHeader(
     date: LocalDate,
     currentStreak: Int,
+    onOpenHabits: () -> Unit,
     onOpenHistory: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
@@ -202,6 +212,13 @@ private fun TodayHeader(
                 text = subtitle,
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        IconButton(onClick = onOpenHabits) {
+            Icon(
+                imageVector = Icons.Outlined.Checklist,
+                contentDescription = stringResource(R.string.today_open_habits),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         IconButton(onClick = onOpenHistory) {
@@ -318,7 +335,8 @@ private fun TodayScreenPreview() {
             state = previewState(),
             snackbarHostState = remember { SnackbarHostState() },
             onThemeChange = {}, onToggleCheck = {}, onIncrement = {}, onDecrement = {},
-            onAddHabit = {}, onOpenHistory = {}, onOpenSettings = {},
+            onAddHabit = {}, onEditHabit = {}, onOpenHabits = {},
+            onOpenHistory = {}, onOpenSettings = {},
         )
     }
 }
@@ -331,7 +349,8 @@ private fun TodayScreenDarkPreview() {
             state = previewState(passed = true),
             snackbarHostState = remember { SnackbarHostState() },
             onThemeChange = {}, onToggleCheck = {}, onIncrement = {}, onDecrement = {},
-            onAddHabit = {}, onOpenHistory = {}, onOpenSettings = {},
+            onAddHabit = {}, onEditHabit = {}, onOpenHabits = {},
+            onOpenHistory = {}, onOpenSettings = {},
         )
     }
 }
@@ -344,7 +363,8 @@ private fun TodayScreenEmptyPreview() {
             state = TodayUiState(date = LocalDate.of(2026, 8, 31), loaded = true),
             snackbarHostState = remember { SnackbarHostState() },
             onThemeChange = {}, onToggleCheck = {}, onIncrement = {}, onDecrement = {},
-            onAddHabit = {}, onOpenHistory = {}, onOpenSettings = {},
+            onAddHabit = {}, onEditHabit = {}, onOpenHabits = {},
+            onOpenHistory = {}, onOpenSettings = {},
         )
     }
 }

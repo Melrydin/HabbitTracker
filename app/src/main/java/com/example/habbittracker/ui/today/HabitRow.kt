@@ -2,6 +2,7 @@ package com.example.habbittracker.ui.today
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -30,7 +30,12 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.toggleableState
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.habbittracker.R
@@ -42,7 +47,8 @@ import com.example.habbittracker.ui.theme.HabitTheme
 
 /**
  * Eine Zeile der Tagesliste (F3). CHECK togglet auf Tippen der ganzen Zeile,
- * COUNTER und AMOUNT bekommen einen Stepper.
+ * COUNTER und AMOUNT bekommen einen Stepper und oeffnen beim Tippen den Editor.
+ * Langes Druecken fuehrt immer in den Editor (F1).
  */
 @Composable
 fun HabitRow(
@@ -51,12 +57,14 @@ fun HabitRow(
     onToggle: (HabitItem) -> Unit,
     onIncrement: (HabitItem) -> Unit,
     onDecrement: (HabitItem) -> Unit,
+    onEdit: (HabitItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val habit = item.entry.habit
     val status = HabitTheme.status
     val haptics = LocalHapticFeedback.current
     val isCheck = habit.type == HabitType.CHECK
+    val editLabel = stringResource(R.string.habit_edit_action)
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -65,16 +73,31 @@ fun HabitRow(
     ) {
         Row(
             modifier = Modifier
+                .combinedClickable(
+                    role = if (isCheck) Role.Checkbox else Role.Button,
+                    onClick = {
+                        if (isCheck) {
+                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onToggle(item)
+                        } else {
+                            onEdit(item)
+                        }
+                    },
+                    onLongClick = { onEdit(item) },
+                )
                 .then(
+                    // Bei CHECK ist Tippen das Abhaken, deshalb braucht TalkBack
+                    // einen eigenen Weg zum Editor.
                     if (isCheck) {
-                        Modifier.toggleable(
-                            value = item.fulfilled,
-                            role = Role.Checkbox,
-                            onValueChange = {
-                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                onToggle(item)
-                            },
-                        )
+                        Modifier.semantics {
+                            toggleableState = ToggleableState(item.fulfilled)
+                            customActions = listOf(
+                                CustomAccessibilityAction(editLabel) {
+                                    onEdit(item)
+                                    true
+                                },
+                            )
+                        }
                     } else {
                         Modifier
                     },
