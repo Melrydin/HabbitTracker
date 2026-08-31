@@ -523,7 +523,16 @@ private fun FormSection(
 private fun HabitEditorNewPreview() {
     HabbitTrackerTheme {
         HabitEditorScreen(
-            state = HabitEditorUiState(HabitFormState(name = "Wasser trinken", type = HabitType.COUNTER, target = "8", unit = "Glaeser", points = 2, icon = "water_drop")),
+            state = HabitEditorUiState(
+                HabitFormState(
+                    name = "Wasser trinken",
+                    type = HabitType.COUNTER,
+                    target = "8",
+                    unit = "Glaeser",
+                    points = 2,
+                    icon = "water_drop",
+                ),
+            ),
             onNameChange = {}, onTypeChange = {}, onTargetChange = {}, onUnitChange = {},
             onPointsChange = {}, onRequiredChange = {}, onIconChange = {},
             onSave = {}, onToggleArchived = {}, onDelete = {}, onBack = {},
@@ -537,7 +546,14 @@ private fun HabitEditorEditPreview() {
     HabbitTrackerTheme(darkTheme = true) {
         HabitEditorScreen(
             state = HabitEditorUiState(
-                HabitFormState(id = 2, name = "Sport", type = HabitType.CHECK, points = 3, required = true, icon = "directions_run"),
+                HabitFormState(
+                    id = 2,
+                    name = "Sport",
+                    type = HabitType.CHECK,
+                    points = 3,
+                    required = true,
+                    icon = "directions_run",
+                ),
             ),
             onNameChange = {}, onTypeChange = {}, onTargetChange = {}, onUnitChange = {},
             onPointsChange = {}, onRequiredChange = {}, onIconChange = {},

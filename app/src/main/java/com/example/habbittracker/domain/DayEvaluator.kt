@@ -28,33 +28,40 @@ data class DayGoalProgress(
  */
 object DayEvaluator {
 
-    fun evaluate(day: Day, entries: List<HabitEntry>): DayGoalProgress {
-        val fulfilled = entries.filter { it.fulfilled }
-        return when (day.goalType) {
-            GoalType.ALL_REQUIRED -> {
-                val required = entries.filter { it.habit.required }
-                DayGoalProgress(
-                    goalType = day.goalType,
-                    current = required.count { it.fulfilled },
-                    threshold = required.size,
-                    // Ohne Pflicht-Habits gibt es nichts zu erfuellen: der Tag bleibt neutral.
-                    passed = required.isNotEmpty() && required.all { it.fulfilled },
-                )
-            }
+    fun evaluate(day: Day, entries: List<HabitEntry>): DayGoalProgress = when (day.goalType) {
+        GoalType.ALL_REQUIRED -> evaluateAllRequired(day, entries)
+        GoalType.MIN_COUNT -> evaluateMinCount(day, entries)
+        GoalType.POINTS -> evaluatePoints(day, entries)
+    }
 
-            GoalType.MIN_COUNT -> DayGoalProgress(
-                goalType = day.goalType,
-                current = fulfilled.size,
-                threshold = day.goalThreshold,
-                passed = day.goalThreshold > 0 && fulfilled.size >= day.goalThreshold,
-            )
+    private fun evaluateAllRequired(day: Day, entries: List<HabitEntry>): DayGoalProgress {
+        val required = entries.filter { it.habit.required }
+        return DayGoalProgress(
+            goalType = day.goalType,
+            current = required.count { it.fulfilled },
+            threshold = required.size,
+            // Ohne Pflicht-Habits gibt es nichts zu erfuellen: der Tag bleibt neutral.
+            passed = required.isNotEmpty() && required.all { it.fulfilled },
+        )
+    }
 
-            GoalType.POINTS -> DayGoalProgress(
-                goalType = day.goalType,
-                current = fulfilled.sumOf { it.habit.points },
-                threshold = day.goalThreshold,
-                passed = day.goalThreshold > 0 && fulfilled.sumOf { it.habit.points } >= day.goalThreshold,
-            )
-        }
+    private fun evaluateMinCount(day: Day, entries: List<HabitEntry>): DayGoalProgress {
+        val fulfilled = entries.count { it.fulfilled }
+        return DayGoalProgress(
+            goalType = day.goalType,
+            current = fulfilled,
+            threshold = day.goalThreshold,
+            passed = day.goalThreshold > 0 && fulfilled >= day.goalThreshold,
+        )
+    }
+
+    private fun evaluatePoints(day: Day, entries: List<HabitEntry>): DayGoalProgress {
+        val points = entries.filter { it.fulfilled }.sumOf { it.habit.points }
+        return DayGoalProgress(
+            goalType = day.goalType,
+            current = points,
+            threshold = day.goalThreshold,
+            passed = day.goalThreshold > 0 && points >= day.goalThreshold,
+        )
     }
 }

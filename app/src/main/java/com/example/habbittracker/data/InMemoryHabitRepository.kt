@@ -133,7 +133,15 @@ class InMemoryHabitRepository(
 
     private fun seed(today: LocalDate): Store {
         val habits = listOf(
-            Habit(1, "Wasser trinken", HabitType.COUNTER, target = 8, unit = "Glaeser", points = 2, icon = "water_drop"),
+            Habit(
+                id = 1,
+                name = "Wasser trinken",
+                type = HabitType.COUNTER,
+                target = 8,
+                unit = "Glaeser",
+                points = 2,
+                icon = "water_drop",
+            ),
             Habit(2, "Sport", HabitType.CHECK, target = 1, points = 3, required = true, icon = "directions_run"),
             Habit(3, "Lesen", HabitType.AMOUNT, target = 30, unit = "min", points = 2, icon = "menu_book"),
             Habit(4, "Meditation", HabitType.CHECK, target = 1, points = 1, icon = "self_improvement"),

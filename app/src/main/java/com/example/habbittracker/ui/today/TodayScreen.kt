@@ -319,7 +319,10 @@ private fun previewState(passed: Boolean = false) = TodayUiState(
     goal = DayGoalProgress(GoalType.POINTS, current = if (passed) 6 else 3, threshold = 6, passed = passed),
     habits = listOf(
         HabitEntry(Habit(1, "Wasser trinken", HabitType.COUNTER, 8, "Glaeser", points = 2, icon = "water_drop"), 3),
-        HabitEntry(Habit(2, "Sport", HabitType.CHECK, 1, points = 3, required = true, icon = "directions_run"), if (passed) 1 else 0),
+        HabitEntry(
+            habit = Habit(2, "Sport", HabitType.CHECK, 1, points = 3, required = true, icon = "directions_run"),
+            progress = if (passed) 1 else 0,
+        ),
         HabitEntry(Habit(3, "Lesen", HabitType.AMOUNT, 30, "min", points = 2, icon = "menu_book"), 30),
         HabitEntry(Habit(4, "Meditation", HabitType.CHECK, 1, points = 1, icon = "self_improvement"), 0),
     ).map(::HabitItem),
