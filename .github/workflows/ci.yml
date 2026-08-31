@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# Ein laufender Job pro Branch reicht, aeltere Laeufe werden abgebrochen.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: self-hosted
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Die Daemon-Toolchain in gradle/gradle-daemon-jvm.properties verlangt JDK 25.
+      - name: JDK einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Gradle einrichten
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Codestil pruefen
+        run: ./gradlew ktlintCheck
+
+      - name: Android Lint
+        run: ./gradlew :app:lintDebug
+
+      - name: Bauen
+        run: ./gradlew :app:assembleDebug
+
+      - name: Unit-Tests
+        run: ./gradlew :app:testDebugUnitTest
+
+      # Bei rotem Lauf sind die Reports das Erste, was man sehen will.
+      - name: Reports sichern
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            app/build/reports/
+            app/build/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
