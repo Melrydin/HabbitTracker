@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
 
-# Ein laufender Job pro Branch reicht, aeltere Laeufe werden abgebrochen.
+# One running job per branch is enough, older runs are stopped.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -21,30 +21,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Die Daemon-Toolchain in gradle/gradle-daemon-jvm.properties verlangt JDK 25.
-      - name: JDK einrichten
+      # The daemon toolchain in gradle/gradle-daemon-jvm.properties requires JDK 25.
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '25'
 
-      - name: Gradle einrichten
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Codestil pruefen
+      # Needed for cspell; a self-hosted runner does not necessarily ship Node.
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check code style
         run: ./gradlew ktlintCheck
+
+      # The whole codebase is English, so an English spell checker is meaningful here.
+      - name: Check spelling
+        run: npx --yes cspell@10 lint --no-progress "**/*.{kt,kts,xml,yml,yaml,md,toml}"
 
       - name: Android Lint
         run: ./gradlew :app:lintDebug
 
-      - name: Bauen
+      - name: Build
         run: ./gradlew :app:assembleDebug
 
-      - name: Unit-Tests
+      - name: Unit tests
         run: ./gradlew :app:testDebugUnitTest
 
-      # Bei rotem Lauf sind die Reports das Erste, was man sehen will.
-      - name: Reports sichern
+      # On a red run the reports are the first thing anyone wants to see.
+      - name: Upload reports
         if: failure()
         uses: actions/upload-artifact@v4
         with:

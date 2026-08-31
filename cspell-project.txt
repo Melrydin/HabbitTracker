@@ -1,0 +1,45 @@
+# Project specific vocabulary. One word per line, case insensitive.
+# Keep this list short: every entry is a word the spell checker will stop
+# catching, so only add real terms, never typos.
+
+# Project identity
+habbit
+habbittracker
+featureliste
+
+# Android, Gradle and Kotlin toolchain
+aapt
+androidx
+jetpack
+mvvm
+autogenerate
+composable
+composables
+coroutines
+editorconfig
+foojay
+gradlew
+jvmargs
+kotlinx
+ktlint
+mipmap
+proguard
+temurin
+viewmodel
+viewmodels
+
+# Material and Compose vocabulary
+automirrored
+hapticfeedback
+roboto
+scaffold
+sharedpref
+toggleable
+unarchive
+unarchived
+
+# Third party names referenced in documentation
+bengt
+brodersen
+pinterest
+qoomon
