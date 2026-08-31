@@ -15,7 +15,9 @@
     "**/*.png",
     "**/res/mipmap*/**",
     "cspell.json",
-    "docs/habit_tracker_featureliste.md"
+    "docs/habit_tracker_featureliste.md",
+    "gradle.properties",
+    "app/schemas/**"
   ],
   "dictionaryDefinitions": [
     {

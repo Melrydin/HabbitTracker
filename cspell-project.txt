@@ -10,8 +10,12 @@ featureliste
 # Android, Gradle and Kotlin toolchain
 aapt
 androidx
+daos
 jetpack
+ksp
 mvvm
+robolectric
+sqlite
 autogenerate
 composable
 composables

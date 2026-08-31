@@ -21,7 +21,7 @@ checker skips it.
 | Language | Kotlin |
 | UI | Jetpack Compose, Material 3 |
 | Architecture | MVVM, repository, StateFlow |
-| Persistence | **none yet** — `InMemoryHabitRepository` is a placeholder for Room |
+| Persistence | Room (SQLite), local only |
 | Navigation | `navigation-compose`, string routes |
 | minSdk / targetSdk | 26 / 37 |
 | Permissions | none (later only `POST_NOTIFICATIONS` for F5) |
@@ -73,7 +73,8 @@ app/src/main/java/com/example/habbittracker/
 │   ├── model/        Habit, Day, DayHabit, HabitEntry
 │   ├── DayEvaluator      daily goal evaluation (F2)
 │   └── StreakCalculator  current and longest streak (F4)
-├── data/             HabitRepository (interface) + InMemoryHabitRepository
+├── data/             HabitRepository (interface) + RoomHabitRepository
+│   └── local/        entities, DAOs, type converters, HabitDatabase
 ├── ui/
 │   ├── theme/        colors, typography, shapes
 │   ├── components/   building blocks shared across screens (ProgressTrack, StatusPill)
@@ -87,6 +88,31 @@ app/src/main/java/com/example/habbittracker/
 
 `domain/` must not import anything from `android.*` or Compose — that is what keeps the
 business rules testable in fast JVM tests.
+
+## Persistence
+
+Room stores habits, days and recorded values in three tables. `data/local/` holds the
+entities, DAOs and converters; `RoomHabitRepository` maps them onto the domain models and
+keeps `Day.passed` in step.
+
+* Dates are stored as ISO-8601 text and enums by name, so the database stays readable when
+  inspected by hand and dates still sort correctly.
+* `day_habits` has a foreign key onto `habits` with `ON DELETE CASCADE`. Deleting a habit
+  takes its recorded values with it; archiving leaves those rows untouched, which is what
+  keeps old entries visible.
+* Schemas are exported to `app/schemas/` and checked in, so a future migration can diff
+  against them. Bump `HabitDatabase.SCHEMA_VERSION` together with a migration — there is
+  deliberately **no destructive fallback**, losing a user's history silently is worse than a
+  crash that shows up in testing.
+
+`RoomHabitRepository` is covered by JVM tests through Robolectric, so the DAOs, converters and
+the cascade run in the normal `testDebugUnitTest` pass rather than only on a device. The
+in-memory `InMemoryHabitRepository` lives in the test sources as a fast fake; both share the
+rules in `domain/`, so they cannot drift apart on the parts that matter.
+
+KSP registers its generated sources through the `kotlin.sourceSets` DSL, which AGP 9's
+built-in Kotlin support rejects. `android.disallowKotlinSourceSets=false` in
+`gradle.properties` is the documented escape hatch and is required for Room to build.
 
 ## Business rules
 
@@ -292,8 +318,6 @@ archive and delete.
 
 Open:
 
-* **Room** — until then no habit survives an app restart. The repository interface is cut so
-  that view models and UI stay untouched by that change.
 * History and settings are still empty callbacks in `HabitNavHost`.
 * `Habit.colorTag` exists in the data model but deliberately not in the editor — a per-habit
   color picker contradicts the one-color rule above.
