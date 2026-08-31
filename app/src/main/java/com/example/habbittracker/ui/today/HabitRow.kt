@@ -46,9 +46,9 @@ import com.example.habbittracker.ui.icons.HabitIcons
 import com.example.habbittracker.ui.theme.HabitTheme
 
 /**
- * Eine Zeile der Tagesliste (F3). CHECK togglet auf Tippen der ganzen Zeile,
- * COUNTER und AMOUNT bekommen einen Stepper und oeffnen beim Tippen den Editor.
- * Langes Druecken fuehrt immer in den Editor (F1).
+ * A row of the daily list (F3). CHECK toggles when the whole row is tapped;
+ * COUNTER and AMOUNT get a stepper and open the editor on tap instead.
+ * A long press always leads to the editor (F1).
  */
 @Composable
 fun HabitRow(
@@ -86,8 +86,8 @@ fun HabitRow(
                         },
                         onLongClick = { onEdit(item) },
                     ).then(
-                        // Bei CHECK ist Tippen das Abhaken, deshalb braucht TalkBack
-                        // einen eigenen Weg zum Editor.
+                        // For CHECK a tap ticks the habit off, so TalkBack needs its
+                        // own route into the editor.
                         if (isCheck) {
                             Modifier.semantics {
                                 toggleableState = ToggleableState(item.fulfilled)
@@ -109,7 +109,7 @@ fun HabitRow(
             Icon(
                 imageVector = HabitIcons[habit.icon],
                 contentDescription = null,
-                // Gruen heisst jetzt ausschliesslich "erledigt", offen bleibt neutral.
+                // Green now means "done" and nothing else, open stays neutral.
                 tint = if (item.fulfilled) status.passed else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(24.dp),
             )
@@ -230,8 +230,8 @@ private fun Stepper(
 }
 
 /**
- * Zweite Zeile: bei Zaehlern der Stand, bei CHECK das, was den Tag weiterbringt
- * (Punkte oder Pflicht), damit die Regel des Tages ablesbar bleibt.
+ * Second line: the current value for counters, and for CHECK whatever moves the day
+ * forward (points or required), so the rule of the day stays readable.
  */
 @Composable
 private fun habitSubtitle(item: HabitItem, goalType: GoalType): String {

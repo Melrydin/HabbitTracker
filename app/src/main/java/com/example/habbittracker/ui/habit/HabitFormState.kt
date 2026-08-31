@@ -5,7 +5,7 @@ import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.ui.icons.HabitIcons
 
-/** Gruende, aus denen das Formular noch nicht gespeichert werden kann. */
+/** Reasons why the form cannot be saved yet. */
 enum class HabitFormError {
     NAME_REQUIRED,
     TARGET_REQUIRED,
@@ -14,11 +14,11 @@ enum class HabitFormError {
 }
 
 /**
- * Zustand des Habit-Editors (F1).
+ * State of the habit editor (F1).
  *
- * [target] und [points] liegen bewusst als Text vor: ein Zahlenfeld darf
- * zwischendurch leer sein, ohne dass der Zustand einen erfundenen Wert erfindet.
- * Die Umwandlung nach [Habit] passiert erst beim Speichern.
+ * [target] is deliberately held as text: a number field may be empty in between
+ * without the state inventing a value for it. The conversion into a [Habit] only
+ * happens on save.
  */
 data class HabitFormState(
     val id: Long = NEW_HABIT_ID,
@@ -33,7 +33,7 @@ data class HabitFormState(
 ) {
     val isNew: Boolean get() = id == NEW_HABIT_ID
 
-    /** CHECK hat laut Featureliste immer das Ziel 1, das Feld wird dort nicht gezeigt. */
+    /** Per the feature list CHECK always has target 1, so the field is hidden there. */
     val showsTargetAndUnit: Boolean get() = type != HabitType.CHECK
 
     private val parsedTarget: Int? get() = if (type == HabitType.CHECK) 1 else target.trim().toIntOrNull()
@@ -54,30 +54,30 @@ data class HabitFormState(
 
     val canSave: Boolean get() = nameError == null && targetError == null
 
-    // --- Bearbeitungen ---
+    // --- Edits ---
 
     fun withName(value: String) = copy(name = value.take(Habit.NAME_MAX_LENGTH))
 
-    /** Nur Ziffern, damit Vorzeichen und Trennzeichen gar nicht erst entstehen. */
+    /** Digits only, so signs and separators never appear in the first place. */
     fun withTarget(value: String) = copy(target = value.filter(Char::isDigit).take(TARGET_MAX_DIGITS))
 
     fun withUnit(value: String) = copy(unit = value.take(UNIT_MAX_LENGTH))
 
     fun withPoints(value: Int) = copy(points = value.coerceIn(POINTS_MIN, POINTS_MAX))
 
-    /** Beim Wechsel auf CHECK verlieren Ziel und Einheit ihre Bedeutung. */
+    /** Switching to CHECK makes target and unit meaningless. */
     fun withType(value: HabitType): HabitFormState =
         when {
             value == type -> this
 
             value == HabitType.CHECK -> copy(type = value, target = "1", unit = "")
 
-            // Von CHECK kommend ist das Ziel "1": gueltig, also ohne Fehlermeldung beim Umschalten.
+            // Coming from CHECK the target is "1", which is valid, so switching shows no error.
             else -> copy(type = value)
         }
 
     fun toHabit(): Habit {
-        check(canSave) { "Formular ist unvollstaendig" }
+        check(canSave) { "the form is incomplete" }
         return Habit(
             id = id,
             name = name.trim(),

@@ -15,12 +15,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 /**
- * Flacher Fortschrittsbalken. Bewusst selbst gezeichnet statt
- * `LinearProgressIndicator`, damit Hoehe, Radius und Ruhe des Balkens
- * unabhaengig von Material-Defaults bleiben.
+ * A flat progress bar. Deliberately drawn by hand instead of using
+ * `LinearProgressIndicator`, so that its height, radius and calmness stay
+ * independent of the Material defaults.
  *
- * Der Balken traegt keine Semantik: der begleitende Text sagt schon,
- * wie weit der Tag ist.
+ * The bar carries no semantics: the accompanying text already states how far
+ * along the day is.
  */
 @Composable
 fun ProgressTrack(
@@ -47,7 +47,7 @@ fun ProgressTrack(
         if (filled > 0f) {
             drawRoundRect(
                 color = color,
-                // Mindestens Kreisbreite, damit auch ein kleiner Wert sichtbar bleibt.
+                // At least one circle wide, so even a small value stays visible.
                 size = Size(filled.coerceAtLeast(size.height), size.height),
                 cornerRadius = radius,
             )

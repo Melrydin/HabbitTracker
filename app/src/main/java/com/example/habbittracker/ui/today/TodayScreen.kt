@@ -53,7 +53,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-/** Bindet den Heute-Screen an sein ViewModel. */
+/** Binds the today screen to its view model. */
 @Composable
 fun TodayRoute(
     viewModel: TodayViewModel,
@@ -117,7 +117,7 @@ fun TodayScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = MaterialTheme.shapes.medium,
-                // Trennung ueber Farbe und Abstand statt ueber Schatten.
+                // Separation through color and spacing rather than shadow.
                 elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
             ) {
                 Icon(Icons.Outlined.Add, contentDescription = stringResource(R.string.today_add_habit))
@@ -240,7 +240,7 @@ private fun TodayHeader(
     }
 }
 
-/** Tagesthema, direkt inline editierbar. Reine Kennzeichnung, ohne Einfluss auf das Ziel (F2). */
+/** The day theme, editable inline. A pure label with no effect on the goal (F2). */
 @Composable
 private fun ThemeField(
     theme: String,
@@ -322,26 +322,35 @@ private fun EmptyHabits(onAddHabit: () -> Unit, modifier: Modifier = Modifier) {
 private fun previewState(passed: Boolean = false) =
     TodayUiState(
         date = LocalDate.of(2026, 8, 31),
-        theme = if (passed) "Ruhiger Fokus" else "",
+        theme = if (passed) "Calm focus" else "",
         goal = DayGoalProgress(GoalType.POINTS, current = if (passed) 6 else 3, threshold = 6, passed = passed),
         habits =
             listOf(
                 HabitEntry(
-                    Habit(1, "Wasser trinken", HabitType.COUNTER, 8, "Glaeser", points = 2, icon = "water_drop"),
+                    Habit(1, "Drink water", HabitType.COUNTER, 8, "glasses", points = 2, icon = "water_drop"),
                     3,
                 ),
                 HabitEntry(
-                    habit = Habit(2, "Sport", HabitType.CHECK, 1, points = 3, required = true, icon = "directions_run"),
+                    habit =
+                        Habit(
+                            2,
+                            "Exercise",
+                            HabitType.CHECK,
+                            1,
+                            points = 3,
+                            required = true,
+                            icon = "directions_run",
+                        ),
                     progress = if (passed) 1 else 0,
                 ),
-                HabitEntry(Habit(3, "Lesen", HabitType.AMOUNT, 30, "min", points = 2, icon = "menu_book"), 30),
+                HabitEntry(Habit(3, "Read", HabitType.AMOUNT, 30, "min", points = 2, icon = "menu_book"), 30),
                 HabitEntry(Habit(4, "Meditation", HabitType.CHECK, 1, points = 1, icon = "self_improvement"), 0),
             ).map(::HabitItem),
         currentStreak = 4,
         loaded = true,
     )
 
-@Preview(name = "Heute, hell", showBackground = true)
+@Preview(name = "Today, light", showBackground = true)
 @Composable
 private fun TodayScreenPreview() {
     HabbitTrackerTheme(darkTheme = false) {
@@ -361,7 +370,7 @@ private fun TodayScreenPreview() {
     }
 }
 
-@Preview(name = "Heute, dunkel, bestanden", showBackground = true)
+@Preview(name = "Today, dark, passed", showBackground = true)
 @Composable
 private fun TodayScreenDarkPreview() {
     HabbitTrackerTheme(darkTheme = true) {
@@ -381,7 +390,7 @@ private fun TodayScreenDarkPreview() {
     }
 }
 
-@Preview(name = "Heute, leer", showBackground = true)
+@Preview(name = "Today, empty", showBackground = true)
 @Composable
 private fun TodayScreenEmptyPreview() {
     HabbitTrackerTheme {

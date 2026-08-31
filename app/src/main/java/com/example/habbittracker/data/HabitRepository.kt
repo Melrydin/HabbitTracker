@@ -6,7 +6,7 @@ import com.example.habbittracker.domain.model.HabitEntry
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
-/** Alles, was der Heute-Screen ueber einen Tag wissen muss. */
+/** Everything the today screen needs to know about a single day. */
 data class DaySnapshot(
     val day: Day,
     val entries: List<HabitEntry>,
@@ -14,42 +14,42 @@ data class DaySnapshot(
 )
 
 /**
- * Zugriff auf Habits und Tageserfassung. Die Implementierung wechselt spaeter
- * von [InMemoryHabitRepository] auf Room, ohne dass ViewModel oder UI sich aendern.
+ * Access to habits and daily tracking. The implementation later moves from
+ * [InMemoryHabitRepository] to Room without any change to view models or UI.
  */
 interface HabitRepository {
-    // --- Tageserfassung (F2, F3) ---
+    // --- Daily tracking (F2, F3) ---
 
     fun observeDay(date: LocalDate): Flow<DaySnapshot>
 
-    /** Setzt den Ist-Wert und rechnet `Day.passed` sowie die Streak neu (F3). */
+    /** Stores the recorded value and recomputes `Day.passed` and the streak (F3). */
     suspend fun setProgress(date: LocalDate, habitId: Long, progress: Int)
 
-    /** Leerer Text loescht das Thema, deshalb `null` statt Leerstring (F2). */
+    /** Empty text clears the theme, hence `null` rather than an empty string (F2). */
     suspend fun setDayTheme(date: LocalDate, theme: String?)
 
-    // --- Habit-Verwaltung (F1) ---
+    // --- Habit management (F1) ---
 
-    /** Alle Habits inklusive archivierter. Wer nur aktive braucht, filtert selbst. */
+    /** Every habit including archived ones. Callers that want only active ones filter themselves. */
     fun observeHabits(): Flow<List<Habit>>
 
     /**
-     * Einmaliges Laden fuer den Editor. Bewusst kein Flow: das Formular soll
-     * waehrend der Bearbeitung nicht unter der Hand aktualisiert werden.
+     * A one-off load for the editor. Deliberately not a flow: the form must not
+     * change underneath the user while they are editing it.
      */
     suspend fun getHabit(id: Long): Habit?
 
-    /** Legt an, wenn `habit.id == NEW_HABIT_ID`, sonst aktualisiert. Gibt die Id zurueck. */
+    /** Inserts when `habit.id == NEW_HABIT_ID`, updates otherwise. Returns the id. */
     suspend fun upsertHabit(habit: Habit): Long
 
-    /** Archivieren statt loeschen: der Verlauf bleibt erhalten (F1). */
+    /** Archiving instead of deleting keeps the history intact (F1). */
     suspend fun setArchived(id: Long, archived: Boolean)
 
-    /** Entfernt den Habit und alle erfassten Werte. */
+    /** Removes the habit along with every recorded value. */
     suspend fun deleteHabit(id: Long)
 
     companion object {
-        /** Id fuer einen noch nicht gespeicherten Habit, passend zu Rooms `autoGenerate`. */
+        /** Id of a habit that has not been stored yet, matching Room's `autoGenerate`. */
         const val NEW_HABIT_ID = 0L
     }
 }

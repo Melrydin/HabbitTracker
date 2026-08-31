@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.model.HabitType
 
-/** Beschriftung der Erfassungsart, an einer Stelle, damit Editor und Liste gleich sprechen. */
+/** Label for the tracking type, kept in one place so editor and list speak alike. */
 @StringRes
 fun HabitType.labelRes(): Int =
     when (this) {

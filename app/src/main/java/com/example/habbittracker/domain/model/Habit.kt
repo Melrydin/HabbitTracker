@@ -1,20 +1,20 @@
 package com.example.habbittracker.domain.model
 
-/** Erfassungsart eines Habits (F1). */
+/** How a habit is tracked (F1). */
 enum class HabitType {
-    /** Ja/Nein, `target` ist immer 1. */
+    /** Yes/no. `target` is always 1. */
     CHECK,
 
-    /** Anzahl, z. B. 8 Glaeser. Darf das Ziel ueberschreiten. */
+    /** A count, for example 8 glasses. May exceed the target. */
     COUNTER,
 
-    /** Menge oder Dauer, z. B. 30 min. Darf das Ziel ueberschreiten. */
+    /** An amount or duration, for example 30 min. May exceed the target. */
     AMOUNT,
 }
 
 /**
- * Definition eines Habits (Vorlage). Entspricht F1 der Featureliste.
- * Reines Domain-Modell, spaeter auf eine Room-Entity gemappt.
+ * The definition of a habit, used as a template. Covers F1 of the feature list.
+ * A plain domain model, later mapped onto a Room entity.
  */
 data class Habit(
     val id: Long,
@@ -29,9 +29,9 @@ data class Habit(
     val archived: Boolean = false,
 ) {
     init {
-        require(name.length in 1..NAME_MAX_LENGTH) { "name muss 1 bis $NAME_MAX_LENGTH Zeichen haben" }
-        require(target >= 1) { "target muss mindestens 1 sein" }
-        require(type != HabitType.CHECK || target == 1) { "CHECK hat immer target = 1" }
+        require(name.length in 1..NAME_MAX_LENGTH) { "name must be between 1 and $NAME_MAX_LENGTH characters" }
+        require(target >= 1) { "target must be at least 1" }
+        require(type != HabitType.CHECK || target == 1) { "CHECK always has target = 1" }
     }
 
     companion object {

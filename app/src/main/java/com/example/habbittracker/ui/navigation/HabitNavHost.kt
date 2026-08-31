@@ -37,7 +37,7 @@ object Routes {
     const val HABIT_ID_ARG = "habitId"
     const val HABIT_EDITOR = "habit_editor?$HABIT_ID_ARG={$HABIT_ID_ARG}"
 
-    /** Ohne Id wird angelegt, mit Id bearbeitet. */
+    /** Without an id a habit is created, with an id it is edited. */
     fun habitEditor(habitId: Long = NEW_HABIT_ID) = "habit_editor?$HABIT_ID_ARG=$habitId"
 }
 
@@ -65,7 +65,7 @@ fun HabitNavHost(
                 onAddHabit = { navController.navigate(Routes.habitEditor()) },
                 onEditHabit = { habitId -> navController.navigate(Routes.habitEditor(habitId)) },
                 onOpenHabits = { navController.navigate(Routes.HABITS) },
-                // TODO: an Verlauf und Einstellungen anschliessen, sobald die Screens stehen.
+                // TODO: hook up history and settings once those screens exist.
                 onOpenHistory = {},
                 onOpenSettings = {},
             )
@@ -109,7 +109,7 @@ fun HabitNavHost(
             val state by viewModel.uiState.collectAsStateWithLifecycle()
 
             LaunchedEffect(viewModel) {
-                // Jedes Ergebnis beendet den Editor, der aufrufende Screen zeigt den neuen Stand.
+                // Every outcome closes the editor; the calling screen shows the new state.
                 viewModel.events.collect { navController.popBackStack() }
             }
 

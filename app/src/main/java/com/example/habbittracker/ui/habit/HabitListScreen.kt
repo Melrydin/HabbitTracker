@@ -41,8 +41,8 @@ import com.example.habbittracker.ui.icons.HabitIcons
 import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 
 /**
- * Uebersicht aller Habits (F1). Hier liegt auch das Archiv, damit Archivieren
- * umkehrbar bleibt und nicht faktisch ein Loeschen ist.
+ * Overview of every habit (F1). The archive lives here too, so that archiving stays
+ * reversible instead of being a deletion in disguise.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -189,7 +189,7 @@ private fun HabitSummaryRow(
     }
 }
 
-/** Zweite Zeile: Art, Ziel, Punkte, Pflicht, so wie im Editor eingestellt. */
+/** Second line: type, target, points and required, exactly as set in the editor. */
 @Composable
 private fun habitSummary(habit: Habit): String {
     val parts =
@@ -252,18 +252,26 @@ private fun HabitListPreview() {
                         listOf(
                             Habit(
                                 1,
-                                "Wasser trinken",
+                                "Drink water",
                                 HabitType.COUNTER,
                                 8,
-                                "Glaeser",
+                                "glasses",
                                 points = 2,
                                 icon = "water_drop",
                             ),
-                            Habit(2, "Sport", HabitType.CHECK, 1, points = 3, required = true, icon = "directions_run"),
+                            Habit(
+                                2,
+                                "Exercise",
+                                HabitType.CHECK,
+                                1,
+                                points = 3,
+                                required = true,
+                                icon = "directions_run",
+                            ),
                         ),
                     archived =
                         listOf(
-                            Habit(3, "Vokabeln", HabitType.AMOUNT, 20, "min", icon = "menu_book", archived = true),
+                            Habit(3, "Vocabulary", HabitType.AMOUNT, 20, "min", icon = "menu_book", archived = true),
                         ),
                     loaded = true,
                 ),

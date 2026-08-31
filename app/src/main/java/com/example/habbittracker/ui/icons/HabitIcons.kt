@@ -23,10 +23,10 @@ import androidx.compose.material.icons.outlined.WaterDrop
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
- * `Habit.icon` haelt den Namen aus dem Material-Symbols-Set (F1). Hier wird er
- * auf genau ein Icon-Set abgebildet: outlined, keine Mischung.
+ * `Habit.icon` holds a name from the Material Symbols set (F1). Here it is mapped
+ * onto exactly one icon set: outlined, never mixed.
  *
- * Dieselbe Liste dient spaeter als Auswahl im Habit-Editor.
+ * The same list doubles as the picker in the habit editor.
  */
 object HabitIcons {
     const val FALLBACK = "task_alt"
@@ -54,6 +54,6 @@ object HabitIcons {
             "savings" to Icons.Outlined.Savings,
         )
 
-    /** Unbekannte Namen (z. B. aus einem aelteren Backup) fallen auf ein neutrales Icon zurueck. */
+    /** Unknown names, for example from an older backup, fall back to a neutral icon. */
     operator fun get(name: String): ImageVector = catalog[name] ?: catalog.getValue(FALLBACK)
 }

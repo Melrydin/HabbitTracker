@@ -12,17 +12,17 @@ indent_size = 4
 ktlint_code_style = ktlint_official
 max_line_length = 120
 
-# Compose-Composables sind PascalCase, das kollidiert mit der Funktionsnamen-Regel.
+# Composables are PascalCase, which collides with the function naming rule.
 ktlint_function_naming_ignore_when_annotated_with = Composable
 
-# Diese beiden Regeln brechen jede Signatur ab zwei Parametern auf eigene Zeilen,
-# auch wenn sie bequem in 120 Zeichen passt. Das blaeht Funktionen auf und
-# arbeitet damit gegen die 20-Zeilen-Regel aus CLAUDE.md. Die Zeilenlaenge
-# deckt max_line_length bereits ab.
+# These two rules break every signature with two or more parameters onto separate
+# lines, even when it fits comfortably within 120 characters. That inflates
+# functions and works against the 20 line rule from CLAUDE.md, while
+# max_line_length already covers the line length itself.
 ktlint_standard_function-signature = disabled
 ktlint_standard_class-signature = disabled
 
-# Ein Ausdruckskoerper ist nicht immer die lesbarere Form.
+# An expression body is not always the more readable form.
 ktlint_standard_function-expression-body = disabled
 
 [*.{xml,yml,yaml}]

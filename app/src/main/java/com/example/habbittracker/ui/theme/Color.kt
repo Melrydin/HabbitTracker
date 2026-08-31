@@ -3,14 +3,13 @@ package com.example.habbittracker.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /*
- * Farbkonzept: neutrale Basis plus genau **ein** Akzent, und der ist Grün.
- * Der Statusmarker "bestanden" benutzt denselben Ton, damit das Bild ruhig bleibt.
+ * Color concept: a neutral base plus exactly **one** accent, and that accent is
+ * green. The "passed" status marker reuses the same tone to keep the look calm.
  *
- * Der Akzent laesst sich hier an einer Stelle tauschen, ohne dass eine andere
- * Datei angefasst werden muss.
+ * The accent can be swapped here in a single place without touching any other file.
  */
 
-// Akzent
+// Accent
 val AccentLight = Color(0xFF2E7D4F)
 val AccentContainerLight = Color(0xFFE6F4EC)
 val OnAccentContainerLight = Color(0xFF0F4429)
@@ -20,9 +19,9 @@ val AccentContainerDark = Color(0xFF22523A)
 val OnAccentContainerDark = Color(0xFFB5EDCA)
 val OnAccentDark = Color(0xFF0B3B22)
 
-// Statusmarker "bestanden". Seit die App durchgehend gruen ist, teilt er sich
-// den Ton mit dem Akzent: unterschieden wird ueber Form (Pille, Haken) und
-// ueber den Kontrast zum neutralen "offen", nicht ueber einen zweiten Gruenton.
+// The "passed" status marker. Now that the app is green throughout it shares the
+// accent tone: it is told apart by shape (pill, check mark) and by the contrast to
+// the neutral "open" state, not by a second shade of green.
 val PassedLight = AccentLight
 val PassedContainerLight = AccentContainerLight
 val OnPassedContainerLight = OnAccentContainerLight
@@ -31,11 +30,11 @@ val PassedDark = AccentDark
 val PassedContainerDark = AccentContainerDark
 val OnPassedContainerDark = OnAccentContainerDark
 
-// Status "offen": bewusst ein Grauton, kein Rot, um nicht zu werten
+// The "open" status is deliberately grey rather than red, so nothing is judged
 val OpenLight = Color(0xFF9DA0A9)
 val OpenDark = Color(0xFF6E717A)
 
-// Neutrale Basis, hell
+// Neutral base, light
 val BackgroundLight = Color(0xFFFAFAFB)
 val OnBackgroundLight = Color(0xFF17181B)
 val SurfaceContainerLightC = Color(0xFFFFFFFF)
@@ -45,7 +44,7 @@ val OnSurfaceVariantLight = Color(0xFF6A6D77)
 val OutlineLight = Color(0xFF8B8E98)
 val OutlineVariantLight = Color(0xFFE2E3E9)
 
-// Neutrale Basis, dunkel
+// Neutral base, dark
 val BackgroundDark = Color(0xFF111214)
 val OnBackgroundDark = Color(0xFFE4E5E9)
 val SurfaceContainerDarkC = Color(0xFF1A1B1F)

@@ -2,23 +2,23 @@ package com.example.habbittracker.domain.model
 
 import java.time.LocalDate
 
-/** Tagesziel-Regel, genau eine je Tag (F2). */
+/** Daily goal rule, exactly one per day (F2). */
 enum class GoalType {
-    /** Bestanden, wenn alle Habits mit `required = true` erfuellt sind. */
+    /** Passed once every habit with `required = true` is fulfilled. */
     ALL_REQUIRED,
 
-    /** Bestanden, wenn mindestens `goalThreshold` Habits erfuellt sind. */
+    /** Passed once at least `goalThreshold` habits are fulfilled. */
     MIN_COUNT,
 
-    /** Bestanden, wenn die Punktsumme erfuellter Habits >= `goalThreshold` ist. */
+    /** Passed once the points of fulfilled habits reach `goalThreshold`. */
     POINTS,
 }
 
 /**
- * Ein Kalendertag mit Thema und Tagesziel (F2).
+ * A calendar day with its theme and daily goal (F2).
  *
- * [passed] wird bei jeder Erfassungsaenderung neu berechnet und persistiert,
- * damit Verlauf und Streak ohne Nachrechnen abfragbar bleiben.
+ * [passed] is recomputed and stored on every change so that history and streaks
+ * stay queryable without recalculating them.
  */
 data class Day(
     val date: LocalDate,
@@ -28,7 +28,7 @@ data class Day(
     val passed: Boolean = false,
 ) {
     init {
-        require((theme?.length ?: 0) <= THEME_MAX_LENGTH) { "theme darf hoechstens $THEME_MAX_LENGTH Zeichen haben" }
+        require((theme?.length ?: 0) <= THEME_MAX_LENGTH) { "theme must be at most $THEME_MAX_LENGTH characters" }
     }
 
     companion object {

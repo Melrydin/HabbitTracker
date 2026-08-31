@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Nur der Fensterhintergrund vor dem ersten Compose-Frame.
-         Die eigentliche Palette liegt in ui/theme/Color.kt. -->
+    <!-- Only the window background shown before the first Compose frame.
+         The actual palette lives in ui/theme/Color.kt. -->
     <color name="window_background">#FAFAFB</color>
 </resources>

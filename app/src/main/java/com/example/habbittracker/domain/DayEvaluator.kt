@@ -5,8 +5,8 @@ import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.HabitEntry
 
 /**
- * Fortschritt gegen das Tagesziel. [current] und [threshold] haengen von der
- * Regel ab: Punkte bei [GoalType.POINTS], Anzahl Habits sonst.
+ * Progress towards the daily goal. [current] and [threshold] depend on the rule:
+ * points for [GoalType.POINTS], a habit count otherwise.
  */
 data class DayGoalProgress(
     val goalType: GoalType,
@@ -14,17 +14,17 @@ data class DayGoalProgress(
     val threshold: Int,
     val passed: Boolean,
 ) {
-    /** 0f bis 1f, fuer die Fortschrittsanzeige. Ohne Schwelle bleibt der Balken leer. */
+    /** 0f to 1f, for the progress bar. Without a threshold the bar stays empty. */
     val fraction: Float
         get() = if (threshold <= 0) 0f else (current.toFloat() / threshold).coerceIn(0f, 1f)
 
-    /** Kein Ziel erreichbar, weil der Tag keine passenden Habits hat: neutral statt "nicht bestanden". */
+    /** No goal is reachable because the day has no matching habits: neutral rather than failed. */
     val isNeutral: Boolean get() = threshold <= 0
 }
 
 /**
- * Wertet ein Tagesziel aus (F2). Reine Funktion ohne Zustand, damit Repository,
- * ViewModel und Tests dieselbe Regel benutzen.
+ * Evaluates a daily goal (F2). A pure function without state, so that repository,
+ * view model and tests all share the same rule.
  */
 object DayEvaluator {
     fun evaluate(day: Day, entries: List<HabitEntry>): DayGoalProgress =
@@ -40,7 +40,7 @@ object DayEvaluator {
             goalType = day.goalType,
             current = required.count { it.fulfilled },
             threshold = required.size,
-            // Ohne Pflicht-Habits gibt es nichts zu erfuellen: der Tag bleibt neutral.
+            // Without required habits there is nothing to fulfill, so the day stays neutral.
             passed = required.isNotEmpty() && required.all { it.fulfilled },
         )
     }

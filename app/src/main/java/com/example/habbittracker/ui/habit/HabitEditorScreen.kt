@@ -58,8 +58,8 @@ import com.example.habbittracker.ui.icons.HabitIcons
 import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 
 /**
- * Anlegen und Bearbeiten eines Habits (F1). Speichern ist gesperrt, solange das
- * Formular unvollstaendig ist, statt beim Tippen auf Speichern zu meckern.
+ * Creating and editing a habit (F1). Saving stays disabled while the form is
+ * incomplete, rather than complaining once the user taps save.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -264,7 +264,7 @@ private fun IconPicker(
                     ) {
                         Icon(
                             imageVector = vector,
-                            // Die Auswahl beschreibt der Zustand des Buttons, nicht das Symbol.
+                            // The selection is conveyed by the button state, not by the icon.
                             contentDescription = name,
                             tint =
                                 if (isSelected) {
@@ -478,7 +478,7 @@ private fun DangerZone(
     }
 }
 
-/** Beschriftete Zeile mit Bedienelement rechts, fuer Punkte und Pflicht-Schalter. */
+/** A labeled row with its control on the right, used for points and the required switch. */
 @Composable
 private fun SettingCard(
     title: String,
@@ -533,7 +533,7 @@ private fun FormSection(
 
 // --- Previews ---------------------------------------------------------------
 
-@Preview(name = "Editor, neu", showBackground = true)
+@Preview(name = "Editor, new", showBackground = true)
 @Composable
 private fun HabitEditorNewPreview() {
     HabbitTrackerTheme {
@@ -541,10 +541,10 @@ private fun HabitEditorNewPreview() {
             state =
                 HabitEditorUiState(
                     HabitFormState(
-                        name = "Wasser trinken",
+                        name = "Drink water",
                         type = HabitType.COUNTER,
                         target = "8",
-                        unit = "Glaeser",
+                        unit = "glasses",
                         points = 2,
                         icon = "water_drop",
                     ),
@@ -564,7 +564,7 @@ private fun HabitEditorNewPreview() {
     }
 }
 
-@Preview(name = "Editor, bearbeiten, dunkel", showBackground = true)
+@Preview(name = "Editor, edit, dark", showBackground = true)
 @Composable
 private fun HabitEditorEditPreview() {
     HabbitTrackerTheme(darkTheme = true) {
@@ -573,7 +573,7 @@ private fun HabitEditorEditPreview() {
                 HabitEditorUiState(
                     HabitFormState(
                         id = 2,
-                        name = "Sport",
+                        name = "Exercise",
                         type = HabitType.CHECK,
                         points = 3,
                         required = true,

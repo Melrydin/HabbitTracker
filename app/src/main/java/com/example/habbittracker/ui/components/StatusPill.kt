@@ -20,8 +20,8 @@ import com.example.habbittracker.R
 import com.example.habbittracker.ui.theme.HabitTheme
 
 /**
- * Statusmarker fuer den Tag. "bestanden" ist der einzige Ort, an dem Gruen
- * auftaucht, "offen" bleibt neutral grau, damit nichts gewertet wird.
+ * Status marker for the day. "passed" is the only place where green appears;
+ * "open" stays neutral grey so that nothing is being judged.
  */
 @Composable
 fun StatusPill(passed: Boolean, modifier: Modifier = Modifier) {

@@ -7,14 +7,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
- * Drei Stufen laut Featureliste: Titel, Fliesstext, Label.
- * System-Schrift (Roboto), keine zusaetzlichen Fonts.
+ * Three steps as required by the feature list: title, body, label.
+ * System typeface (Roboto), no additional fonts.
  */
 private val Sans = FontFamily.Default
 
 val Typography =
     Typography(
-        // Titel
+        // Title
         headlineSmall =
             TextStyle(
                 fontFamily = Sans,
@@ -31,7 +31,7 @@ val Typography =
                 lineHeight = 22.sp,
                 letterSpacing = 0.sp,
             ),
-        // Fliesstext
+        // Body
         bodyLarge =
             TextStyle(
                 fontFamily = Sans,

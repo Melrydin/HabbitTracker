@@ -22,7 +22,7 @@ import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.ui.components.ProgressTrack
 import com.example.habbittracker.ui.components.StatusPill
 
-/** Tagesziel mit Fortschrittsbalken und Statusmarker (F2). */
+/** The daily goal with its progress bar and status marker (F2). */
 @Composable
 fun DayGoalCard(goal: DayGoalProgress, modifier: Modifier = Modifier) {
     val label = goalLabel(goal)
@@ -40,7 +40,7 @@ fun DayGoalCard(goal: DayGoalProgress, modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                 )
-                // Ohne erreichbares Ziel bleibt der Tag neutral, statt "offen" zu behaupten.
+                // Without a reachable goal the day stays neutral instead of claiming "open".
                 if (!goal.isNeutral) StatusPill(passed = goal.passed)
             }
             Spacer(Modifier.height(8.dp))

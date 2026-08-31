@@ -5,8 +5,8 @@ import com.example.habbittracker.data.HabitRepository
 import com.example.habbittracker.data.InMemoryHabitRepository
 
 /**
- * Einfacher Service-Locator. Hier wird spaeter die Room-Datenbank aufgebaut,
- * ohne dass Screens oder ViewModels sich aendern.
+ * A simple service locator. The Room database will later be built here without
+ * screens or view models having to change.
  */
 class AppContainer {
     val habitRepository: HabitRepository by lazy { InMemoryHabitRepository() }

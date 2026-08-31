@@ -22,34 +22,34 @@ class InMemoryHabitRepositoryTest {
         observeDay(today).first().entries.map { it.habit.id }
 
     @Test
-    fun `ein neuer habit bekommt eine id und taucht in der liste auf`() =
+    fun `a new habit receives an id and appears in the list`() =
         runBlocking {
             val repository = repository()
-            val newHabit = Habit(NEW_HABIT_ID, "Spazieren", HabitType.CHECK, target = 1, icon = "directions_run")
+            val newHabit = Habit(NEW_HABIT_ID, "Walk", HabitType.CHECK, target = 1, icon = "directions_run")
 
             val id = repository.upsertHabit(newHabit)
 
             assertTrue(id != NEW_HABIT_ID)
-            assertEquals("Spazieren", repository.getHabit(id)?.name)
+            assertEquals("Walk", repository.getHabit(id)?.name)
             assertTrue(repository.observeHabits().first().any { it.id == id })
         }
 
     @Test
-    fun `bearbeiten ersetzt den habit statt einen zweiten anzulegen`() =
+    fun `editing replaces the habit instead of creating a second one`() =
         runBlocking {
             val repository = repository()
             val before = repository.observeHabits().first().size
 
-            val sport = repository.getHabit(2)!!
-            repository.upsertHabit(sport.copy(name = "Joggen", points = 5))
+            val exercise = repository.getHabit(2)!!
+            repository.upsertHabit(exercise.copy(name = "Jogging", points = 5))
 
             val habits = repository.observeHabits().first()
             assertEquals(before, habits.size)
-            assertEquals("Joggen", habits.first { it.id == 2L }.name)
+            assertEquals("Jogging", habits.first { it.id == 2L }.name)
         }
 
     @Test
-    fun `ein archivierter habit ohne erfassung verschwindet aus dem tag`() =
+    fun `an archived habit without a record disappears from the day`() =
         runBlocking {
             val repository = repository()
             assertTrue(repository.habitIdsToday().contains(4L))
@@ -60,7 +60,7 @@ class InMemoryHabitRepositoryTest {
         }
 
     @Test
-    fun `ein archivierter habit mit erfassung bleibt am tag sichtbar`() =
+    fun `an archived habit with a record stays visible on the day`() =
         runBlocking {
             val repository = repository()
             repository.setProgress(today, habitId = 4, progress = 1)
@@ -71,7 +71,7 @@ class InMemoryHabitRepositoryTest {
         }
 
     @Test
-    fun `wiederherstellen holt den habit zurueck`() =
+    fun `restoring brings the habit back`() =
         runBlocking {
             val repository = repository()
             repository.setArchived(4, archived = true)
@@ -82,10 +82,10 @@ class InMemoryHabitRepositoryTest {
         }
 
     @Test
-    fun `eine geaenderte punktzahl rechnet den tagesstatus neu`() =
+    fun `changed points recompute the day status`() =
         runBlocking {
             val repository = repository()
-            // Sport bringt 3 von 6 noetigen Punkten: der Tag ist damit noch offen.
+            // Exercise contributes 3 of the 6 required points, so the day is still open.
             repository.setProgress(today, habitId = 2, progress = 1)
             assertFalse(
                 repository
@@ -94,8 +94,8 @@ class InMemoryHabitRepositoryTest {
                     .day.passed,
             )
 
-            val sport = repository.getHabit(2)!!
-            repository.upsertHabit(sport.copy(points = 6))
+            val exercise = repository.getHabit(2)!!
+            repository.upsertHabit(exercise.copy(points = 6))
 
             assertTrue(
                 repository
@@ -106,7 +106,7 @@ class InMemoryHabitRepositoryTest {
         }
 
     @Test
-    fun `archivieren nimmt einem bestandenen tag sein ergebnis nicht weg`() =
+    fun `archiving does not take the result away from a passed day`() =
         runBlocking {
             val repository = repository()
             repository.setProgress(today, habitId = 2, progress = 1)
@@ -119,7 +119,7 @@ class InMemoryHabitRepositoryTest {
                     .day.passed,
             )
 
-            // Sport hat heute schon gezaehlt, also bleibt der Tag bestanden (F1: alte Eintraege bleiben).
+            // Exercise already counted today, so the day stays passed (F1: old entries remain).
             repository.setArchived(2, archived = true)
 
             assertTrue(
@@ -132,7 +132,7 @@ class InMemoryHabitRepositoryTest {
         }
 
     @Test
-    fun `loeschen entfernt den habit samt erfassten werten`() =
+    fun `deleting removes the habit together with its recorded values`() =
         runBlocking {
             val repository = repository()
             repository.setProgress(today, habitId = 1, progress = 5)
@@ -145,16 +145,16 @@ class InMemoryHabitRepositoryTest {
         }
 
     @Test
-    fun `ein geloeschter habit laesst keinen fortschritt zurueck`() =
+    fun `a deleted habit leaves no progress behind`() =
         runBlocking {
             val repository = repository()
             repository.setProgress(today, habitId = 1, progress = 5)
             repository.deleteHabit(1)
 
-            // Gleiche Id neu vergeben: der alte Wert darf nicht wieder auftauchen.
+            // The same id is handed out again: the old value must not reappear.
             val id =
                 repository.upsertHabit(
-                    Habit(NEW_HABIT_ID, "Neu", HabitType.COUNTER, target = 8, unit = "x", icon = "water_drop"),
+                    Habit(NEW_HABIT_ID, "New", HabitType.COUNTER, target = 8, unit = "x", icon = "water_drop"),
                 )
             val entry =
                 repository

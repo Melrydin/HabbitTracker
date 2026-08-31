@@ -11,7 +11,7 @@ import org.junit.Test
 
 class HabitFormStateTest {
     @Test
-    fun `ein leerer name blockiert das speichern`() {
+    fun `an empty name blocks saving`() {
         val form = HabitFormState()
 
         assertEquals(HabitFormError.NAME_REQUIRED, form.nameError)
@@ -19,27 +19,27 @@ class HabitFormStateTest {
     }
 
     @Test
-    fun `ein name aus leerzeichen zaehlt als leer`() {
+    fun `a name made of spaces counts as empty`() {
         val form = HabitFormState().withName("   ")
 
         assertEquals(HabitFormError.NAME_REQUIRED, form.nameError)
     }
 
     @Test
-    fun `der name wird auf die erlaubte laenge gekappt`() {
+    fun `the name is truncated to the allowed length`() {
         val form = HabitFormState().withName("x".repeat(80))
 
         assertEquals(Habit.NAME_MAX_LENGTH, form.name.length)
     }
 
     @Test
-    fun `der wechsel auf ja nein setzt ziel und einheit zurueck`() {
+    fun `switching to yes no resets target and unit`() {
         val form =
             HabitFormState()
-                .withName("Wasser")
+                .withName("Water")
                 .withType(HabitType.COUNTER)
                 .withTarget("8")
-                .withUnit("Glaeser")
+                .withUnit("glasses")
                 .withType(HabitType.CHECK)
 
         assertEquals("1", form.target)
@@ -48,38 +48,38 @@ class HabitFormStateTest {
     }
 
     @Test
-    fun `der wechsel von ja nein auf anzahl zeigt keinen fehler`() {
-        val form = HabitFormState().withName("Wasser").withType(HabitType.COUNTER)
+    fun `switching from yes no to counter shows no error`() {
+        val form = HabitFormState().withName("Water").withType(HabitType.COUNTER)
 
         assertNull(form.targetError)
         assertTrue(form.canSave)
     }
 
     @Test
-    fun `das ziel nimmt nur ziffern an`() {
+    fun `the target accepts digits only`() {
         val form = HabitFormState().withType(HabitType.COUNTER).withTarget("-1a2,5")
 
         assertEquals("125", form.target)
     }
 
     @Test
-    fun `ein leeres ziel blockiert das speichern`() {
-        val form = HabitFormState().withName("Lesen").withType(HabitType.AMOUNT).withTarget("")
+    fun `an empty target blocks saving`() {
+        val form = HabitFormState().withName("Read").withType(HabitType.AMOUNT).withTarget("")
 
         assertEquals(HabitFormError.TARGET_REQUIRED, form.targetError)
         assertFalse(form.canSave)
     }
 
     @Test
-    fun `ziel null ist zu klein`() {
-        val form = HabitFormState().withName("Lesen").withType(HabitType.AMOUNT).withTarget("0")
+    fun `a target of zero is too small`() {
+        val form = HabitFormState().withName("Read").withType(HabitType.AMOUNT).withTarget("0")
 
         assertEquals(HabitFormError.TARGET_TOO_SMALL, form.targetError)
     }
 
     @Test
-    fun `ein ja nein habit braucht kein ziel im formular`() {
-        val form = HabitFormState().withName("Sport").withTarget("")
+    fun `a yes no habit needs no target in the form`() {
+        val form = HabitFormState().withName("Exercise").withTarget("")
 
         assertNull(form.targetError)
         assertTrue(form.canSave)
@@ -87,44 +87,44 @@ class HabitFormStateTest {
     }
 
     @Test
-    fun `punkte bleiben im erlaubten bereich`() {
+    fun `points stay within the allowed range`() {
         assertEquals(HabitFormState.POINTS_MIN, HabitFormState().withPoints(0).points)
         assertEquals(HabitFormState.POINTS_MAX, HabitFormState().withPoints(500).points)
     }
 
     @Test
-    fun `toHabit trimmt und uebernimmt die eingaben`() {
+    fun `toHabit trims and carries over the input`() {
         val habit =
             HabitFormState()
-                .withName("  Wasser trinken  ")
+                .withName("  Drink water  ")
                 .withType(HabitType.COUNTER)
                 .withTarget("8")
-                .withUnit(" Glaeser ")
+                .withUnit(" glasses ")
                 .withPoints(2)
                 .copy(required = true, icon = "water_drop")
                 .toHabit()
 
-        assertEquals("Wasser trinken", habit.name)
+        assertEquals("Drink water", habit.name)
         assertEquals(8, habit.target)
-        assertEquals("Glaeser", habit.unit)
+        assertEquals("glasses", habit.unit)
         assertEquals(2, habit.points)
         assertTrue(habit.required)
         assertEquals(NEW_HABIT_ID, habit.id)
     }
 
     @Test
-    fun `ja nein speichert keine einheit`() {
-        val habit = HabitFormState().withName("Sport").withUnit("min").toHabit()
+    fun `yes no stores no unit`() {
+        val habit = HabitFormState().withName("Exercise").withUnit("min").toHabit()
 
         assertNull(habit.unit)
     }
 
     @Test
-    fun `from und toHabit sind zueinander passend`() {
+    fun `from and toHabit round trip`() {
         val original =
             Habit(
                 id = 7,
-                name = "Lesen",
+                name = "Read",
                 type = HabitType.AMOUNT,
                 target = 30,
                 unit = "min",

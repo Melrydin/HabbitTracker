@@ -21,7 +21,7 @@ class DayEvaluatorTest {
         Habit(id, "Habit $id", HabitType.COUNTER, target = target, unit = "x", points = points, icon = "task_alt")
 
     @Test
-    fun `points ziel ist bestanden wenn die summe die schwelle erreicht`() {
+    fun `a points goal passes once the sum reaches the threshold`() {
         val day = Day(date, goalType = GoalType.POINTS, goalThreshold = 5)
         val entries =
             listOf(
@@ -37,9 +37,9 @@ class DayEvaluatorTest {
     }
 
     @Test
-    fun `punkte zaehlen erst wenn der habit erfuellt ist`() {
+    fun `points only count once the habit is fulfilled`() {
         val day = Day(date, goalType = GoalType.POINTS, goalThreshold = 2)
-        // 7 von 8 reicht nicht: erfuellt ist erst progress >= target.
+        // 7 out of 8 is not enough: fulfilled starts at progress >= target.
         val entries = listOf(HabitEntry(counter(1, target = 8, points = 2), progress = 7))
 
         val result = DayEvaluator.evaluate(day, entries)
@@ -49,7 +49,7 @@ class DayEvaluatorTest {
     }
 
     @Test
-    fun `zaehler darf sein ziel ueberschreiten und bleibt erfuellt`() {
+    fun `a counter may exceed its target and stays fulfilled`() {
         val day = Day(date, goalType = GoalType.MIN_COUNT, goalThreshold = 1)
         val entries = listOf(HabitEntry(counter(1, target = 8), progress = 12))
 
@@ -57,7 +57,7 @@ class DayEvaluatorTest {
     }
 
     @Test
-    fun `all required ignoriert habits ohne pflicht`() {
+    fun `all required ignores habits that are not required`() {
         val day = Day(date, goalType = GoalType.ALL_REQUIRED)
         val entries =
             listOf(
@@ -74,7 +74,7 @@ class DayEvaluatorTest {
     }
 
     @Test
-    fun `all required ohne pflicht habits ist neutral statt bestanden`() {
+    fun `all required without required habits is neutral rather than passed`() {
         val day = Day(date, goalType = GoalType.ALL_REQUIRED)
         val entries = listOf(HabitEntry(check(1), progress = 1))
 
@@ -85,7 +85,7 @@ class DayEvaluatorTest {
     }
 
     @Test
-    fun `leerer tag ist neutral und nicht bestanden`() {
+    fun `an empty day is neutral and not passed`() {
         val day = Day(date, goalType = GoalType.POINTS, goalThreshold = 6)
         val result = DayEvaluator.evaluate(day, entries = emptyList())
 
@@ -94,7 +94,7 @@ class DayEvaluatorTest {
     }
 
     @Test
-    fun `fraction ist bei uebererfuellung auf eins begrenzt`() {
+    fun `the fraction is capped at one when overachieving`() {
         val day = Day(date, goalType = GoalType.POINTS, goalThreshold = 2)
         val entries = listOf(HabitEntry(check(1, points = 10), progress = 1))
 
@@ -102,7 +102,7 @@ class DayEvaluatorTest {
     }
 
     @Test
-    fun `min count zaehlt erfuellte habits unabhaengig von punkten`() {
+    fun `min count counts fulfilled habits regardless of points`() {
         val day = Day(date, goalType = GoalType.MIN_COUNT, goalThreshold = 3)
         val entries =
             listOf(

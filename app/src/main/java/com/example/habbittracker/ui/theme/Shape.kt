@@ -4,7 +4,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
 
-/** Einheitlicher Radius von 16 dp fuer Cards und Buttons, 8-dp-Raster. */
+/** A uniform 16 dp radius for cards and buttons, on an 8 dp grid. */
 val Shapes =
     Shapes(
         extraSmall = RoundedCornerShape(8.dp),

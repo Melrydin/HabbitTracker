@@ -26,12 +26,12 @@ class TodayViewModel(
     private val repository: HabitRepository,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) : ViewModel() {
-    // TODO: beim Wechsel ueber Mitternacht neu setzen, sobald der Screen wieder sichtbar wird.
+    // TODO: reset when the date rolls over midnight, once the screen becomes visible again.
     private val date = MutableStateFlow(LocalDate.now(clock))
 
     /**
-     * Waehrend des Tippens gilt der lokale Entwurf, damit der Cursor nicht springt,
-     * wenn der gespeicherte Wert zurueckfliesst. `null` bedeutet: Wert aus dem Repository.
+     * While typing, the local draft wins so that the cursor does not jump when the
+     * stored value flows back. `null` means: take the value from the repository.
      */
     private val themeDraft = MutableStateFlow<String?>(null)
 
@@ -53,7 +53,7 @@ class TodayViewModel(
                     loaded = true,
                 )
             }.onEach { state ->
-                // Nur der Wechsel offen -> bestanden loest die kurze Bestaetigung aus.
+                // Only the transition from open to passed triggers the brief confirmation.
                 if (lastPassed == false && state.goal.passed) eventChannel.trySend(TodayEvent.DayPassed)
                 lastPassed = state.goal.passed
             }.stateIn(
@@ -80,7 +80,7 @@ class TodayViewModel(
         viewModelScope.launch { repository.setProgress(date.value, item.id, progress) }
     }
 
-    /** Zaehler gehen in Einerschritten, Mengen in groeberen, damit 30 min nicht 30 Taps sind. */
+    /** Counters step by one, amounts step coarser so that 30 min is not 30 taps. */
     private val HabitItem.step: Int
         get() =
             when (entry.habit.type) {

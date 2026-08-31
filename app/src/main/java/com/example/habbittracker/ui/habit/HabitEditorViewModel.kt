@@ -17,7 +17,7 @@ data class HabitEditorUiState(
     val loading: Boolean = false,
 )
 
-/** Der Editor ist fertig, wenn eines dieser Ereignisse eintritt. */
+/** The editor is done once one of these events occurs. */
 sealed interface HabitEditorEvent {
     data object Saved : HabitEditorEvent
 
@@ -25,7 +25,7 @@ sealed interface HabitEditorEvent {
 
     data object Deleted : HabitEditorEvent
 
-    /** Der Habit wurde inzwischen woanders geloescht. */
+    /** The habit has been deleted elsewhere in the meantime. */
     data object NotFound : HabitEditorEvent
 }
 
@@ -75,7 +75,7 @@ class HabitEditorViewModel(
         }
     }
 
-    /** Archivieren speichert offene Aenderungen mit, damit nichts still verloren geht. */
+    /** Archiving also saves pending edits, so that nothing is silently lost. */
     fun onToggleArchived() {
         val form = _uiState.value.form
         if (form.isNew || !form.canSave) return

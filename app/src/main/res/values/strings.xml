@@ -1,88 +1,88 @@
 <resources>
     <string name="app_name">Habbit Tracker</string>
 
-    <!-- Heute-Screen -->
-    <string name="today_title">Heute</string>
+    <!-- Today screen -->
+    <string name="today_title">Today</string>
     <string name="today_subtitle_separator">" · "</string>
-    <string name="today_theme_placeholder">Tagesthema hinzufügen</string>
-    <string name="today_theme_hint">Tagesthema</string>
-    <string name="today_goal_label">Tagesziel</string>
-    <string name="today_goal_points">%1$d von %2$d Punkten</string>
-    <string name="today_goal_min_count">%1$d von %2$d Habits erfüllt</string>
-    <string name="today_goal_all_required">%1$d von %2$d Pflicht-Habits erfüllt</string>
-    <string name="today_goal_none">Für heute ist noch kein Ziel gesetzt</string>
-    <string name="today_status_passed">Bestanden</string>
-    <string name="today_status_open">Offen</string>
-    <string name="today_passed_confirmation">Tag bestanden</string>
+    <string name="today_theme_placeholder">Add a theme for today</string>
+    <string name="today_theme_hint">Theme of the day</string>
+    <string name="today_goal_label">Daily goal</string>
+    <string name="today_goal_points">%1$d of %2$d points</string>
+    <string name="today_goal_min_count">%1$d of %2$d habits done</string>
+    <string name="today_goal_all_required">%1$d of %2$d required habits done</string>
+    <string name="today_goal_none">No goal set for today yet</string>
+    <string name="today_status_passed">Passed</string>
+    <string name="today_status_open">Open</string>
+    <string name="today_passed_confirmation">Day passed</string>
     <string name="today_habits_label">Habits</string>
-    <string name="today_open_history">Verlauf</string>
-    <string name="today_open_settings">Einstellungen</string>
-    <string name="today_add_habit">Habit anlegen</string>
-    <string name="today_empty_title">Noch keine Habits</string>
-    <string name="today_empty_body">Lege deinen ersten Habit an, um den Tag zu erfassen.</string>
+    <string name="today_open_history">History</string>
+    <string name="today_open_settings">Settings</string>
+    <string name="today_add_habit">Add habit</string>
+    <string name="today_empty_title">No habits yet</string>
+    <string name="today_empty_body">Add your first habit to start tracking the day.</string>
 
     <plurals name="today_streak">
-        <item quantity="one">%d Tag Streak</item>
-        <item quantity="other">%d Tage Streak</item>
+        <item quantity="one">%d day streak</item>
+        <item quantity="other">%d day streak</item>
     </plurals>
 
-    <!-- Habit-Zeile -->
+    <!-- Habit row -->
     <string name="habit_progress_with_unit">%1$d / %2$d %3$s</string>
     <string name="habit_progress_plain">%1$d / %2$d</string>
-    <string name="habit_required">Pflicht</string>
-    <string name="habit_decrease">%s verringern</string>
-    <string name="habit_increase">%s erhöhen</string>
+    <string name="habit_required">Required</string>
+    <string name="habit_decrease">Decrease %s</string>
+    <string name="habit_increase">Increase %s</string>
 
     <plurals name="habit_points">
-        <item quantity="one">%d Punkt</item>
-        <item quantity="other">%d Punkte</item>
+        <item quantity="one">%d point</item>
+        <item quantity="other">%d points</item>
     </plurals>
 
-    <!-- Habit-Verwaltung -->
+    <!-- Habit management -->
     <string name="habit_list_title">Habits</string>
-    <string name="habit_list_archived">Archiviert</string>
-    <string name="habit_list_empty_title">Noch keine Habits</string>
-    <string name="habit_list_empty_body">Lege deinen ersten Habit an, um den Tag zu erfassen.</string>
-    <string name="today_open_habits">Habits verwalten</string>
+    <string name="habit_list_archived">Archived</string>
+    <string name="habit_list_empty_title">No habits yet</string>
+    <string name="habit_list_empty_body">Add your first habit to start tracking the day.</string>
+    <string name="today_open_habits">Manage habits</string>
 
-    <!-- Habit-Editor -->
-    <string name="habit_editor_title_new">Neuer Habit</string>
-    <string name="habit_editor_title_edit">Habit bearbeiten</string>
-    <string name="habit_editor_save">Speichern</string>
-    <string name="habit_editor_cancel">Abbrechen</string>
-    <string name="habit_editor_back">Zurück</string>
+    <!-- Habit editor -->
+    <string name="habit_editor_title_new">New habit</string>
+    <string name="habit_editor_title_edit">Edit habit</string>
+    <string name="habit_editor_save">Save</string>
+    <string name="habit_editor_cancel">Cancel</string>
+    <string name="habit_editor_back">Back</string>
     <string name="habit_editor_name_label">Name</string>
-    <string name="habit_editor_name_error">Bitte einen Namen eingeben</string>
+    <string name="habit_editor_name_error">Please enter a name</string>
     <string name="habit_editor_name_counter">%1$d/%2$d</string>
-    <string name="habit_editor_icon_label">Symbol</string>
-    <string name="habit_editor_type_label">Art</string>
-    <string name="habit_editor_target_label">Ziel</string>
-    <string name="habit_editor_target_error_required">Zahl eingeben</string>
-    <string name="habit_editor_target_error_min">Mindestens 1</string>
-    <string name="habit_editor_target_error_max">Höchstens %d</string>
-    <string name="habit_editor_unit_label">Einheit</string>
-    <string name="habit_editor_unit_placeholder">z. B. Gläser</string>
-    <string name="habit_editor_points_label">Punkte</string>
-    <string name="habit_editor_points_hint">Zählen für das Tagesziel, sobald der Habit erfüllt ist.</string>
-    <string name="habit_editor_points_decrease">Punkte verringern</string>
-    <string name="habit_editor_points_increase">Punkte erhöhen</string>
-    <string name="habit_editor_required_label">Pflicht-Habit</string>
-    <string name="habit_editor_required_hint">Nötig für das Tagesziel Alle Pflicht-Habits.</string>
-    <string name="habit_editor_archive">Archivieren</string>
-    <string name="habit_editor_unarchive">Wiederherstellen</string>
-    <string name="habit_editor_archive_hint">Der Habit verschwindet aus neuen Tagen, der Verlauf bleibt erhalten.</string>
-    <string name="habit_editor_delete">Löschen</string>
-    <string name="habit_editor_delete_title">Habit löschen?</string>
-    <string name="habit_editor_delete_message">%s und alle erfassten Werte werden entfernt. Archivieren behält den Verlauf.</string>
-    <string name="habit_editor_saved">Gespeichert</string>
-    <string name="habit_editor_archived_done">Archiviert</string>
-    <string name="habit_editor_unarchived_done">Wiederhergestellt</string>
-    <string name="habit_editor_deleted">Gelöscht</string>
+    <string name="habit_editor_icon_label">Icon</string>
+    <string name="habit_editor_type_label">Type</string>
+    <string name="habit_editor_target_label">Target</string>
+    <string name="habit_editor_target_error_required">Enter a number</string>
+    <string name="habit_editor_target_error_min">At least 1</string>
+    <string name="habit_editor_target_error_max">At most %d</string>
+    <string name="habit_editor_unit_label">Unit</string>
+    <string name="habit_editor_unit_placeholder">e.g. glasses</string>
+    <string name="habit_editor_points_label">Points</string>
+    <string name="habit_editor_points_hint">Count towards the daily goal once the habit is done.</string>
+    <string name="habit_editor_points_decrease">Decrease points</string>
+    <string name="habit_editor_points_increase">Increase points</string>
+    <string name="habit_editor_required_label">Required habit</string>
+    <string name="habit_editor_required_hint">Needed for the daily goal All required habits.</string>
+    <string name="habit_editor_archive">Archive</string>
+    <string name="habit_editor_unarchive">Restore</string>
+    <string name="habit_editor_archive_hint">The habit disappears from new days, the history stays intact.</string>
+    <string name="habit_editor_delete">Delete</string>
+    <string name="habit_editor_delete_title">Delete habit?</string>
+    <string name="habit_editor_delete_message">%s and every recorded value will be removed. Archiving keeps the history.</string>
+    <string name="habit_editor_saved">Saved</string>
+    <string name="habit_editor_archived_done">Archived</string>
+    <string name="habit_editor_unarchived_done">Restored</string>
+    <string name="habit_editor_deleted">Deleted</string>
 
-    <string name="habit_type_check">Ja/Nein</string>
-    <string name="habit_type_counter">Anzahl</string>
-    <string name="habit_type_amount">Menge</string>
-    <string name="habit_summary_target">Ziel %1$d %2$s</string>
-    <string name="habit_summary_target_plain">Ziel %d</string>
-    <string name="habit_edit_action">Bearbeiten</string>
+    <string name="habit_type_check">Yes/No</string>
+    <string name="habit_type_counter">Count</string>
+    <string name="habit_type_amount">Amount</string>
+    <string name="habit_summary_target">Target %1$d %2$s</string>
+    <string name="habit_summary_target_plain">Target %d</string>
+    <string name="habit_edit_action">Edit</string>
 </resources>

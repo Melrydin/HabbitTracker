@@ -16,12 +16,12 @@ import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
 
 /**
- * Platzhalter-Repository mit Beispieldaten, damit die Screens ohne Datenbank
- * lauffaehig und im Emulator bedienbar sind.
+ * Placeholder repository with sample data so the screens run and can be used in
+ * the emulator without a database.
  *
- * TODO(Room): durch eine Room-Implementierung ersetzen. Die Regeln fuer `passed`
- *  und Streak liegen bereits in [DayEvaluator] und [StreakCalculator] und werden
- *  dabei unveraendert uebernommen.
+ * TODO(Room): replace with a Room implementation. The rules for `passed` and the
+ *  streak already live in [DayEvaluator] and [StreakCalculator] and carry over
+ *  unchanged.
  */
 class InMemoryHabitRepository(
     today: LocalDate = LocalDate.now(),
@@ -55,7 +55,7 @@ class InMemoryHabitRepository(
             val habit = current.habits.firstOrNull { it.id == habitId } ?: return@withLock
             val clamped =
                 when (habit.type) {
-                    // CHECK kennt nur 0 oder 1, Zaehler duerfen ihr Ziel ueberschreiten.
+                    // CHECK only knows 0 or 1, counters are allowed to exceed their target.
                     HabitType.CHECK -> progress.coerceIn(0, 1)
 
                     HabitType.COUNTER, HabitType.AMOUNT -> progress.coerceIn(0, PROGRESS_MAX)
@@ -116,11 +116,11 @@ class InMemoryHabitRepository(
         }
 
     /**
-     * Habits eines Tages: alle aktiven, dazu archivierte, fuer die an diesem Tag
-     * schon etwas erfasst wurde. So verschwindet ein archivierter Habit aus neuen
-     * Tagen, alte Eintraege bleiben aber sichtbar (F1).
+     * The habits of a day: every active one, plus archived ones that already have a
+     * value recorded on that day. An archived habit therefore disappears from new
+     * days while older entries stay visible (F1).
      *
-     * TODO(Room): dort ergibt sich die Zugehoerigkeit direkt aus den `DayHabit`-Zeilen.
+     * TODO(Room): there the membership follows directly from the `DayHabit` rows.
      */
     private fun Store.entriesFor(date: LocalDate): List<HabitEntry> =
         habits
@@ -128,8 +128,8 @@ class InMemoryHabitRepository(
             .map { habit -> HabitEntry(habit, progress[date to habit.id] ?: 0) }
 
     /**
-     * Schreibt `Day.passed` fort. Nicht nur Erfassungen aendern das Ergebnis:
-     * auch geaenderte Punkte, ein neues Ziel oder ein archivierter Habit tun es.
+     * Carries `Day.passed` forward. Recorded values are not the only thing that
+     * changes the outcome: edited points, a new goal or an archived habit do too.
      */
     private fun Store.withRecalculatedDays(): Store =
         copy(
@@ -151,19 +151,19 @@ class InMemoryHabitRepository(
             listOf(
                 Habit(
                     id = 1,
-                    name = "Wasser trinken",
+                    name = "Drink water",
                     type = HabitType.COUNTER,
                     target = 8,
-                    unit = "Glaeser",
+                    unit = "glasses",
                     points = 2,
                     icon = "water_drop",
                 ),
-                Habit(2, "Sport", HabitType.CHECK, target = 1, points = 3, required = true, icon = "directions_run"),
-                Habit(3, "Lesen", HabitType.AMOUNT, target = 30, unit = "min", points = 2, icon = "menu_book"),
+                Habit(2, "Exercise", HabitType.CHECK, target = 1, points = 3, required = true, icon = "directions_run"),
+                Habit(3, "Read", HabitType.AMOUNT, target = 30, unit = "min", points = 2, icon = "menu_book"),
                 Habit(4, "Meditation", HabitType.CHECK, target = 1, points = 1, icon = "self_improvement"),
-                Habit(5, "Tagebuch", HabitType.CHECK, target = 1, points = 1, icon = "edit_note"),
+                Habit(5, "Journal", HabitType.CHECK, target = 1, points = 1, icon = "edit_note"),
             )
-        // Vier bestandene Tage vor heute, damit Streak und Verlauf etwas anzeigen.
+        // Four passed days before today so the streak and history show something.
         val pastDays =
             (1..4).associate { back ->
                 val date = today.minusDays(back.toLong())

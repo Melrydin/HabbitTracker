@@ -3,15 +3,15 @@ package com.example.habbittracker.domain
 import java.time.LocalDate
 
 /**
- * Aktuelle und laengste Streak (F4). Gezaehlt werden nur Tage mit `passed = true`,
- * ein nicht bestandener oder leerer Tag setzt die Serie zurueck.
+ * Current and longest streak (F4). Only days with `passed = true` count; a failed
+ * or empty day resets the run.
  */
 object StreakCalculator {
     /**
-     * Laenge der Serie, die auf [today] endet.
+     * Length of the run ending on [today].
      *
-     * Ist [today] noch nicht bestanden, zaehlt die Serie bis gestern weiter. Der laufende
-     * Tag bricht die Serie also nicht, solange er nicht vorbei ist.
+     * While [today] has not passed yet the run is counted up to yesterday, so the day
+     * in progress does not break the streak before it is over.
      */
     fun currentStreak(passedDates: Set<LocalDate>, today: LocalDate): Int {
         var cursor = if (today in passedDates) today else today.minusDays(1)
@@ -23,7 +23,7 @@ object StreakCalculator {
         return streak
     }
 
-    /** Laengste zusammenhaengende Serie ueber den gesamten Verlauf. */
+    /** Longest uninterrupted run across the whole history. */
     fun longestStreak(passedDates: Set<LocalDate>): Int {
         var longest = 0
         var run = 0

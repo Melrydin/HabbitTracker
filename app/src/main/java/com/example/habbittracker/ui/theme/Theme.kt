@@ -16,9 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 /**
- * Statusfarben ausserhalb der Material-Rollen: "bestanden" ist ein Marker,
- * kein Flaechenton, deshalb bewusst eine eigene Rolle. Der Ton ist derselbe
- * wie der Akzent, [onPassedContainer] sorgt fuer lesbaren Text auf der Pille.
+ * Status colors outside the Material roles: "passed" is a marker rather than a
+ * surface tone, so it deliberately gets its own role. The tone matches the accent;
+ * [onPassedContainer] keeps the text on the pill readable.
  */
 @Immutable
 data class StatusColors(
@@ -46,7 +46,7 @@ private val DarkStatusColors =
 
 val LocalStatusColors = staticCompositionLocalOf { LightStatusColors }
 
-/** Zugriff auf die App-eigenen Zusatzfarben: `HabitTheme.status.passed`. */
+/** Access to the app specific extra colors: `HabitTheme.status.passed`. */
 object HabitTheme {
     val status: StatusColors
         @Composable @ReadOnlyComposable
@@ -120,7 +120,7 @@ private val DarkColorScheme =
 @Composable
 fun HabbitTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Material-You bleibt aus, damit das Bild konsistent bleibt (F7: optional ab V2).
+    // Material You stays off to keep the look consistent (F7: optional from V2 on).
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
 ) {
