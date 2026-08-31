@@ -5,7 +5,6 @@ import org.junit.Test
 import java.time.LocalDate
 
 class StreakCalculatorTest {
-
     private val today = LocalDate.of(2026, 8, 31)
 
     private fun daysBefore(vararg offsets: Long) = offsets.map { today.minusDays(it) }.toSet()

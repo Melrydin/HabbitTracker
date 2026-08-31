@@ -10,7 +10,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class HabitFormStateTest {
-
     @Test
     fun `ein leerer name blockiert das speichern`() {
         val form = HabitFormState()
@@ -35,12 +34,13 @@ class HabitFormStateTest {
 
     @Test
     fun `der wechsel auf ja nein setzt ziel und einheit zurueck`() {
-        val form = HabitFormState()
-            .withName("Wasser")
-            .withType(HabitType.COUNTER)
-            .withTarget("8")
-            .withUnit("Glaeser")
-            .withType(HabitType.CHECK)
+        val form =
+            HabitFormState()
+                .withName("Wasser")
+                .withType(HabitType.COUNTER)
+                .withTarget("8")
+                .withUnit("Glaeser")
+                .withType(HabitType.CHECK)
 
         assertEquals("1", form.target)
         assertEquals("", form.unit)
@@ -94,14 +94,15 @@ class HabitFormStateTest {
 
     @Test
     fun `toHabit trimmt und uebernimmt die eingaben`() {
-        val habit = HabitFormState()
-            .withName("  Wasser trinken  ")
-            .withType(HabitType.COUNTER)
-            .withTarget("8")
-            .withUnit(" Glaeser ")
-            .withPoints(2)
-            .copy(required = true, icon = "water_drop")
-            .toHabit()
+        val habit =
+            HabitFormState()
+                .withName("  Wasser trinken  ")
+                .withType(HabitType.COUNTER)
+                .withTarget("8")
+                .withUnit(" Glaeser ")
+                .withPoints(2)
+                .copy(required = true, icon = "water_drop")
+                .toHabit()
 
         assertEquals("Wasser trinken", habit.name)
         assertEquals(8, habit.target)
@@ -120,17 +121,18 @@ class HabitFormStateTest {
 
     @Test
     fun `from und toHabit sind zueinander passend`() {
-        val original = Habit(
-            id = 7,
-            name = "Lesen",
-            type = HabitType.AMOUNT,
-            target = 30,
-            unit = "min",
-            points = 2,
-            required = true,
-            icon = "menu_book",
-            archived = true,
-        )
+        val original =
+            Habit(
+                id = 7,
+                name = "Lesen",
+                type = HabitType.AMOUNT,
+                target = 30,
+                unit = "min",
+                points = 2,
+                required = true,
+                icon = "menu_book",
+                archived = true,
+            )
 
         assertEquals(original, HabitFormState.from(original).toHabit())
     }

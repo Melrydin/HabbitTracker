@@ -20,7 +20,9 @@ data class HabitEditorUiState(
 /** Der Editor ist fertig, wenn eines dieser Ereignisse eintritt. */
 sealed interface HabitEditorEvent {
     data object Saved : HabitEditorEvent
+
     data object Archived : HabitEditorEvent
+
     data object Deleted : HabitEditorEvent
 
     /** Der Habit wurde inzwischen woanders geloescht. */
@@ -31,7 +33,6 @@ class HabitEditorViewModel(
     private val repository: HabitRepository,
     private val habitId: Long = NEW_HABIT_ID,
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow(HabitEditorUiState(loading = habitId != NEW_HABIT_ID))
     val uiState: StateFlow<HabitEditorUiState> = _uiState.asStateFlow()
 

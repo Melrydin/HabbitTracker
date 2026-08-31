@@ -72,37 +72,37 @@ fun HabitRow(
         color = MaterialTheme.colorScheme.surfaceContainer,
     ) {
         Row(
-            modifier = Modifier
-                .combinedClickable(
-                    role = if (isCheck) Role.Checkbox else Role.Button,
-                    onClick = {
+            modifier =
+                Modifier
+                    .combinedClickable(
+                        role = if (isCheck) Role.Checkbox else Role.Button,
+                        onClick = {
+                            if (isCheck) {
+                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onToggle(item)
+                            } else {
+                                onEdit(item)
+                            }
+                        },
+                        onLongClick = { onEdit(item) },
+                    ).then(
+                        // Bei CHECK ist Tippen das Abhaken, deshalb braucht TalkBack
+                        // einen eigenen Weg zum Editor.
                         if (isCheck) {
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onToggle(item)
+                            Modifier.semantics {
+                                toggleableState = ToggleableState(item.fulfilled)
+                                customActions =
+                                    listOf(
+                                        CustomAccessibilityAction(editLabel) {
+                                            onEdit(item)
+                                            true
+                                        },
+                                    )
+                            }
                         } else {
-                            onEdit(item)
-                        }
-                    },
-                    onLongClick = { onEdit(item) },
-                )
-                .then(
-                    // Bei CHECK ist Tippen das Abhaken, deshalb braucht TalkBack
-                    // einen eigenen Weg zum Editor.
-                    if (isCheck) {
-                        Modifier.semantics {
-                            toggleableState = ToggleableState(item.fulfilled)
-                            customActions = listOf(
-                                CustomAccessibilityAction(editLabel) {
-                                    onEdit(item)
-                                    true
-                                },
-                            )
-                        }
-                    } else {
-                        Modifier
-                    },
-                )
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            Modifier
+                        },
+                    ).padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -162,15 +162,16 @@ fun HabitRow(
 private fun CheckMarker(checked: Boolean, modifier: Modifier = Modifier) {
     val status = HabitTheme.status
     Box(
-        modifier = modifier
-            .size(28.dp)
-            .then(
-                if (checked) {
-                    Modifier.background(status.passedContainer, CircleShape)
-                } else {
-                    Modifier.border(1.5.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
-                },
-            ),
+        modifier =
+            modifier
+                .size(28.dp)
+                .then(
+                    if (checked) {
+                        Modifier.background(status.passedContainer, CircleShape)
+                    } else {
+                        Modifier.border(1.5.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                    },
+                ),
         contentAlignment = Alignment.Center,
     ) {
         if (checked) {
@@ -200,9 +201,10 @@ private fun Stepper(
                 onDecrement()
             },
             enabled = canDecrease,
-            colors = IconButtonDefaults.iconButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            ),
+            colors =
+                IconButtonDefaults.iconButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
         ) {
             Icon(
                 imageVector = Icons.Outlined.Remove,
@@ -214,9 +216,10 @@ private fun Stepper(
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                 onIncrement()
             },
-            colors = IconButtonDefaults.iconButtonColors(
-                contentColor = MaterialTheme.colorScheme.primary,
-            ),
+            colors =
+                IconButtonDefaults.iconButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary,
+                ),
         ) {
             Icon(
                 imageVector = Icons.Outlined.Add,
@@ -242,10 +245,16 @@ private fun habitSubtitle(item: HabitItem, goalType: GoalType): String {
         }
     }
     return when {
-        goalType == GoalType.ALL_REQUIRED && habit.required -> stringResource(R.string.habit_required)
-        goalType == GoalType.POINTS ->
-            pluralStringResource(R.plurals.habit_points, habit.points, habit.points)
+        goalType == GoalType.ALL_REQUIRED && habit.required -> {
+            stringResource(R.string.habit_required)
+        }
 
-        else -> ""
+        goalType == GoalType.POINTS -> {
+            pluralStringResource(R.plurals.habit_points, habit.points, habit.points)
+        }
+
+        else -> {
+            ""
+        }
     }
 }

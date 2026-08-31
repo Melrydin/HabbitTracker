@@ -12,7 +12,6 @@ import org.junit.Test
 import java.time.LocalDate
 
 class DayEvaluatorTest {
-
     private val date = LocalDate.of(2026, 8, 31)
 
     private fun check(id: Long, points: Int = 1, required: Boolean = false) =
@@ -24,11 +23,12 @@ class DayEvaluatorTest {
     @Test
     fun `points ziel ist bestanden wenn die summe die schwelle erreicht`() {
         val day = Day(date, goalType = GoalType.POINTS, goalThreshold = 5)
-        val entries = listOf(
-            HabitEntry(check(1, points = 3), progress = 1),
-            HabitEntry(check(2, points = 2), progress = 1),
-            HabitEntry(check(3, points = 4), progress = 0),
-        )
+        val entries =
+            listOf(
+                HabitEntry(check(1, points = 3), progress = 1),
+                HabitEntry(check(2, points = 2), progress = 1),
+                HabitEntry(check(3, points = 4), progress = 0),
+            )
 
         val result = DayEvaluator.evaluate(day, entries)
 
@@ -59,11 +59,12 @@ class DayEvaluatorTest {
     @Test
     fun `all required ignoriert habits ohne pflicht`() {
         val day = Day(date, goalType = GoalType.ALL_REQUIRED)
-        val entries = listOf(
-            HabitEntry(check(1, required = true), progress = 1),
-            HabitEntry(check(2, required = true), progress = 1),
-            HabitEntry(check(3, required = false), progress = 0),
-        )
+        val entries =
+            listOf(
+                HabitEntry(check(1, required = true), progress = 1),
+                HabitEntry(check(2, required = true), progress = 1),
+                HabitEntry(check(3, required = false), progress = 0),
+            )
 
         val result = DayEvaluator.evaluate(day, entries)
 
@@ -103,11 +104,12 @@ class DayEvaluatorTest {
     @Test
     fun `min count zaehlt erfuellte habits unabhaengig von punkten`() {
         val day = Day(date, goalType = GoalType.MIN_COUNT, goalThreshold = 3)
-        val entries = listOf(
-            HabitEntry(check(1, points = 9), progress = 1),
-            HabitEntry(check(2, points = 9), progress = 1),
-            HabitEntry(check(3, points = 9), progress = 0),
-        )
+        val entries =
+            listOf(
+                HabitEntry(check(1, points = 9), progress = 1),
+                HabitEntry(check(2, points = 9), progress = 1),
+                HabitEntry(check(3, points = 9), progress = 0),
+            )
 
         val result = DayEvaluator.evaluate(day, entries)
 

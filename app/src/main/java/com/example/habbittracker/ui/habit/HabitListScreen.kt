@@ -72,10 +72,11 @@ fun HabitListScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    ),
             )
         },
         floatingActionButton = {
@@ -92,12 +93,13 @@ fun HabitListScreen(
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(
-                start = 20.dp,
-                end = 20.dp,
-                top = innerPadding.calculateTopPadding() + 8.dp,
-                bottom = innerPadding.calculateBottomPadding() + 96.dp,
-            ),
+            contentPadding =
+                PaddingValues(
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = innerPadding.calculateTopPadding() + 8.dp,
+                    bottom = innerPadding.calculateBottomPadding() + 96.dp,
+                ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(items = state.active, key = { it.id }) { habit ->
@@ -136,31 +138,34 @@ private fun HabitSummaryRow(
     modifier: Modifier = Modifier,
     dimmed: Boolean = false,
 ) {
-    val contentColor = if (dimmed) {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    }
+    val contentColor =
+        if (dimmed) {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        }
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceContainer,
     ) {
         Row(
-            modifier = Modifier
-                .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier =
+                Modifier
+                    .clickable(onClick = onClick)
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Icon(
                 imageVector = HabitIcons[habit.icon],
                 contentDescription = null,
-                tint = if (dimmed) {
-                    MaterialTheme.colorScheme.outline
-                } else {
-                    MaterialTheme.colorScheme.primary
-                },
+                tint =
+                    if (dimmed) {
+                        MaterialTheme.colorScheme.outline
+                    } else {
+                        MaterialTheme.colorScheme.primary
+                    },
                 modifier = Modifier.size(24.dp),
             )
             Column(modifier = Modifier.weight(1f)) {
@@ -187,30 +192,32 @@ private fun HabitSummaryRow(
 /** Zweite Zeile: Art, Ziel, Punkte, Pflicht, so wie im Editor eingestellt. */
 @Composable
 private fun habitSummary(habit: Habit): String {
-    val parts = buildList {
-        add(stringResource(habit.type.labelRes()))
-        if (habit.type != HabitType.CHECK) {
-            val unit = habit.unit
-            add(
-                if (unit.isNullOrBlank()) {
-                    stringResource(R.string.habit_summary_target_plain, habit.target)
-                } else {
-                    stringResource(R.string.habit_summary_target, habit.target, unit)
-                },
-            )
+    val parts =
+        buildList {
+            add(stringResource(habit.type.labelRes()))
+            if (habit.type != HabitType.CHECK) {
+                val unit = habit.unit
+                add(
+                    if (unit.isNullOrBlank()) {
+                        stringResource(R.string.habit_summary_target_plain, habit.target)
+                    } else {
+                        stringResource(R.string.habit_summary_target, habit.target, unit)
+                    },
+                )
+            }
+            add(pluralStringResource(R.plurals.habit_points, habit.points, habit.points))
+            if (habit.required) add(stringResource(R.string.habit_required))
         }
-        add(pluralStringResource(R.plurals.habit_points, habit.points, habit.points))
-        if (habit.required) add(stringResource(R.string.habit_required))
-    }
     return parts.joinToString(stringResource(R.string.today_subtitle_separator))
 }
 
 @Composable
 private fun EmptyHabitList(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 64.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(top = 64.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
@@ -239,17 +246,30 @@ private fun EmptyHabitList(modifier: Modifier = Modifier) {
 private fun HabitListPreview() {
     HabbitTrackerTheme {
         HabitListScreen(
-            state = HabitListUiState(
-                active = listOf(
-                    Habit(1, "Wasser trinken", HabitType.COUNTER, 8, "Glaeser", points = 2, icon = "water_drop"),
-                    Habit(2, "Sport", HabitType.CHECK, 1, points = 3, required = true, icon = "directions_run"),
+            state =
+                HabitListUiState(
+                    active =
+                        listOf(
+                            Habit(
+                                1,
+                                "Wasser trinken",
+                                HabitType.COUNTER,
+                                8,
+                                "Glaeser",
+                                points = 2,
+                                icon = "water_drop",
+                            ),
+                            Habit(2, "Sport", HabitType.CHECK, 1, points = 3, required = true, icon = "directions_run"),
+                        ),
+                    archived =
+                        listOf(
+                            Habit(3, "Vokabeln", HabitType.AMOUNT, 20, "min", icon = "menu_book", archived = true),
+                        ),
+                    loaded = true,
                 ),
-                archived = listOf(
-                    Habit(3, "Vokabeln", HabitType.AMOUNT, 20, "min", icon = "menu_book", archived = true),
-                ),
-                loaded = true,
-            ),
-            onAddHabit = {}, onEditHabit = {}, onBack = {},
+            onAddHabit = {},
+            onEditHabit = {},
+            onBack = {},
         )
     }
 }

@@ -53,11 +53,13 @@ fun HabitNavHost(
         modifier = modifier,
     ) {
         composable(Routes.TODAY) {
-            val viewModel: TodayViewModel = viewModel(
-                factory = viewModelFactory {
-                    initializer { TodayViewModel(container.habitRepository) }
-                },
-            )
+            val viewModel: TodayViewModel =
+                viewModel(
+                    factory =
+                        viewModelFactory {
+                            initializer { TodayViewModel(container.habitRepository) }
+                        },
+                )
             TodayRoute(
                 viewModel = viewModel,
                 onAddHabit = { navController.navigate(Routes.habitEditor()) },
@@ -70,11 +72,13 @@ fun HabitNavHost(
         }
 
         composable(Routes.HABITS) {
-            val viewModel: HabitListViewModel = viewModel(
-                factory = viewModelFactory {
-                    initializer { HabitListViewModel(container.habitRepository) }
-                },
-            )
+            val viewModel: HabitListViewModel =
+                viewModel(
+                    factory =
+                        viewModelFactory {
+                            initializer { HabitListViewModel(container.habitRepository) }
+                        },
+                )
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             HabitListScreen(
                 state = state,
@@ -86,19 +90,22 @@ fun HabitNavHost(
 
         composable(
             route = Routes.HABIT_EDITOR,
-            arguments = listOf(
-                navArgument(Routes.HABIT_ID_ARG) {
-                    type = NavType.LongType
-                    defaultValue = NEW_HABIT_ID
-                },
-            ),
+            arguments =
+                listOf(
+                    navArgument(Routes.HABIT_ID_ARG) {
+                        type = NavType.LongType
+                        defaultValue = NEW_HABIT_ID
+                    },
+                ),
         ) { backStackEntry ->
             val habitId = backStackEntry.arguments?.getLong(Routes.HABIT_ID_ARG) ?: NEW_HABIT_ID
-            val viewModel: HabitEditorViewModel = viewModel(
-                factory = viewModelFactory {
-                    initializer { HabitEditorViewModel(container.habitRepository, habitId) }
-                },
-            )
+            val viewModel: HabitEditorViewModel =
+                viewModel(
+                    factory =
+                        viewModelFactory {
+                            initializer { HabitEditorViewModel(container.habitRepository, habitId) }
+                        },
+                )
             val state by viewModel.uiState.collectAsStateWithLifecycle()
 
             LaunchedEffect(viewModel) {

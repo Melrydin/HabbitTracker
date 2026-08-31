@@ -13,8 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.DayGoalProgress
@@ -61,13 +61,21 @@ fun DayGoalCard(goal: DayGoalProgress, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun goalLabel(goal: DayGoalProgress): String = when {
-    goal.isNeutral -> stringResource(R.string.today_goal_none)
-    goal.goalType == GoalType.POINTS ->
-        stringResource(R.string.today_goal_points, goal.current, goal.threshold)
+private fun goalLabel(goal: DayGoalProgress): String =
+    when {
+        goal.isNeutral -> {
+            stringResource(R.string.today_goal_none)
+        }
 
-    goal.goalType == GoalType.MIN_COUNT ->
-        stringResource(R.string.today_goal_min_count, goal.current, goal.threshold)
+        goal.goalType == GoalType.POINTS -> {
+            stringResource(R.string.today_goal_points, goal.current, goal.threshold)
+        }
 
-    else -> stringResource(R.string.today_goal_all_required, goal.current, goal.threshold)
-}
+        goal.goalType == GoalType.MIN_COUNT -> {
+            stringResource(R.string.today_goal_min_count, goal.current, goal.threshold)
+        }
+
+        else -> {
+            stringResource(R.string.today_goal_all_required, goal.current, goal.threshold)
+        }
+    }

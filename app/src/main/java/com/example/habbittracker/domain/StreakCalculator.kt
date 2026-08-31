@@ -7,7 +7,6 @@ import java.time.LocalDate
  * ein nicht bestandener oder leerer Tag setzt die Serie zurueck.
  */
 object StreakCalculator {
-
     /**
      * Laenge der Serie, die auf [today] endet.
      *

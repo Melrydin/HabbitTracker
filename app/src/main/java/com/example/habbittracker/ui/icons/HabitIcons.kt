@@ -29,30 +29,30 @@ import androidx.compose.ui.graphics.vector.ImageVector
  * Dieselbe Liste dient spaeter als Auswahl im Habit-Editor.
  */
 object HabitIcons {
-
     const val FALLBACK = "task_alt"
 
-    val catalog: Map<String, ImageVector> = linkedMapOf(
-        FALLBACK to Icons.Outlined.TaskAlt,
-        "water_drop" to Icons.Outlined.WaterDrop,
-        "directions_run" to Icons.AutoMirrored.Outlined.DirectionsRun,
-        "directions_bike" to Icons.AutoMirrored.Outlined.DirectionsBike,
-        "fitness_center" to Icons.Outlined.FitnessCenter,
-        "self_improvement" to Icons.Outlined.SelfImprovement,
-        "menu_book" to Icons.AutoMirrored.Outlined.MenuBook,
-        "edit_note" to Icons.Outlined.EditNote,
-        "bedtime" to Icons.Outlined.Bedtime,
-        "restaurant" to Icons.Outlined.Restaurant,
-        "medication" to Icons.Outlined.Medication,
-        "mood" to Icons.Outlined.Mood,
-        "local_florist" to Icons.Outlined.LocalFlorist,
-        "smoke_free" to Icons.Outlined.SmokeFree,
-        "music_note" to Icons.Outlined.MusicNote,
-        "code" to Icons.Outlined.Code,
-        "call" to Icons.Outlined.Call,
-        "cleaning_services" to Icons.Outlined.CleaningServices,
-        "savings" to Icons.Outlined.Savings,
-    )
+    val catalog: Map<String, ImageVector> =
+        linkedMapOf(
+            FALLBACK to Icons.Outlined.TaskAlt,
+            "water_drop" to Icons.Outlined.WaterDrop,
+            "directions_run" to Icons.AutoMirrored.Outlined.DirectionsRun,
+            "directions_bike" to Icons.AutoMirrored.Outlined.DirectionsBike,
+            "fitness_center" to Icons.Outlined.FitnessCenter,
+            "self_improvement" to Icons.Outlined.SelfImprovement,
+            "menu_book" to Icons.AutoMirrored.Outlined.MenuBook,
+            "edit_note" to Icons.Outlined.EditNote,
+            "bedtime" to Icons.Outlined.Bedtime,
+            "restaurant" to Icons.Outlined.Restaurant,
+            "medication" to Icons.Outlined.Medication,
+            "mood" to Icons.Outlined.Mood,
+            "local_florist" to Icons.Outlined.LocalFlorist,
+            "smoke_free" to Icons.Outlined.SmokeFree,
+            "music_note" to Icons.Outlined.MusicNote,
+            "code" to Icons.Outlined.Code,
+            "call" to Icons.Outlined.Call,
+            "cleaning_services" to Icons.Outlined.CleaningServices,
+            "savings" to Icons.Outlined.Savings,
+        )
 
     /** Unbekannte Namen (z. B. aus einem aelteren Backup) fallen auf ein neutrales Icon zurueck. */
     operator fun get(name: String): ImageVector = catalog[name] ?: catalog.getValue(FALLBACK)

@@ -2,7 +2,7 @@ package com.example.habbittracker.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-/**
+/*
  * Farbkonzept: neutrale Basis plus genau **ein** Akzent, und der ist Grün.
  * Der Statusmarker "bestanden" benutzt denselben Ton, damit das Bild ruhig bleibt.
  *

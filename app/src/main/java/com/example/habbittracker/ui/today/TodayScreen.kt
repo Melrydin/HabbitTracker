@@ -126,12 +126,13 @@ fun TodayScreen(
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                start = 20.dp,
-                end = 20.dp,
-                top = innerPadding.calculateTopPadding() + 12.dp,
-                bottom = innerPadding.calculateBottomPadding() + 96.dp,
-            ),
+            contentPadding =
+                androidx.compose.foundation.layout.PaddingValues(
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = innerPadding.calculateTopPadding() + 12.dp,
+                    bottom = innerPadding.calculateBottomPadding() + 96.dp,
+                ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item(key = "header") {
@@ -192,13 +193,14 @@ private fun TodayHeader(
     val locale = Locale.getDefault()
     val formatter = remember(locale) { DateTimeFormatter.ofPattern("EEEE, d. MMMM", locale) }
     val separator = stringResource(R.string.today_subtitle_separator)
-    val subtitle = buildString {
-        append(date.format(formatter))
-        if (currentStreak > 0) {
-            append(separator)
-            append(pluralStringResource(R.plurals.today_streak, currentStreak, currentStreak))
+    val subtitle =
+        buildString {
+            append(date.format(formatter))
+            if (currentStreak > 0) {
+                append(separator)
+                append(pluralStringResource(R.plurals.today_streak, currentStreak, currentStreak))
+            }
         }
-    }
 
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(1f)) {
@@ -253,17 +255,20 @@ private fun ThemeField(
         BasicTextField(
             value = theme,
             onValueChange = onThemeChange,
-            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                color = MaterialTheme.colorScheme.onSurface,
-            ),
+            textStyle =
+                MaterialTheme.typography.bodyLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurface,
+                ),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             singleLine = true,
-            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                imeAction = ImeAction.Done,
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
+            keyboardOptions =
+                androidx.compose.foundation.text.KeyboardOptions(
+                    imeAction = ImeAction.Done,
+                ),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 16.dp),
             decorationBox = { innerTextField ->
                 if (theme.isEmpty()) {
                     Text(
@@ -281,9 +286,10 @@ private fun ThemeField(
 @Composable
 private fun EmptyHabits(onAddHabit: () -> Unit, modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 48.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(top = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
@@ -313,22 +319,27 @@ private fun EmptyHabits(onAddHabit: () -> Unit, modifier: Modifier = Modifier) {
 
 // --- Previews ---------------------------------------------------------------
 
-private fun previewState(passed: Boolean = false) = TodayUiState(
-    date = LocalDate.of(2026, 8, 31),
-    theme = if (passed) "Ruhiger Fokus" else "",
-    goal = DayGoalProgress(GoalType.POINTS, current = if (passed) 6 else 3, threshold = 6, passed = passed),
-    habits = listOf(
-        HabitEntry(Habit(1, "Wasser trinken", HabitType.COUNTER, 8, "Glaeser", points = 2, icon = "water_drop"), 3),
-        HabitEntry(
-            habit = Habit(2, "Sport", HabitType.CHECK, 1, points = 3, required = true, icon = "directions_run"),
-            progress = if (passed) 1 else 0,
-        ),
-        HabitEntry(Habit(3, "Lesen", HabitType.AMOUNT, 30, "min", points = 2, icon = "menu_book"), 30),
-        HabitEntry(Habit(4, "Meditation", HabitType.CHECK, 1, points = 1, icon = "self_improvement"), 0),
-    ).map(::HabitItem),
-    currentStreak = 4,
-    loaded = true,
-)
+private fun previewState(passed: Boolean = false) =
+    TodayUiState(
+        date = LocalDate.of(2026, 8, 31),
+        theme = if (passed) "Ruhiger Fokus" else "",
+        goal = DayGoalProgress(GoalType.POINTS, current = if (passed) 6 else 3, threshold = 6, passed = passed),
+        habits =
+            listOf(
+                HabitEntry(
+                    Habit(1, "Wasser trinken", HabitType.COUNTER, 8, "Glaeser", points = 2, icon = "water_drop"),
+                    3,
+                ),
+                HabitEntry(
+                    habit = Habit(2, "Sport", HabitType.CHECK, 1, points = 3, required = true, icon = "directions_run"),
+                    progress = if (passed) 1 else 0,
+                ),
+                HabitEntry(Habit(3, "Lesen", HabitType.AMOUNT, 30, "min", points = 2, icon = "menu_book"), 30),
+                HabitEntry(Habit(4, "Meditation", HabitType.CHECK, 1, points = 1, icon = "self_improvement"), 0),
+            ).map(::HabitItem),
+        currentStreak = 4,
+        loaded = true,
+    )
 
 @Preview(name = "Heute, hell", showBackground = true)
 @Composable
@@ -337,9 +348,15 @@ private fun TodayScreenPreview() {
         TodayScreen(
             state = previewState(),
             snackbarHostState = remember { SnackbarHostState() },
-            onThemeChange = {}, onToggleCheck = {}, onIncrement = {}, onDecrement = {},
-            onAddHabit = {}, onEditHabit = {}, onOpenHabits = {},
-            onOpenHistory = {}, onOpenSettings = {},
+            onThemeChange = {},
+            onToggleCheck = {},
+            onIncrement = {},
+            onDecrement = {},
+            onAddHabit = {},
+            onEditHabit = {},
+            onOpenHabits = {},
+            onOpenHistory = {},
+            onOpenSettings = {},
         )
     }
 }
@@ -351,9 +368,15 @@ private fun TodayScreenDarkPreview() {
         TodayScreen(
             state = previewState(passed = true),
             snackbarHostState = remember { SnackbarHostState() },
-            onThemeChange = {}, onToggleCheck = {}, onIncrement = {}, onDecrement = {},
-            onAddHabit = {}, onEditHabit = {}, onOpenHabits = {},
-            onOpenHistory = {}, onOpenSettings = {},
+            onThemeChange = {},
+            onToggleCheck = {},
+            onIncrement = {},
+            onDecrement = {},
+            onAddHabit = {},
+            onEditHabit = {},
+            onOpenHabits = {},
+            onOpenHistory = {},
+            onOpenSettings = {},
         )
     }
 }
@@ -365,9 +388,15 @@ private fun TodayScreenEmptyPreview() {
         TodayScreen(
             state = TodayUiState(date = LocalDate.of(2026, 8, 31), loaded = true),
             snackbarHostState = remember { SnackbarHostState() },
-            onThemeChange = {}, onToggleCheck = {}, onIncrement = {}, onDecrement = {},
-            onAddHabit = {}, onEditHabit = {}, onOpenHabits = {},
-            onOpenHistory = {}, onOpenSettings = {},
+            onThemeChange = {},
+            onToggleCheck = {},
+            onIncrement = {},
+            onDecrement = {},
+            onAddHabit = {},
+            onEditHabit = {},
+            onOpenHabits = {},
+            onOpenHistory = {},
+            onOpenSettings = {},
         )
     }
 }

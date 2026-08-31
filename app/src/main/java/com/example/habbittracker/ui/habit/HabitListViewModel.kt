@@ -18,17 +18,17 @@ data class HabitListUiState(
 }
 
 class HabitListViewModel(repository: HabitRepository) : ViewModel() {
-
-    val uiState: StateFlow<HabitListUiState> = repository.observeHabits()
-        .map { habits ->
-            val (archived, active) = habits.partition { it.archived }
-            HabitListUiState(active = active, archived = archived, loaded = true)
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-            initialValue = HabitListUiState(),
-        )
+    val uiState: StateFlow<HabitListUiState> =
+        repository
+            .observeHabits()
+            .map { habits ->
+                val (archived, active) = habits.partition { it.archived }
+                HabitListUiState(active = active, archived = archived, loaded = true)
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+                initialValue = HabitListUiState(),
+            )
 
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L

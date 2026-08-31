@@ -88,9 +88,10 @@ fun HabitEditorScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = stringResource(
-                            if (form.isNew) R.string.habit_editor_title_new else R.string.habit_editor_title_edit,
-                        ),
+                        text =
+                            stringResource(
+                                if (form.isNew) R.string.habit_editor_title_new else R.string.habit_editor_title_edit,
+                            ),
                         style = MaterialTheme.typography.titleMedium,
                     )
                 },
@@ -107,21 +108,23 @@ fun HabitEditorScreen(
                         Text(stringResource(R.string.habit_editor_save))
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                ),
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    ),
             )
         },
     ) { innerPadding ->
         if (state.loading) return@Scaffold
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 8.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             NameField(form = form, onNameChange = onNameChange)
@@ -204,15 +207,16 @@ private fun NameField(
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         supportingText = {
             Text(
-                text = if (hasError) {
-                    stringResource(R.string.habit_editor_name_error)
-                } else {
-                    stringResource(
-                        R.string.habit_editor_name_counter,
-                        form.name.length,
-                        com.example.habbittracker.domain.model.Habit.NAME_MAX_LENGTH,
-                    )
-                },
+                text =
+                    if (hasError) {
+                        stringResource(R.string.habit_editor_name_error)
+                    } else {
+                        stringResource(
+                            R.string.habit_editor_name_counter,
+                            form.name.length,
+                            com.example.habbittracker.domain.model.Habit.NAME_MAX_LENGTH,
+                        )
+                    },
                 style = MaterialTheme.typography.labelMedium,
             )
         },
@@ -238,19 +242,21 @@ private fun IconPicker(
             HabitIcons.catalog.forEach { (name, vector) ->
                 val isSelected = name == selected
                 Surface(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .selectable(
-                            selected = isSelected,
-                            role = Role.RadioButton,
-                            onClick = { onIconChange(name) },
-                        ),
+                    modifier =
+                        Modifier
+                            .size(48.dp)
+                            .selectable(
+                                selected = isSelected,
+                                role = Role.RadioButton,
+                                onClick = { onIconChange(name) },
+                            ),
                     shape = CircleShape,
-                    color = if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainer
-                    },
+                    color =
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainer
+                        },
                 ) {
                     Column(
                         verticalArrangement = Arrangement.Center,
@@ -260,11 +266,12 @@ private fun IconPicker(
                             imageVector = vector,
                             // Die Auswahl beschreibt der Zustand des Buttons, nicht das Symbol.
                             contentDescription = name,
-                            tint = if (isSelected) {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.onSurfaceVariant
-                            },
+                            tint =
+                                if (isSelected) {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                },
                             modifier = Modifier.size(24.dp),
                         )
                     }
@@ -314,29 +321,36 @@ private fun TargetAndUnitFields(
             singleLine = true,
             isError = form.targetError != null,
             shape = MaterialTheme.shapes.medium,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Next,
-            ),
-            supportingText = form.targetError?.let { error ->
-                {
-                    Text(
-                        text = when (error) {
-                            HabitFormError.TARGET_REQUIRED ->
-                                stringResource(R.string.habit_editor_target_error_required)
+            keyboardOptions =
+                KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next,
+                ),
+            supportingText =
+                form.targetError?.let { error ->
+                    {
+                        Text(
+                            text =
+                                when (error) {
+                                    HabitFormError.TARGET_REQUIRED -> {
+                                        stringResource(R.string.habit_editor_target_error_required)
+                                    }
 
-                            HabitFormError.TARGET_TOO_SMALL ->
-                                stringResource(R.string.habit_editor_target_error_min)
+                                    HabitFormError.TARGET_TOO_SMALL -> {
+                                        stringResource(R.string.habit_editor_target_error_min)
+                                    }
 
-                            else -> stringResource(
-                                R.string.habit_editor_target_error_max,
-                                HabitFormState.TARGET_MAX,
-                            )
-                        },
-                        style = MaterialTheme.typography.labelMedium,
-                    )
-                }
-            },
+                                    else -> {
+                                        stringResource(
+                                            R.string.habit_editor_target_error_max,
+                                            HabitFormState.TARGET_MAX,
+                                        )
+                                    }
+                                },
+                            style = MaterialTheme.typography.labelMedium,
+                        )
+                    }
+                },
         )
         OutlinedTextField(
             value = form.unit,
@@ -431,9 +445,10 @@ private fun DangerZone(
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(
-                            if (archived) R.string.habit_editor_unarchive else R.string.habit_editor_archive,
-                        ),
+                        text =
+                            stringResource(
+                                if (archived) R.string.habit_editor_unarchive else R.string.habit_editor_archive,
+                            ),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -523,19 +538,28 @@ private fun FormSection(
 private fun HabitEditorNewPreview() {
     HabbitTrackerTheme {
         HabitEditorScreen(
-            state = HabitEditorUiState(
-                HabitFormState(
-                    name = "Wasser trinken",
-                    type = HabitType.COUNTER,
-                    target = "8",
-                    unit = "Glaeser",
-                    points = 2,
-                    icon = "water_drop",
+            state =
+                HabitEditorUiState(
+                    HabitFormState(
+                        name = "Wasser trinken",
+                        type = HabitType.COUNTER,
+                        target = "8",
+                        unit = "Glaeser",
+                        points = 2,
+                        icon = "water_drop",
+                    ),
                 ),
-            ),
-            onNameChange = {}, onTypeChange = {}, onTargetChange = {}, onUnitChange = {},
-            onPointsChange = {}, onRequiredChange = {}, onIconChange = {},
-            onSave = {}, onToggleArchived = {}, onDelete = {}, onBack = {},
+            onNameChange = {},
+            onTypeChange = {},
+            onTargetChange = {},
+            onUnitChange = {},
+            onPointsChange = {},
+            onRequiredChange = {},
+            onIconChange = {},
+            onSave = {},
+            onToggleArchived = {},
+            onDelete = {},
+            onBack = {},
         )
     }
 }
@@ -545,19 +569,28 @@ private fun HabitEditorNewPreview() {
 private fun HabitEditorEditPreview() {
     HabbitTrackerTheme(darkTheme = true) {
         HabitEditorScreen(
-            state = HabitEditorUiState(
-                HabitFormState(
-                    id = 2,
-                    name = "Sport",
-                    type = HabitType.CHECK,
-                    points = 3,
-                    required = true,
-                    icon = "directions_run",
+            state =
+                HabitEditorUiState(
+                    HabitFormState(
+                        id = 2,
+                        name = "Sport",
+                        type = HabitType.CHECK,
+                        points = 3,
+                        required = true,
+                        icon = "directions_run",
+                    ),
                 ),
-            ),
-            onNameChange = {}, onTypeChange = {}, onTargetChange = {}, onUnitChange = {},
-            onPointsChange = {}, onRequiredChange = {}, onIconChange = {},
-            onSave = {}, onToggleArchived = {}, onDelete = {}, onBack = {},
+            onNameChange = {},
+            onTypeChange = {},
+            onTargetChange = {},
+            onUnitChange = {},
+            onPointsChange = {},
+            onRequiredChange = {},
+            onIconChange = {},
+            onSave = {},
+            onToggleArchived = {},
+            onDelete = {},
+            onBack = {},
         )
     }
 }

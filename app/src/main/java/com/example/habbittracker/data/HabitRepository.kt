@@ -18,7 +18,6 @@ data class DaySnapshot(
  * von [InMemoryHabitRepository] auf Room, ohne dass ViewModel oder UI sich aendern.
  */
 interface HabitRepository {
-
     // --- Tageserfassung (F2, F3) ---
 
     fun observeDay(date: LocalDate): Flow<DaySnapshot>

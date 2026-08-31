@@ -27,12 +27,12 @@ data class DayGoalProgress(
  * ViewModel und Tests dieselbe Regel benutzen.
  */
 object DayEvaluator {
-
-    fun evaluate(day: Day, entries: List<HabitEntry>): DayGoalProgress = when (day.goalType) {
-        GoalType.ALL_REQUIRED -> evaluateAllRequired(day, entries)
-        GoalType.MIN_COUNT -> evaluateMinCount(day, entries)
-        GoalType.POINTS -> evaluatePoints(day, entries)
-    }
+    fun evaluate(day: Day, entries: List<HabitEntry>): DayGoalProgress =
+        when (day.goalType) {
+            GoalType.ALL_REQUIRED -> evaluateAllRequired(day, entries)
+            GoalType.MIN_COUNT -> evaluateMinCount(day, entries)
+            GoalType.POINTS -> evaluatePoints(day, entries)
+        }
 
     private fun evaluateAllRequired(day: Day, entries: List<HabitEntry>): DayGoalProgress {
         val required = entries.filter { it.habit.required }

@@ -26,7 +26,6 @@ class TodayViewModel(
     private val repository: HabitRepository,
     private val clock: Clock = Clock.systemDefaultZone(),
 ) : ViewModel() {
-
     // TODO: beim Wechsel ueber Mitternacht neu setzen, sobald der Screen wieder sichtbar wird.
     private val date = MutableStateFlow(LocalDate.now(clock))
 
@@ -41,28 +40,27 @@ class TodayViewModel(
 
     private var lastPassed: Boolean? = null
 
-    val uiState: StateFlow<TodayUiState> = date
-        .flatMapLatest { day -> repository.observeDay(day) }
-        .combine(themeDraft) { snapshot, draft ->
-            TodayUiState(
-                date = snapshot.day.date,
-                theme = draft ?: snapshot.day.theme.orEmpty(),
-                goal = DayEvaluator.evaluate(snapshot.day, snapshot.entries),
-                habits = snapshot.entries.map(::HabitItem),
-                currentStreak = snapshot.currentStreak,
-                loaded = true,
+    val uiState: StateFlow<TodayUiState> =
+        date
+            .flatMapLatest { day -> repository.observeDay(day) }
+            .combine(themeDraft) { snapshot, draft ->
+                TodayUiState(
+                    date = snapshot.day.date,
+                    theme = draft ?: snapshot.day.theme.orEmpty(),
+                    goal = DayEvaluator.evaluate(snapshot.day, snapshot.entries),
+                    habits = snapshot.entries.map(::HabitItem),
+                    currentStreak = snapshot.currentStreak,
+                    loaded = true,
+                )
+            }.onEach { state ->
+                // Nur der Wechsel offen -> bestanden loest die kurze Bestaetigung aus.
+                if (lastPassed == false && state.goal.passed) eventChannel.trySend(TodayEvent.DayPassed)
+                lastPassed = state.goal.passed
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+                initialValue = TodayUiState(date = date.value),
             )
-        }
-        .onEach { state ->
-            // Nur der Wechsel offen -> bestanden loest die kurze Bestaetigung aus.
-            if (lastPassed == false && state.goal.passed) eventChannel.trySend(TodayEvent.DayPassed)
-            lastPassed = state.goal.passed
-        }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-            initialValue = TodayUiState(date = date.value),
-        )
 
     fun onToggleCheck(item: HabitItem) {
         setProgress(item, if (item.fulfilled) 0 else item.entry.habit.target)
@@ -84,11 +82,12 @@ class TodayViewModel(
 
     /** Zaehler gehen in Einerschritten, Mengen in groeberen, damit 30 min nicht 30 Taps sind. */
     private val HabitItem.step: Int
-        get() = when (entry.habit.type) {
-            HabitType.CHECK -> 1
-            HabitType.COUNTER -> 1
-            HabitType.AMOUNT -> AMOUNT_STEP
-        }
+        get() =
+            when (entry.habit.type) {
+                HabitType.CHECK -> 1
+                HabitType.COUNTER -> 1
+                HabitType.AMOUNT -> AMOUNT_STEP
+            }
 
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L

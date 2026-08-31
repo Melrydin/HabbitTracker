@@ -35,10 +35,11 @@ fun ProgressTrack(
         label = "progress",
     )
     Canvas(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height)
-            .clearAndSetSemantics { },
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(height)
+                .clearAndSetSemantics { },
     ) {
         val radius = CornerRadius(size.height / 2f)
         drawRoundRect(color = trackColor, size = size, cornerRadius = radius)

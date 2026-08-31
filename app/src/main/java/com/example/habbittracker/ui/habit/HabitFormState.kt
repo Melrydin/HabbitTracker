@@ -66,12 +66,15 @@ data class HabitFormState(
     fun withPoints(value: Int) = copy(points = value.coerceIn(POINTS_MIN, POINTS_MAX))
 
     /** Beim Wechsel auf CHECK verlieren Ziel und Einheit ihre Bedeutung. */
-    fun withType(value: HabitType): HabitFormState = when {
-        value == type -> this
-        value == HabitType.CHECK -> copy(type = value, target = "1", unit = "")
-        // Von CHECK kommend ist das Ziel "1": gueltig, also ohne Fehlermeldung beim Umschalten.
-        else -> copy(type = value)
-    }
+    fun withType(value: HabitType): HabitFormState =
+        when {
+            value == type -> this
+
+            value == HabitType.CHECK -> copy(type = value, target = "1", unit = "")
+
+            // Von CHECK kommend ist das Ziel "1": gueltig, also ohne Fehlermeldung beim Umschalten.
+            else -> copy(type = value)
+        }
 
     fun toHabit(): Habit {
         check(canSave) { "Formular ist unvollstaendig" }
@@ -95,16 +98,17 @@ data class HabitFormState(
         const val UNIT_MAX_LENGTH = 12
         private const val TARGET_MAX_DIGITS = 4
 
-        fun from(habit: Habit) = HabitFormState(
-            id = habit.id,
-            name = habit.name,
-            type = habit.type,
-            target = habit.target.toString(),
-            unit = habit.unit.orEmpty(),
-            points = habit.points,
-            required = habit.required,
-            icon = habit.icon,
-            archived = habit.archived,
-        )
+        fun from(habit: Habit) =
+            HabitFormState(
+                id = habit.id,
+                name = habit.name,
+                type = habit.type,
+                target = habit.target.toString(),
+                unit = habit.unit.orEmpty(),
+                points = habit.points,
+                required = habit.required,
+                icon = habit.icon,
+                archived = habit.archived,
+            )
     }
 }

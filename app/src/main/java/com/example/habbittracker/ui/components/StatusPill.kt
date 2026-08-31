@@ -45,9 +45,10 @@ fun StatusPill(passed: Boolean, modifier: Modifier = Modifier) {
                 )
             }
             Text(
-                text = stringResource(
-                    if (passed) R.string.today_status_passed else R.string.today_status_open,
-                ),
+                text =
+                    stringResource(
+                        if (passed) R.string.today_status_passed else R.string.today_status_open,
+                    ),
                 style = MaterialTheme.typography.labelMedium,
                 color = if (passed) status.onPassedContainer else MaterialTheme.colorScheme.onSurfaceVariant,
             )
