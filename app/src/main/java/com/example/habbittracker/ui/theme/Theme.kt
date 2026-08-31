@@ -17,24 +17,28 @@ import androidx.compose.ui.platform.LocalContext
 
 /**
  * Statusfarben ausserhalb der Material-Rollen: "bestanden" ist ein Marker,
- * kein Flaechenton, deshalb bewusst nicht auf primary/tertiary gemappt.
+ * kein Flaechenton, deshalb bewusst eine eigene Rolle. Der Ton ist derselbe
+ * wie der Akzent, [onPassedContainer] sorgt fuer lesbaren Text auf der Pille.
  */
 @Immutable
 data class StatusColors(
     val passed: Color,
     val passedContainer: Color,
+    val onPassedContainer: Color,
     val open: Color,
 )
 
 private val LightStatusColors = StatusColors(
     passed = PassedLight,
     passedContainer = PassedContainerLight,
+    onPassedContainer = OnPassedContainerLight,
     open = OpenLight,
 )
 
 private val DarkStatusColors = StatusColors(
     passed = PassedDark,
     passedContainer = PassedContainerDark,
+    onPassedContainer = OnPassedContainerDark,
     open = OpenDark,
 )
 
@@ -58,7 +62,7 @@ private val LightColorScheme = lightColorScheme(
     tertiary = PassedLight,
     onTertiary = Color.White,
     tertiaryContainer = PassedContainerLight,
-    onTertiaryContainer = Color(0xFF14351F),
+    onTertiaryContainer = OnPassedContainerLight,
     background = BackgroundLight,
     onBackground = OnBackgroundLight,
     surface = BackgroundLight,
@@ -87,9 +91,9 @@ private val DarkColorScheme = darkColorScheme(
     secondaryContainer = Color(0xFF424653),
     onSecondaryContainer = Color(0xFFDFE1EA),
     tertiary = PassedDark,
-    onTertiary = Color(0xFF0B3B22),
+    onTertiary = OnAccentDark,
     tertiaryContainer = PassedContainerDark,
-    onTertiaryContainer = Color(0xFFB5EDCA),
+    onTertiaryContainer = OnPassedContainerDark,
     background = BackgroundDark,
     onBackground = OnBackgroundDark,
     surface = BackgroundDark,

@@ -49,7 +49,7 @@ fun StatusPill(passed: Boolean, modifier: Modifier = Modifier) {
                     if (passed) R.string.today_status_passed else R.string.today_status_open,
                 ),
                 style = MaterialTheme.typography.labelMedium,
-                color = if (passed) status.passed else MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (passed) status.onPassedContainer else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }

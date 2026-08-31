@@ -21,12 +21,10 @@ import com.example.habbittracker.domain.DayGoalProgress
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.ui.components.ProgressTrack
 import com.example.habbittracker.ui.components.StatusPill
-import com.example.habbittracker.ui.theme.HabitTheme
 
 /** Tagesziel mit Fortschrittsbalken und Statusmarker (F2). */
 @Composable
 fun DayGoalCard(goal: DayGoalProgress, modifier: Modifier = Modifier) {
-    val status = HabitTheme.status
     val label = goalLabel(goal)
 
     Surface(
@@ -54,7 +52,7 @@ fun DayGoalCard(goal: DayGoalProgress, modifier: Modifier = Modifier) {
             Spacer(Modifier.height(14.dp))
             ProgressTrack(
                 fraction = goal.fraction,
-                color = if (goal.passed) status.passed else MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 modifier = Modifier.semantics { contentDescription = label },
             )

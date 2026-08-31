@@ -3,28 +3,33 @@ package com.example.habbittracker.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /**
- * Farbkonzept laut Featureliste: neutrale Basis, genau **ein** Akzent (Indigo),
- * dazu ein dezentes Grün ausschliesslich als Statusmarker. Mehr Farben gibt es nicht.
+ * Farbkonzept: neutrale Basis plus genau **ein** Akzent, und der ist Grün.
+ * Der Statusmarker "bestanden" benutzt denselben Ton, damit das Bild ruhig bleibt.
  *
- * Der Akzent laesst sich hier an einer Stelle tauschen (z. B. gegen Teal),
- * ohne dass eine andere Datei angefasst werden muss.
+ * Der Akzent laesst sich hier an einer Stelle tauschen, ohne dass eine andere
+ * Datei angefasst werden muss.
  */
 
 // Akzent
-val AccentLight = Color(0xFF4C56B8)
-val AccentContainerLight = Color(0xFFE4E6FA)
-val OnAccentContainerLight = Color(0xFF232A6B)
+val AccentLight = Color(0xFF2E7D4F)
+val AccentContainerLight = Color(0xFFE6F4EC)
+val OnAccentContainerLight = Color(0xFF0F4429)
 
-val AccentDark = Color(0xFFB6BDF5)
-val AccentContainerDark = Color(0xFF333B85)
-val OnAccentContainerDark = Color(0xFFE0E3FB)
-val OnAccentDark = Color(0xFF1E2359)
+val AccentDark = Color(0xFF7FD4A0)
+val AccentContainerDark = Color(0xFF22523A)
+val OnAccentContainerDark = Color(0xFFB5EDCA)
+val OnAccentDark = Color(0xFF0B3B22)
 
-// Statusmarker "bestanden" (dezentes Gruen, nie flaechig)
-val PassedLight = Color(0xFF2E7D4F)
-val PassedContainerLight = Color(0xFFE2F1E8)
-val PassedDark = Color(0xFF7FD4A0)
-val PassedContainerDark = Color(0xFF1C3A28)
+// Statusmarker "bestanden". Seit die App durchgehend gruen ist, teilt er sich
+// den Ton mit dem Akzent: unterschieden wird ueber Form (Pille, Haken) und
+// ueber den Kontrast zum neutralen "offen", nicht ueber einen zweiten Gruenton.
+val PassedLight = AccentLight
+val PassedContainerLight = AccentContainerLight
+val OnPassedContainerLight = OnAccentContainerLight
+
+val PassedDark = AccentDark
+val PassedContainerDark = AccentContainerDark
+val OnPassedContainerDark = OnAccentContainerDark
 
 // Status "offen": bewusst ein Grauton, kein Rot, um nicht zu werten
 val OpenLight = Color(0xFF9DA0A9)
