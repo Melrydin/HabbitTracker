@@ -1,42 +1,49 @@
 # Habit Tracker
 
-Lokaler Habit-Tracker für Android. Kein Konto, keine Cloud, keine Synchronisation — die App
-hat bewusst **keine `INTERNET`-Permission** und soll auch keine bekommen.
+A local habit tracker for Android. No account, no cloud, no sync — the app
+deliberately has **no `INTERNET` permission** and must not gain one.
 
-Anforderungsquelle ist `~/Downloads/habit_tracker_featureliste.md` (liegt außerhalb des Repos
-und ist nicht eingecheckt). Sie definiert die Features F1 bis F7. MVP-Umfang: F1, F2, F3,
-F4-Basis, F6, F7-Basis. V2: Erinnerungen, Statistik-Ausbau, Merge-Import, Widgets.
+The requirements live in [`docs/habit_tracker_featureliste.md`](docs/habit_tracker_featureliste.md)
+and define the features F1 to F7. MVP scope: F1, F2, F3, F4 basics, F6, F7 basics. V2:
+reminders, richer statistics, merge import, widgets.
+
+## Language
+
+**The entire codebase is written in English** — comments, KDoc, identifiers, test names,
+string resources, commit messages and this document. The one exception is the requirements
+document under `docs/`, which is the original German source and stays as written; the spell
+checker skips it.
 
 ## Stack
 
-| Punkt | Angabe |
+| Item | Value |
 |---|---|
-| Sprache | Kotlin |
+| Language | Kotlin |
 | UI | Jetpack Compose, Material 3 |
-| Architektur | MVVM, Repository, StateFlow |
-| Persistenz | **noch keine** — `InMemoryHabitRepository` ist Platzhalter für Room |
-| Navigation | `navigation-compose`, String-Routen |
+| Architecture | MVVM, repository, StateFlow |
+| Persistence | **none yet** — `InMemoryHabitRepository` is a placeholder for Room |
+| Navigation | `navigation-compose`, string routes |
 | minSdk / targetSdk | 26 / 37 |
-| Berechtigungen | keine (später nur `POST_NOTIFICATIONS` für F5) |
+| Permissions | none (later only `POST_NOTIFICATIONS` for F5) |
 
-AGP 9 bringt Kotlin-Unterstützung mit; ein separates `kotlin-android`-Plugin gibt es hier
-nicht. Dependencies laufen über den Version-Catalog in `gradle/libs.versions.toml`.
+AGP 9 brings its own Kotlin support; there is no separate `kotlin-android` plugin here.
+Dependencies go through the version catalog in `gradle/libs.versions.toml`.
 
-## Befehle
+## Commands
 
-Bauen:
+Build:
 
 ```bash
 ./gradlew :app:assembleDebug
 ```
 
-Tests:
+Test:
 
 ```bash
 ./gradlew :app:testDebugUnitTest
 ```
 
-Codestil prüfen und automatisch korrigieren:
+Check and fix the code style:
 
 ```bash
 ./gradlew ktlintCheck
@@ -46,245 +53,253 @@ Codestil prüfen und automatisch korrigieren:
 ./gradlew ktlintFormat
 ```
 
-Alles zusammen, genau das fährt auch die CI:
+Spell check:
+
+```bash
+npx cspell lint --no-progress "**/*.{kt,kts,xml,yml,md,toml}"
+```
+
+Everything at once, exactly what CI runs:
 
 ```bash
 ./gradlew ktlintCheck :app:lintDebug :app:assembleDebug :app:testDebugUnitTest
 ```
 
-## Aufbau
+## Layout
 
 ```
 app/src/main/java/com/example/habbittracker/
-├── domain/           Fachlogik, reines Kotlin, kein Android-Import
+├── domain/           business rules, plain Kotlin, no Android imports
 │   ├── model/        Habit, Day, DayHabit, HabitEntry
-│   ├── DayEvaluator      Tagesziel-Auswertung (F2)
-│   └── StreakCalculator  aktuelle und längste Serie (F4)
-├── data/             HabitRepository (Interface) + InMemoryHabitRepository
+│   ├── DayEvaluator      daily goal evaluation (F2)
+│   └── StreakCalculator  current and longest streak (F4)
+├── data/             HabitRepository (interface) + InMemoryHabitRepository
 ├── ui/
-│   ├── theme/        Farben, Typografie, Formen
-│   ├── components/   screenübergreifende Bausteine (ProgressTrack, StatusPill)
-│   ├── icons/        HabitIcons: Name aus Habit.icon → ImageVector
+│   ├── theme/        colors, typography, shapes
+│   ├── components/   building blocks shared across screens (ProgressTrack, StatusPill)
+│   ├── icons/        HabitIcons: name from Habit.icon → ImageVector
 │   ├── navigation/   HabitNavHost, Routes
-│   ├── today/        Heute-Screen (F2, F3)
-│   └── habit/        Habit-Editor und Habits-Liste (F1)
-├── HabbitTrackerApp  Application + AppContainer (Service-Locator)
+│   ├── today/        today screen (F2, F3)
+│   └── habit/        habit editor and habit list (F1)
+├── HabbitTrackerApp  Application + AppContainer (service locator)
 └── MainActivity
 ```
 
-`domain/` darf nichts aus `android.*` oder Compose importieren — daran hängt, dass die
-Fachlogik in schnellen JVM-Tests prüfbar bleibt.
+`domain/` must not import anything from `android.*` or Compose — that is what keeps the
+business rules testable in fast JVM tests.
 
-## Fachlogik
+## Business rules
 
-Die Regeln für Tagesziel und Streak liegen als **reine Funktionen** in `domain/` und werden
-von Repository, ViewModel und Tests gemeinsam benutzt. Neue Regeln gehören dorthin, nicht in
-ein ViewModel und nicht in einen Composable.
+The rules for daily goals and streaks live as **pure functions** in `domain/` and are shared
+by repository, view models and tests. New rules belong there, not in a view model and not in
+a composable.
 
-Drei Verhaltensweisen, die man dem Code nicht ansieht und die durch Tests abgesichert sind:
+Three behaviors that are not obvious from the code and are pinned down by tests:
 
-* Ein Tag ohne erreichbares Ziel ist **neutral**, nicht „nicht bestanden". Das UI zeigt dann
-  gar keinen Statusmarker, statt Versagen zu behaupten.
-* Ein noch offenes **Heute bricht die Streak nicht** — gezählt wird bis gestern weiter. Sonst
-  stünde die Serie jeden Morgen auf 0.
-* Ein **archivierter Habit bleibt** an Tagen sichtbar, an denen schon etwas erfasst wurde.
-  Damit kann Archivieren einen bestandenen Tag nicht nachträglich kaputtmachen.
+* A day with no reachable goal is **neutral**, not failed. The UI then shows no status marker
+  at all rather than claiming failure.
+* A **today that is still open does not break the streak** — the run is counted up to
+  yesterday. Otherwise the streak would read 0 every morning.
+* An **archived habit stays visible** on days that already have a value recorded. Archiving
+  therefore cannot retroactively ruin a day that had passed.
 
-`Day.passed` wird nach jeder Änderung neu berechnet und persistiert — nicht nur nach
-Erfassungen, sondern auch nach geänderten Punkten oder einem archivierten Habit.
+`Day.passed` is recomputed and stored after every change — not only after tracking a value,
+but also after edited points or an archived habit.
 
-## Designsystem
+## Design system
 
-Leitlinie: modern, schlicht, ruhig. Viel Weißraum, flach, Trennung über Farbe und Abstand
-statt über Schatten.
+Guiding idea: modern, plain, calm. Plenty of whitespace, flat, separation through color and
+spacing rather than shadow.
 
-* **Genau eine Farbe plus Neutraltöne.** Der Akzent ist Grün, zentral in `ui/theme/Color.kt`
-  an einer Stelle austauschbar.
-* Der Statusmarker „bestanden" teilt sich diesen Ton mit dem Akzent. Unterschieden wird über
-  **Form** — Pille mit Haken für den Tag, Kreis mit Haken für den Habit —, nicht über Farbe.
-* Grün heißt ausschließlich „erledigt". Offene Elemente bleiben neutral grau. Es gibt **kein
-  Rot** für „nicht erfüllt", um nicht zu werten.
-* Einheitlicher Radius 16 dp, 8-dp-Raster, Innenabstände 16 bis 24 dp.
-* Ein Icon-Set: Material Symbols outlined, keine Mischung.
-* Dark Mode wird vollständig unterstützt und folgt dem System.
-* Material-You Dynamic Color ist **aus** (`dynamicColor = false`), damit das Bild konsistent
-  bleibt. Der Parameter steht für F7/V2 bereit.
+* **Exactly one color plus neutrals.** The accent is green, swappable in one place in
+  `ui/theme/Color.kt`.
+* The "passed" status marker shares that tone with the accent. The two are told apart by
+  **shape** — a pill with a check for the day, a circle with a check for the habit — never by
+  color.
+* Green means "done" and nothing else. Open elements stay neutral grey. There is **no red**
+  for "not fulfilled", so that nothing is being judged.
+* A uniform 16 dp radius, an 8 dp grid, 16 to 24 dp of inner padding.
+* One icon set: Material Symbols outlined, never mixed.
+* Dark mode is fully supported and follows the system.
+* Material You dynamic color is **off** (`dynamicColor = false`) to keep the look consistent.
+  The parameter is ready for F7/V2.
 
-Farben nie direkt im Composable literalisieren — immer über `MaterialTheme.colorScheme` oder
-`HabitTheme.status`.
+Never write color literals inside a composable — always go through `MaterialTheme.colorScheme`
+or `HabitTheme.status`.
 
-## Code-Regeln
+## Code rules
 
-* **Funktionen höchstens 20 Zeilen, Zeilen höchstens 120 Zeichen.**
-* [DRY][dry] und [SRP][srp] einhalten.
-* **Nur eine Abstraktionsebene pro Funktion.**
-* **Kommentare** erklären komplexe oder nicht offensichtliche Logik — das *Warum*, nicht das
-  *Was*. Kommentare und UI-Texte sind auf Deutsch.
-* **Statische Typen** nutzen, wo sie die Lesbarkeit verbessern: explizite Rückgabetypen bei
-  öffentlichen Funktionen, kein `Any`, keine Plattformtypen aus Java-Interop ungeprüft
-  weiterreichen.
+* **Functions at most 20 lines, lines at most 120 characters.**
+* Follow [DRY][dry] and [SRP][srp].
+* **Only one level of abstraction per function.**
+* **Comments** explain complex or non-obvious logic — the *why*, not the *what*.
+* **Static types** where they help readability: explicit return types on public functions, no
+  `Any`, never pass platform types from Java interop through unchecked.
 
-Die Formatierung erzwingt **ktlint** (`ktlint_official`), konfiguriert in `.editorconfig`.
-Zwei Regeln sind dort bewusst abgeschaltet: `function-signature` und `class-signature`
-brechen jede Signatur ab zwei Parametern auf eigene Zeilen, auch wenn sie bequem in 120
-Zeichen passt. Das verlängert Funktionen um etwa ein Drittel und arbeitet damit direkt
-gegen die 20-Zeilen-Regel; die Zeilenlänge deckt `max_line_length` ohnehin ab.
+Formatting is enforced by **ktlint** (`ktlint_official`), configured in `.editorconfig`. Two
+rules are deliberately disabled there: `function-signature` and `class-signature` break every
+signature with two or more parameters onto separate lines, even when it fits comfortably
+within 120 characters. That lengthens functions by roughly a third and works directly against
+the 20 line rule, while `max_line_length` already covers the line length itself.
 
-[dry]: https://de.wikipedia.org/wiki/Don%E2%80%99t_repeat_yourself
+[dry]: https://en.wikipedia.org/wiki/Don%27t_repeat_yourself
 [srp]: https://en.wikipedia.org/wiki/Single-responsibility_principle
 
-### 20-Zeilen-Regel und Compose
+### The 20 line rule and Compose
 
-Für Logik — ViewModels, Repository, `domain/` — gilt die Grenze hart. Ein deklarativer
-Layout-Baum in einer `@Composable`-Funktion darf länger sein, aber unter zwei Bedingungen:
+For logic — view models, repository, `domain/` — the limit is hard. A declarative layout tree
+inside a `@Composable` may be longer, under two conditions:
 
-1. Die Funktion stellt **einen** zusammenhängenden UI-Abschnitt dar. Sobald sie zwei
-   darstellt, wird sie geteilt (so entstanden `TodayHeader`, `DangerZone`, `SettingCard`).
-2. Logik im Composable bleibt bei den 20 Zeilen. Rechnen, Formatieren und Ableiten gehören
-   ins ViewModel oder in eine eigene Funktion, nicht zwischen die Layout-Aufrufe.
+1. The function renders **one** coherent section of UI. As soon as it renders two, it gets
+   split (that is how `TodayHeader`, `DangerZone` and `SettingCard` came to be).
+2. Logic inside a composable stays within the 20 lines. Computing, formatting and deriving
+   belong in the view model or in a function of their own, not between the layout calls.
 
 ## Branching
 
-Ein-Personen-Projekt, deshalb Trunk-Based Development:
+A solo project, so trunk based development:
 
-* Alle Arbeit wird **direkt auf `main`** committet, in kleinen, fokussierten Commits (siehe
-  Commit-Nachrichten unten).
-* Die CI-Pipeline läuft bei jedem Push und hält `main` gesund:
-  `.github/workflows/ci.yml` prüft Codestil (ktlint), Android Lint, Build und Unit-Tests
-  auf einem **self-hosted Runner**. Bei rotem Lauf landen die Reports als Artefakt am Job.
-  Eine Rechtschreibprüfung ist noch nicht dabei, siehe *Stand*.
-* Kommen weitere Mitwirkende dazu, lässt sich ein Feature-Branch- und Pull-Request-Workflow
-  wieder einführen.
+* All work is committed **directly to `main`**, in small focused commits (see commit messages
+  below).
+* The CI pipeline runs on every push and keeps `main` healthy: `.github/workflows/ci.yml`
+  checks code style (ktlint), spelling (cspell), Android Lint, the build and the unit tests on
+  a **self-hosted runner**. On a red run the reports are attached to the job as an artifact.
+* Should the project gain further contributors, a feature branch and pull request workflow can
+  be reintroduced.
 
-## Commit-Nachrichten
+## Commit messages
 
 ```
-<type>(<optionaler scope>): <description>
+<type>(<optional scope>): <description>
 
-<optionaler body>
+<optional body>
 
-<optionaler footer>
+<optional footer>
 ```
 
-Merge- und Revert-Commits behalten die Standardnachricht von Git
-(`Merge branch '<name>'` bzw. `Revert "<betreff>"`). Der erste Commit eines Repos ist
-`chore: init`.
+Merge and revert commits keep the default git message (`Merge branch '<name>'` and
+`Revert "<subject>"`). The first commit of a repository is `chore: init`.
 
 ### Types
 
-| Type | Wofür |
+| Type | Purpose |
 |---|---|
-| `feat` | fügt der API oder dem UI ein Feature hinzu oder entfernt eines |
-| `fix` | behebt einen API- oder UI-Fehler eines vorangegangenen `feat` |
-| `refactor` | schreibt Code um, **ohne** API- oder UI-Verhalten zu ändern |
-| `perf` | spezielles `refactor`, das die Performance verbessert |
-| `style` | Formatierung, Leerzeichen, Umbrüche — nichts, was die Bedeutung ändert |
-| `test` | ergänzt fehlende Tests oder korrigiert bestehende |
-| `docs` | betrifft ausschließlich Dokumentation |
-| `build` | Build-Werkzeuge, Dependencies, Projektversion, CI-Pipeline |
-| `ops` | Infrastruktur, Deployment, Backup, Recovery |
-| `chore` | Sonstiges, z. B. `.gitignore` |
+| `feat` | adds or removes a feature of the API or UI |
+| `fix` | fixes an API or UI bug of a preceding `feat` |
+| `refactor` | rewrites code **without** changing API or UI behavior |
+| `perf` | a special `refactor` that improves performance |
+| `style` | formatting, whitespace, wrapping — nothing that changes meaning |
+| `test` | adds missing tests or corrects existing ones |
+| `docs` | documentation only |
+| `build` | build tools, dependencies, project version, CI pipeline |
+| `ops` | infrastructure, deployment, backup, recovery |
+| `chore` | miscellaneous, for example `.gitignore` |
 
 ### Scopes
 
-Optional, gibt zusätzlichen Kontext. Keine Issue-IDs als Scope. In diesem Projekt bewährt:
+Optional, adds context. Never use issue identifiers as a scope. Established in this project:
 `today`, `habit`, `navigation`, `theme`, `data`, `domain`.
 
-### Breaking Changes
+### Breaking changes
 
-Ein `!` vor dem `:` markiert sie, z. B. `feat(data)!: schema neu schneiden`. Ein Breaking
-Change **muss** zusätzlich im Footer beschrieben werden, beginnend mit `BREAKING CHANGE:`.
+Marked by a `!` before the `:`, for example `feat(data)!: reshape the schema`. A breaking
+change **must** also be described in the footer, starting with `BREAKING CHANGE:`.
 
 ### Description
 
-Pflichtteil. Knapp, Imperativ Präsens („ändere", nicht „geändert"), **klein** beginnend, kein
-Punkt am Ende. Gedanklich: *Dieser Commit wird…*
+Mandatory. Concise, imperative present tense ("change", not "changed"), starting **lowercase**,
+no full stop at the end. Think: *This commit will…*
 
 ### Body
 
-Optional. Nennt die **Motivation** und stellt sie dem vorherigen Verhalten gegenüber. Ebenfalls
-Imperativ Präsens. Hier gehören Issue-Bezüge hin.
+Optional. States the **motivation** and contrasts it with the previous behavior, also in
+imperative present tense. Issue references belong here.
 
 ### Footer
 
-Optional. Trägt Breaking Changes und Issue-Referenzen.
+Optional. Carries breaking changes and issue references.
 
-### Versionierung
+### Versioning
 
-Enthält das nächste Release **Breaking Changes**, steigt die Major-Version; enthält es
-API-relevante Änderungen (`feat` oder `fix`), die Minor-Version; sonst die Patch-Version.
+If the next release contains **breaking changes**, the major version goes up; if it contains
+API relevant changes (`feat` or `fix`), the minor version; otherwise the patch version.
 
-### Beispiele
-
-```
-feat(habit): editor an den heute-screen anbinden
-```
+### Examples
 
 ```
-fix(today): leeren tag nicht als nicht bestanden werten
+feat(habit): wire the editor into the today screen
 ```
 
 ```
-refactor(domain): tagesziel-auswertung je regel aufteilen
+fix(today): stop treating an empty day as failed
 ```
 
 ```
-build: dependencies aktualisieren
+refactor(domain): split daily goal evaluation per rule
 ```
 
 ```
-feat(data)!: erfassung auf materialisierte tageszeilen umstellen
-
-BREAKING CHANGE: bestehende Backups vor Schema 2 lassen sich nicht mehr importieren.
+build: update dependencies
 ```
 
-Zusätzlich gilt: **ein Commit, ein Thema**, und jeder Commit baut und besteht die Tests
+```
+feat(data)!: move tracking onto materialized day rows
+
+BREAKING CHANGE: backups written before schema 2 can no longer be imported.
+```
+
+On top of that: **one commit, one topic**, and every commit builds and passes the tests
 (`./gradlew :app:assembleDebug :app:testDebugUnitTest`).
 
-Die Konvention folgt dem [Gist von Bengt Brodersen][gist], der wiederum auf den von Angular
-verbreiteten Conventional Commits aufbaut.
+The convention follows the [gist by Bengt Brodersen][gist], which in turn builds on the
+Conventional Commits popularized by Angular.
 
 [gist]: https://gist.github.com/qoomon/5dfcdf8eec66a051ecd85625518cfd13
 
-## Organisation und Benennung
+## Organization and naming
 
-* **Nach Domäne gruppieren**, nicht nach technischem Typ: `today/`, `habit/`, `theme/` — es
-  gibt bewusst kein `viewmodels/` oder `screens/`.
-* **Jeder Ordner und jede Datei folgt denselben Konventionen.** Konsistente Benennung senkt
-  die kognitive Last und macht Navigation vorhersagbar.
+* **Group by domain**, not by technical type: `today/`, `habit/`, `theme/` — there is
+  deliberately no `viewmodels/` or `screens/`.
+* **Every folder and file follows the same conventions.** Consistent naming lowers cognitive
+  overhead and makes navigation predictable.
 
-Die Schreibweise richtet sich danach, was die jeweilige Plattform verlangt:
+The casing follows what each platform requires:
 
-| Was | Schreibweise | Beispiel |
+| What | Casing | Example |
 |---|---|---|
-| Package-Ordner | klein, ein Wort | `domain/model`, `ui/today` |
-| Kotlin-Dateien | PascalCase, wie die enthaltene Klasse | `HabitRepository.kt` |
-| Ressourcen unter `res/` | `snake_case` | `values-night/themes.xml` |
-| String-Keys | `snake_case`, Screen-Präfix | `today_goal_label` |
-| Icon-Namen in `Habit.icon` | `snake_case`, wie Material Symbols | `water_drop` |
+| Package folders | lowercase, single word | `domain/model`, `ui/today` |
+| Kotlin files | PascalCase, named after the class inside | `HabitRepository.kt` |
+| Resources under `res/` | `snake_case` | `values-night/themes.xml` |
+| String keys | `snake_case`, prefixed by screen | `today_goal_label` |
+| Icon names in `Habit.icon` | `snake_case`, as in Material Symbols | `water_drop` |
 
-> Die ursprüngliche Regel lautete `snake_case` für alle Verzeichnisse und Strukturdateien.
-> Sie stammt aus einem Godot-Projekt. Unter Android gilt sie deshalb dort, wo die Plattform
-> sie erzwingt: das Ressourcensystem lässt in `res/` ausschließlich `[a-z0-9_]` zu.
-> Kotlin-Quelldateien heißen dagegen wie ihre Klasse, sonst arbeiten Android Studio, Lint
-> und jede Navigation im Projekt gegen einen. Die Absicht — eine Konvention, überall gleich —
-> bleibt damit erhalten.
+> The original rule asked for `snake_case` across all directories and structural files. It came
+> from a Godot project. On Android it therefore applies where the platform enforces it: the
+> resource system only accepts `[a-z0-9_]` under `res/`. Kotlin source files keep the name of
+> their class, otherwise Android Studio, Lint and every jump-to-file in the project work
+> against you. The intent — one convention, applied everywhere — is preserved.
 
-## Stand
+## Spell checking
 
-Fertig: Heute-Screen (F2, F3, F4-Basis) und Habit-Verwaltung (F1) inklusive Anlegen,
-Bearbeiten, Archivieren und Löschen.
+`cspell.json` configures the checker; `cspell-project.txt` holds the project vocabulary. Add a
+word there only when it is a real term — a toolchain identifier, a library name, a proper noun.
+Never add a word to silence an actual typo.
 
-Offen:
+## State
 
-* **Room** — bis dahin überlebt kein Habit einen App-Neustart. Das Repository-Interface ist
-  so geschnitten, dass ViewModel und UI dabei unverändert bleiben.
-* Verlauf und Einstellungen sind im `HabitNavHost` noch leere Callbacks.
-* `Habit.colorTag` steckt im Datenmodell, aber bewusst nicht im Editor — ein Farbwähler pro
-  Habit steht gegen die Ein-Farb-Regel oben.
-* Die **Rechtschreibprüfung** in der CI fehlt noch. Ein englischsprachiger Checker würde
-  bei deutschen Kommentaren und Bezeichnern fast nur Fehlalarme liefern — sinnvoll wäre er
-  erst mit einem deutschen Wörterbuch und einer gepflegten Projekt-Wortliste.
-* `material-icons-extended` bläht das Debug-APK auf ~19 MB. Für Release entweder R8
-  anlassen (steht im Template auf `enable = false`) oder den Katalog auf handverlesene
-  Vektoren eindampfen.
+Done: today screen (F2, F3, F4 basics) and habit management (F1) including create, edit,
+archive and delete.
+
+Open:
+
+* **Room** — until then no habit survives an app restart. The repository interface is cut so
+  that view models and UI stay untouched by that change.
+* History and settings are still empty callbacks in `HabitNavHost`.
+* `Habit.colorTag` exists in the data model but deliberately not in the editor — a per-habit
+  color picker contradicts the one-color rule above.
+* The project name is spelled **Habbit** with two b's, in the app name, the package
+  `com.example.habbittracker` and the Gradle project. It is carried in the spell checker
+  vocabulary rather than corrected, because renaming touches the package and the application
+  id.
+* `material-icons-extended` inflates the debug APK to roughly 19 MB. For release either keep R8
+  on (the template sets `enable = false`) or reduce the catalog to hand-picked vectors.
