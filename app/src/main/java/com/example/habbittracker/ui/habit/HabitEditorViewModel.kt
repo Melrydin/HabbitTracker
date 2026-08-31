@@ -17,17 +17,14 @@ data class HabitEditorUiState(
     val loading: Boolean = false,
 )
 
-/** The editor is done once one of these events occurs. */
-sealed interface HabitEditorEvent {
-    data object Saved : HabitEditorEvent
-
-    data object Archived : HabitEditorEvent
-
-    data object Deleted : HabitEditorEvent
-
-    /** The habit has been deleted elsewhere in the meantime. */
-    data object NotFound : HabitEditorEvent
-}
+/**
+ * The editor has run its course and the caller should close it.
+ *
+ * Saving, archiving, deleting and a habit that no longer exists all end the same
+ * way, so they are deliberately not told apart. Should any of them ever need its
+ * own feedback, this becomes a sealed interface again.
+ */
+data object HabitEditorFinished
 
 class HabitEditorViewModel(
     private val repository: HabitRepository,
@@ -36,7 +33,7 @@ class HabitEditorViewModel(
     private val _uiState = MutableStateFlow(HabitEditorUiState(loading = habitId != NEW_HABIT_ID))
     val uiState: StateFlow<HabitEditorUiState> = _uiState.asStateFlow()
 
-    private val eventChannel = Channel<HabitEditorEvent>(Channel.BUFFERED)
+    private val eventChannel = Channel<HabitEditorFinished>(Channel.BUFFERED)
     val events = eventChannel.receiveAsFlow()
 
     init {
@@ -44,7 +41,7 @@ class HabitEditorViewModel(
             viewModelScope.launch {
                 val habit = repository.getHabit(habitId)
                 if (habit == null) {
-                    eventChannel.send(HabitEditorEvent.NotFound)
+                    eventChannel.send(HabitEditorFinished)
                 } else {
                     _uiState.value = HabitEditorUiState(HabitFormState.from(habit), loading = false)
                 }
@@ -71,7 +68,7 @@ class HabitEditorViewModel(
         if (!form.canSave) return
         viewModelScope.launch {
             repository.upsertHabit(form.toHabit())
-            eventChannel.send(HabitEditorEvent.Saved)
+            eventChannel.send(HabitEditorFinished)
         }
     }
 
@@ -81,7 +78,7 @@ class HabitEditorViewModel(
         if (form.isNew || !form.canSave) return
         viewModelScope.launch {
             repository.upsertHabit(form.toHabit().copy(archived = !form.archived))
-            eventChannel.send(HabitEditorEvent.Archived)
+            eventChannel.send(HabitEditorFinished)
         }
     }
 
@@ -90,7 +87,7 @@ class HabitEditorViewModel(
         if (form.isNew) return
         viewModelScope.launch {
             repository.deleteHabit(form.id)
-            eventChannel.send(HabitEditorEvent.Deleted)
+            eventChannel.send(HabitEditorFinished)
         }
     }
 

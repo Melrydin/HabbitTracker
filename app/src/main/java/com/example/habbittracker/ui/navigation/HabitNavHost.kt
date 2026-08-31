@@ -22,7 +22,6 @@ import androidx.navigation.navArgument
 import com.example.habbittracker.AppContainer
 import com.example.habbittracker.R
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
-import com.example.habbittracker.ui.habit.HabitEditorEvent
 import com.example.habbittracker.ui.habit.HabitEditorScreen
 import com.example.habbittracker.ui.habit.HabitEditorViewModel
 import com.example.habbittracker.ui.habit.HabitListScreen

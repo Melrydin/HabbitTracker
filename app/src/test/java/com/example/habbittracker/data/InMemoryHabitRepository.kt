@@ -121,7 +121,6 @@ class InMemoryHabitRepository(
      * value recorded on that day. An archived habit therefore disappears from new
      * days while older entries stay visible (F1).
      *
-     * TODO(Room): there the membership follows directly from the `DayHabit` rows.
      */
     private fun Store.entriesFor(date: LocalDate): List<HabitEntry> =
         habits

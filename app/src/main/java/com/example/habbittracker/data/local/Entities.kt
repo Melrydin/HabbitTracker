@@ -6,7 +6,6 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.habbittracker.domain.model.Day
-import com.example.habbittracker.domain.model.DayHabit
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
@@ -38,7 +37,7 @@ data class DayEntity(
 )
 
 /**
- * Stored form of [DayHabit] (F3).
+ * A habit's recorded value on one day (F3).
  *
  * Deleting a habit cascades to its recorded values, so no orphan rows survive a
  * deletion. Archiving does not touch these rows, which is what keeps old entries

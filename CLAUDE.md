@@ -70,7 +70,7 @@ Everything at once, exactly what CI runs:
 ```
 app/src/main/java/com/example/habbittracker/
 ├── domain/           business rules, plain Kotlin, no Android imports
-│   ├── model/        Habit, Day, DayHabit, HabitEntry
+│   ├── model/        Habit, Day, HabitEntry
 │   ├── DayEvaluator      daily goal evaluation (F2)
 │   └── StreakCalculator  current and longest streak (F4)
 ├── data/             HabitRepository (interface) + RoomHabitRepository

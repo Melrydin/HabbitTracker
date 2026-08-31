@@ -5,7 +5,6 @@
     <string name="today_title">Today</string>
     <string name="today_subtitle_separator">" · "</string>
     <string name="today_theme_placeholder">Add a theme for today</string>
-    <string name="today_theme_hint">Theme of the day</string>
     <string name="today_goal_label">Daily goal</string>
     <string name="today_goal_points">%1$d of %2$d points</string>
     <string name="today_goal_min_count">%1$d of %2$d habits done</string>
@@ -74,10 +73,6 @@
     <string name="habit_editor_delete">Delete</string>
     <string name="habit_editor_delete_title">Delete habit?</string>
     <string name="habit_editor_delete_message">%s and every recorded value will be removed. Archiving keeps the history.</string>
-    <string name="habit_editor_saved">Saved</string>
-    <string name="habit_editor_archived_done">Archived</string>
-    <string name="habit_editor_unarchived_done">Restored</string>
-    <string name="habit_editor_deleted">Deleted</string>
 
     <string name="habit_type_check">Yes/No</string>
     <string name="habit_type_counter">Count</string>
