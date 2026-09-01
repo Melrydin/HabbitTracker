@@ -27,6 +27,7 @@ class ReminderWorker(
             id = id,
             title = habit?.name ?: applicationContext.getString(R.string.reminder_general_title),
             text = applicationContext.getString(R.string.reminder_general_text),
+            habitId = reminder.habitId,
         )
 
         // Booking the next slot here keeps the chain alive without a periodic job.

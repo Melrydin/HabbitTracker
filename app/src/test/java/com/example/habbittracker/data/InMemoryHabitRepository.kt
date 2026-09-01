@@ -66,6 +66,11 @@ class InMemoryHabitRepository(
             store.value = updated.withRecalculatedDays()
         }
 
+    override suspend fun completeHabit(date: LocalDate, habitId: Long) {
+        val habit = store.value.habits.firstOrNull { it.id == habitId } ?: return
+        setProgress(date, habitId, habit.target)
+    }
+
     /** The fake only stores the link; creating a theme habit is the real repository's job. */
     override suspend fun setDayTheme(date: LocalDate, themeName: String?) =
         writeLock.withLock {

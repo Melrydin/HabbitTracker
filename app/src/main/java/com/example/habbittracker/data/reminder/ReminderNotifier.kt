@@ -3,6 +3,7 @@ package com.example.habbittracker.data.reminder
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -30,7 +31,7 @@ class ReminderNotifier(private val context: Context) {
         NotificationManagerCompat.from(context).createNotificationChannel(channel)
     }
 
-    fun notify(id: Long, title: String, text: String) {
+    fun notify(id: Long, title: String, text: String, habitId: Long? = null) {
         // The check sits here rather than in a helper because that is the only
         // shape the lint check can follow.
         val granted =
@@ -45,18 +46,35 @@ class ReminderNotifier(private val context: Context) {
                 .setContentText(text)
                 .setAutoCancel(true)
                 .setContentIntent(openApp())
-                .build()
+                // A reminder about one habit can be answered without opening the app (F9).
+                .apply {
+                    habitId?.let {
+                        addAction(0, context.getString(R.string.reminder_done), complete(it, id.toInt()))
+                    }
+                }.build()
         NotificationManagerCompat.from(context).notify(id.toInt(), notification)
     }
 
+    private fun complete(habitId: Long, notificationId: Int) =
+        PendingIntent.getBroadcast(
+            context,
+            notificationId,
+            Intent(context, ReminderActionReceiver::class.java).apply {
+                action = ReminderActionReceiver.ACTION_COMPLETE
+                putExtra(ReminderActionReceiver.EXTRA_HABIT_ID, habitId)
+                putExtra(ReminderActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+            },
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+
     private fun openApp() =
-        android.app.PendingIntent.getActivity(
+        PendingIntent.getActivity(
             context,
             0,
             Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             },
-            android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
     private companion object {

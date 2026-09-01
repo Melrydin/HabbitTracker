@@ -36,11 +36,13 @@ viewmodel
 viewmodels
 
 # Material and Compose vocabulary
+appwidget
 automirrored
 hapticfeedback
 roboto
 scaffold
 sharedpref
+quicksettings
 toggleable
 unarchive
 unarchived

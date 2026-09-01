@@ -109,6 +109,14 @@
     <string name="reminder_channel_description">Local nudges to record your day.</string>
     <string name="reminder_general_title">Habit Tracker</string>
     <string name="reminder_general_text">Time to record your day.</string>
+    <string name="reminder_done">Done</string>
+    <string name="widget_description">The habits of the day with a one-tap check-in.</string>
+    <string name="tile_label">Record the day</string>
+
+    <plurals name="tile_open">
+        <item quantity="one">%d habit open</item>
+        <item quantity="other">%d habits open</item>
+    </plurals>
     <string name="reminders_title">Reminders</string>
     <string name="reminders_manage">Reminders</string>
     <string name="reminders_manage_hint">Local nudges at a time you choose.</string>

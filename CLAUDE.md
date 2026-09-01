@@ -95,7 +95,8 @@ app/src/main/java/com/example/habbittracker/
 │   ├── habit/        habit editor and habit list (F1)
 │   ├── history/      heatmap, streaks, completion rate (F4)
 │   ├── settings/     theme, default goal, backup (F6, F7)
-│   └── reminder/     managing the local reminders (F5)
+│   ├── reminder/     managing the local reminders (F5)
+│   └── widget/       home screen widget and quick settings tile (F9)
 ├── HabbitTrackerApp  Application + AppContainer (service locator)
 └── MainActivity
 ```
@@ -168,6 +169,20 @@ notification itself.
 * `POST_NOTIFICATIONS` is asked for when the user adds a reminder, not at first launch. The
   permission check before posting sits inline in `ReminderNotifier.notify` because that is the
   only shape Android Lint follows.
+
+## Quick capture
+
+Three ways to tick a habit off without opening a screen (F9): the home screen widget
+(Jetpack Glance), a quick settings tile, and an action on a habit reminder.
+
+* All three call `HabitRepository.completeHabit`, so none of them reinvents what "done"
+  means or skips the status recalculation.
+* The tile finishes **everything the day still asks for** rather than one habit: it has
+  nowhere to choose one.
+* The widget follows the host's palette, so a finished habit is marked with a check rather
+  than the app's accent, which is not available there.
+* `Tile.setSubtitle` only exists from Android 10 on and is guarded; below that the label
+  carries the state on its own.
 
 ## Business rules
 
@@ -393,9 +408,11 @@ editing half; the statistics half waits for V2 together with the rule it depends
 
 Open:
 
-* **Phase 2 (V2)** is under way. Done: reminders (F5). Still open: widgets and quick capture
-  (F9), weekly habits (F8), the statistics build-out including the habit detail (F4),
-  abstinence habits (F11), categories and tags (F12), CSV export.
+* **Phase 2 (V2)** is under way. Done: reminders (F5), widget, tile and notification action
+  (F9). Still open: weekly habits (F8), the statistics build-out including the habit detail
+  (F4), abstinence habits (F11), categories and tags (F12), CSV export.
+* The widget is **not configurable yet**. F9 asks for a choice between all habits of the day
+  and a selection; it currently always shows all of them.
 * The `goals` and `pauses` tables exist but stay empty until F10 and F4 need them.
 * `Habit.colorTag` exists in the data model but deliberately not in the editor — a per-habit
   color picker contradicts the one-color rule above.

@@ -32,6 +32,14 @@ interface HabitRepository {
     suspend fun setProgress(date: LocalDate, habitId: Long, progress: Int)
 
     /**
+     * Marks a habit as done for the day, whatever its target (F9).
+     *
+     * The one-tap check-in of the widget, the tile and the notification action all
+     * mean this, so they share it rather than each looking the target up.
+     */
+    suspend fun completeHabit(date: LocalDate, habitId: Long)
+
+    /**
      * Sets the day theme (F2). The theme is always backed by a habit: a new name
      * creates one, an empty name clears the link again.
      */

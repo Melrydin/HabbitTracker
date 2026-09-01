@@ -73,6 +73,11 @@ class RoomHabitRepository(
         }
     }
 
+    override suspend fun completeHabit(date: LocalDate, habitId: Long) {
+        val habit = habitDao.getById(habitId)?.toDomain() ?: return
+        setProgress(date, habitId, habit.target)
+    }
+
     /**
      * A manually set theme creates a habit and links it to the day (F2). The habit
      * counts towards the daily goal like any other, which is the whole point of
