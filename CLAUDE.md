@@ -24,7 +24,7 @@ checker skips it.
 | Persistence | Room (SQLite) for data, DataStore for settings, local only |
 | Navigation | `navigation-compose`, string routes |
 | minSdk / targetSdk | 26 / 37 |
-| Permissions | none (later only `POST_NOTIFICATIONS` for F5) |
+| Permissions | `POST_NOTIFICATIONS` for reminders, `RECEIVE_BOOT_COMPLETED` to re-arm them |
 
 AGP 9 brings its own Kotlin support; there is no separate `kotlin-android` plugin here.
 Dependencies go through the version catalog in `gradle/libs.versions.toml`.
@@ -83,7 +83,8 @@ app/src/main/java/com/example/habbittracker/
 │   └── CompletionRate    share of passed among judged days (F4)
 ├── data/             HabitRepository, SettingsRepository
 │   ├── local/        entities, DAOs, type converters, HabitDatabase, DataStore
-│   └── backup/       ZIP export and restore (F6)
+│   ├── backup/       ZIP export and restore (F6)
+│   └── reminder/     scheduling and notifications (F5)
 ├── ui/
 │   ├── theme/        colors, typography, shapes
 │   ├── components/   building blocks shared across screens (BackTopAppBar, EmptyState,
@@ -93,7 +94,8 @@ app/src/main/java/com/example/habbittracker/
 │   ├── today/        today screen (F2, F3)
 │   ├── habit/        habit editor and habit list (F1)
 │   ├── history/      heatmap, streaks, completion rate (F4)
-│   └── settings/     theme, default goal, backup (F6, F7)
+│   ├── settings/     theme, default goal, backup (F6, F7)
+│   └── reminder/     managing the local reminders (F5)
 ├── HabbitTrackerApp  Application + AppContainer (service locator)
 └── MainActivity
 ```
@@ -149,6 +151,23 @@ code moves.
   key is checked per row.
 * `ZipBackupRepository` only reads and writes streams; `BackupManager` does the URI handling,
   which keeps the format testable without Android.
+
+## Reminders
+
+Reminders (F5) are entirely local: WorkManager only wakes the app, which posts the
+notification itself.
+
+* Each occurrence is booked as **one-off work that books the next one** when it fires.
+  Periodic work drifts away from a wall-clock time and cannot honour a weekday selection.
+* `ReminderSchedule.nextOccurrence` is a pure function in `domain/`, so "today's slot already
+  gone", "runs on one weekday only" and "runs on none" are settled by tests rather than
+  against a real clock.
+* Storing a reminder arms it in the same call. One that exists in the database but was never
+  booked would simply never fire, and nothing would say so.
+* Scheduled work does not survive a reboot, so `BootReceiver` books everything again.
+* `POST_NOTIFICATIONS` is asked for when the user adds a reminder, not at first launch. The
+  permission check before posting sits inline in `ReminderNotifier.notify` because that is the
+  only shape Android Lint follows.
 
 ## Business rules
 
@@ -374,9 +393,9 @@ editing half; the statistics half waits for V2 together with the rule it depends
 
 Open:
 
-* **Phase 2 (V2)** has not started: reminders (F5), widgets (F9), weekly habits (F8), the
-  statistics build-out including the habit detail (F4), abstinence habits (F11), categories
-  and tags (F12), CSV export.
+* **Phase 2 (V2)** is under way. Done: reminders (F5). Still open: widgets and quick capture
+  (F9), weekly habits (F8), the statistics build-out including the habit detail (F4),
+  abstinence habits (F11), categories and tags (F12), CSV export.
 * The `goals` and `pauses` tables exist but stay empty until F10 and F4 need them.
 * `Habit.colorTag` exists in the data model but deliberately not in the editor — a per-habit
   color picker contradicts the one-color rule above.
