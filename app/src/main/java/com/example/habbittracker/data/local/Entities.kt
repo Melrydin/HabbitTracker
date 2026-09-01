@@ -15,9 +15,11 @@ import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.domain.model.Pause
 import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.domain.model.Recurrence
+import com.example.habbittracker.domain.model.Reminder
 import com.example.habbittracker.domain.model.StreakRule
 import com.example.habbittracker.domain.model.WeekSpan
 import java.time.LocalDate
+import java.time.LocalTime
 
 /**
  * Stored form of [Habit] (F1).
@@ -110,6 +112,38 @@ data class DayHabitEntity(
     @ColumnInfo(name = "habit_id") val habitId: Long,
     val progress: Int,
 )
+
+/**
+ * Stored form of [Reminder] (F5).
+ *
+ * A reminder for a habit goes when the habit does; a general one has no habit to
+ * hang on and keeps a null `habit_id`.
+ */
+@Entity(
+    tableName = "reminders",
+    foreignKeys = [
+        ForeignKey(
+            entity = HabitEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["habit_id"],
+            onDelete = ForeignKey.CASCADE,
+        ),
+    ],
+    indices = [Index("habit_id")],
+)
+data class ReminderEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val time: LocalTime,
+    @ColumnInfo(name = "days_of_week") val daysOfWeek: Set<Int>,
+    @ColumnInfo(name = "habit_id") val habitId: Long?,
+    val enabled: Boolean,
+)
+
+fun ReminderEntity.toDomain() =
+    Reminder(id = id, time = time, daysOfWeek = daysOfWeek, habitId = habitId, enabled = enabled)
+
+fun Reminder.toEntity() =
+    ReminderEntity(id = id, time = time, daysOfWeek = daysOfWeek, habitId = habitId, enabled = enabled)
 
 /** Stored form of [Goal] (F10, V3). Empty until that feature lands. */
 @Entity(

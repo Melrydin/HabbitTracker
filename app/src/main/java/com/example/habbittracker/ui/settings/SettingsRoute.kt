@@ -24,6 +24,7 @@ import com.example.habbittracker.data.backup.BackupProblem
 @Composable
 fun SettingsRoute(
     viewModel: SettingsViewModel,
+    onOpenReminders: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -53,6 +54,7 @@ fun SettingsRoute(
         onThemeModeChange = viewModel::onThemeModeChange,
         onGoalTypeChange = viewModel::onGoalTypeChange,
         onThresholdChange = viewModel::onThresholdChange,
+        onOpenReminders = onOpenReminders,
         onExport = { exportLauncher.launch(viewModel.suggestedFileName()) },
         onImport = { importLauncher.launch(arrayOf(BackupManager.MIME_TYPE)) },
         onBack = onBack,

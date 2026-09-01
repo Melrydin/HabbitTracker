@@ -28,6 +28,8 @@ import com.example.habbittracker.ui.habit.HabitListScreen
 import com.example.habbittracker.ui.habit.HabitListViewModel
 import com.example.habbittracker.ui.history.HistoryScreen
 import com.example.habbittracker.ui.history.HistoryViewModel
+import com.example.habbittracker.ui.reminder.ReminderScreen
+import com.example.habbittracker.ui.reminder.ReminderViewModel
 import com.example.habbittracker.ui.settings.SettingsRoute
 import com.example.habbittracker.ui.settings.SettingsViewModel
 import com.example.habbittracker.ui.today.TodayRoute
@@ -38,6 +40,7 @@ object Routes {
     const val HABITS = "habits"
     const val SETTINGS = "settings"
     const val HISTORY = "history"
+    const val REMINDERS = "reminders"
 
     const val DATE_ARG = "date"
 
@@ -98,6 +101,29 @@ fun HabitNavHost(
             )
         }
 
+        composable(Routes.REMINDERS) {
+            val viewModel: ReminderViewModel =
+                viewModel(
+                    factory =
+                        viewModelFactory {
+                            initializer {
+                                ReminderViewModel(
+                                    repository = container.reminderRepository,
+                                    habitRepository = container.habitRepository,
+                                )
+                            }
+                        },
+                )
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            ReminderScreen(
+                state = state,
+                onSave = viewModel::onSave,
+                onDelete = viewModel::onDelete,
+                onToggle = viewModel::onToggle,
+                onBack = { navController.popBackStack() },
+            )
+        }
+
         composable(Routes.HISTORY) {
             val viewModel: HistoryViewModel =
                 viewModel(
@@ -130,7 +156,11 @@ fun HabitNavHost(
                             }
                         },
                 )
-            SettingsRoute(viewModel = viewModel, onBack = { navController.popBackStack() })
+            SettingsRoute(
+                viewModel = viewModel,
+                onOpenReminders = { navController.navigate(Routes.REMINDERS) },
+                onBack = { navController.popBackStack() },
+            )
         }
 
         composable(Routes.HABITS) {

@@ -60,6 +60,7 @@ fun SettingsScreen(
     onThemeModeChange: (ThemeMode) -> Unit,
     onGoalTypeChange: (GoalType) -> Unit,
     onThresholdChange: (Int) -> Unit,
+    onOpenReminders: () -> Unit,
     onExport: () -> Unit,
     onImport: () -> Unit,
     onBack: () -> Unit,
@@ -124,6 +125,14 @@ fun SettingsScreen(
                 }
             }
 
+            LabeledSection(label = stringResource(R.string.reminders_manage)) {
+                SettingRow(
+                    title = stringResource(R.string.reminders_manage),
+                    subtitle = stringResource(R.string.reminders_manage_hint),
+                    onClick = onOpenReminders,
+                )
+            }
+
             LabeledSection(label = stringResource(R.string.settings_backup_label)) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     SettingRow(
@@ -178,6 +187,7 @@ private fun SettingsPreview() {
             onThemeModeChange = {},
             onGoalTypeChange = {},
             onThresholdChange = {},
+            onOpenReminders = {},
             onExport = {},
             onImport = {},
             onBack = {},

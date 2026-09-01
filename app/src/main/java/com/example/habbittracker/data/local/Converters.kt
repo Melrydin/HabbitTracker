@@ -10,6 +10,7 @@ import com.example.habbittracker.domain.model.Recurrence
 import com.example.habbittracker.domain.model.StreakRule
 import com.example.habbittracker.domain.model.WeekSpan
 import java.time.LocalDate
+import java.time.LocalTime
 
 /**
  * Dates are stored as ISO-8601 text and enums by name. Both are readable when
@@ -43,6 +44,12 @@ class Converters {
 
     @TypeConverter
     fun textToDayStatus(value: String): DayStatus = DayStatus.valueOf(value)
+
+    @TypeConverter
+    fun timeToText(value: LocalTime): String = value.toString()
+
+    @TypeConverter
+    fun textToTime(value: String): LocalTime = LocalTime.parse(value)
 
     @TypeConverter
     fun habitKindToText(value: HabitKind): String = value.name

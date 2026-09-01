@@ -18,6 +18,7 @@ import androidx.room.TypeConverters
         DayHabitEntity::class,
         GoalEntity::class,
         PauseEntity::class,
+        ReminderEntity::class,
     ],
     version = HabitDatabase.SCHEMA_VERSION,
     exportSchema = true,
@@ -34,8 +35,10 @@ abstract class HabitDatabase : RoomDatabase() {
 
     abstract fun pauseDao(): PauseDao
 
+    abstract fun reminderDao(): ReminderDao
+
     companion object {
-        const val SCHEMA_VERSION = 4
+        const val SCHEMA_VERSION = 5
         const val NAME = "habits.db"
     }
 }

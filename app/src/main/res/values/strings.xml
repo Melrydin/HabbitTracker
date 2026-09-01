@@ -104,6 +104,27 @@
         <item quantity="other">%d days</item>
     </plurals>
 
+    <!-- Reminders -->
+    <string name="reminder_channel_name">Reminders</string>
+    <string name="reminder_channel_description">Local nudges to record your day.</string>
+    <string name="reminder_general_title">Habit Tracker</string>
+    <string name="reminder_general_text">Time to record your day.</string>
+    <string name="reminders_title">Reminders</string>
+    <string name="reminders_manage">Reminders</string>
+    <string name="reminders_manage_hint">Local nudges at a time you choose.</string>
+    <string name="reminders_add">Add a reminder</string>
+    <string name="reminders_empty_title">No reminders yet</string>
+    <string name="reminders_empty_body">Add one to be nudged at a time you choose.</string>
+    <string name="reminders_general">Record the day</string>
+    <string name="reminders_never">Never, no weekday chosen</string>
+    <string name="reminders_delete">Delete this reminder</string>
+    <string name="reminders_dialog_title">Reminder</string>
+    <string name="reminders_dialog_days">Weekdays</string>
+    <string name="reminders_dialog_habit">Reminds about</string>
+    <string name="reminders_hour">Hour</string>
+    <string name="reminders_minute">Minute</string>
+    <string name="reminders_permission_denied">Without the notification permission a reminder cannot show up.</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_theme_label">Theme</string>

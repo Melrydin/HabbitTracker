@@ -78,7 +78,7 @@ class MigrationTest {
     private fun openMigrated(): HabitDatabase =
         Room
             .databaseBuilder(context, HabitDatabase::class.java, name)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
             .allowMainThreadQueries()
             .build()
 
@@ -162,6 +162,18 @@ class MigrationTest {
 
             // Days that existed before the flag never chose a goal of their own.
             assertFalse(day.goalOverridden)
+        }
+
+    @Test
+    fun `the reminder table arrives empty`() =
+        runBlocking {
+            createSchemaOne()
+
+            val db = openMigrated()
+            val reminders = db.reminderDao().getAll()
+            db.close()
+
+            assertEquals(0, reminders.size)
         }
 
     @Test

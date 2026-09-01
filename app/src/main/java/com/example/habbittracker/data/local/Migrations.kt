@@ -115,3 +115,17 @@ val MIGRATION_3_4 =
             db.execSQL("ALTER TABLE days ADD COLUMN goal_overridden INTEGER NOT NULL DEFAULT 0")
         }
     }
+
+/** Schema 4 to 5: reminders (F5) get a table of their own. */
+val MIGRATION_4_5 =
+    object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `reminders` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "`time` TEXT NOT NULL, `days_of_week` TEXT NOT NULL, `habit_id` INTEGER, " +
+                    "`enabled` INTEGER NOT NULL, " +
+                    "FOREIGN KEY(`habit_id`) REFERENCES `habits`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+            )
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_reminders_habit_id` ON `reminders` (`habit_id`)")
+        }
+    }
