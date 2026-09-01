@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import java.time.Clock
 import java.time.LocalDate
 
 /**
@@ -35,6 +36,7 @@ class RoomHabitRepository(
     private val dayDao: DayDao,
     private val dayHabitDao: DayHabitDao,
     private val settings: Flow<AppSettings> = flowOf(AppSettings()),
+    private val clock: Clock = Clock.systemDefaultZone(),
 ) : HabitRepository {
     override fun observeDay(date: LocalDate): Flow<DaySnapshot> =
         combine(
@@ -45,7 +47,7 @@ class RoomHabitRepository(
             settings,
         ) { day, habits, recorded, statuses, current ->
             DaySnapshot(
-                day = day?.toDomain() ?: defaultDay(date, current),
+                day = (day?.toDomain() ?: defaultDay(date, current)).underCurrentGoal(current),
                 entries =
                     DayHabits.entriesFor(
                         habits = habits.map { it.toDomain() },
@@ -77,7 +79,7 @@ class RoomHabitRepository(
      */
     override suspend fun setDayTheme(date: LocalDate, themeName: String?) {
         database.withTransaction {
-            val day = dayDao.get(date)?.toDomain() ?: defaultDay(date)
+            val day = dayDao.get(date)?.toDomain() ?: defaultDay(date, settings.first())
             val cleaned = themeName?.trim()?.take(Habit.NAME_MAX_LENGTH)?.ifEmpty { null }
             val themeHabitId =
                 when {
@@ -91,7 +93,7 @@ class RoomHabitRepository(
 
     override suspend fun setDayNote(date: LocalDate, note: String?) {
         database.withTransaction {
-            val day = dayDao.get(date)?.toDomain() ?: defaultDay(date)
+            val day = dayDao.get(date)?.toDomain() ?: defaultDay(date, settings.first())
             val cleaned = note?.trim()?.take(Day.NOTE_MAX_LENGTH)?.ifEmpty { null }
             dayDao.upsert(day.copy(dayNote = cleaned).toEntity())
         }
@@ -169,7 +171,8 @@ class RoomHabitRepository(
         }
 
     private suspend fun recalculate(date: LocalDate) {
-        val day = dayDao.get(date)?.toDomain() ?: defaultDay(date)
+        val current = settings.first()
+        val day = (dayDao.get(date)?.toDomain() ?: defaultDay(date, current)).underCurrentGoal(current)
         val entries =
             DayHabits.entriesFor(
                 habits = habitDao.getAll().map { it.toDomain() },
@@ -183,11 +186,12 @@ class RoomHabitRepository(
      * days other than today, which a single-date pass would silently leave stale.
      */
     private suspend fun recalculateAll() {
+        val current = settings.first()
         val habits = habitDao.getAll().map { it.toDomain() }
         val recordedByDate = dayHabitDao.getAll().groupBy { it.date }
         val updated =
             dayDao.getAll().map { entity ->
-                val day = entity.toDomain()
+                val day = entity.toDomain().underCurrentGoal(current)
                 val entries =
                     DayHabits.entriesFor(
                         habits = habits,
@@ -198,15 +202,31 @@ class RoomHabitRepository(
         dayDao.upsertAll(updated)
     }
 
-    /** New days start from the settings; days that already exist keep their own goal. */
-    private suspend fun defaultDay(date: LocalDate) = defaultDay(date, settings.first())
-
     private fun defaultDay(date: LocalDate, current: AppSettings) =
         Day(
             date = date,
             goalType = current.defaultGoalType,
             goalThreshold = current.defaultGoalThreshold,
         )
+
+    /**
+     * Today and anything ahead of it follow the goal currently set (F7); days
+     * already behind keep the goal they were judged under.
+     *
+     * Without this the setting would look dead: a day gets its row the moment
+     * anything is tracked on it, and from then on it would ignore every later
+     * change. Past days stay untouched for the same reason archiving cannot
+     * rewrite a day that had passed - history should not move under the user.
+     *
+     * TODO(F2): once a day can override its goal by hand, only days without such
+     *  an override should follow the setting.
+     */
+    private fun Day.underCurrentGoal(current: AppSettings): Day =
+        if (date < LocalDate.now(clock)) {
+            this
+        } else {
+            copy(goalType = current.defaultGoalType, goalThreshold = current.defaultGoalThreshold)
+        }
 
     private companion object {
         const val PROGRESS_MAX = 9_999

@@ -1,11 +1,14 @@
 package com.example.habbittracker.data
 
 import android.os.Build
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
+import com.example.habbittracker.data.local.DataStoreSettingsRepository
 import com.example.habbittracker.data.local.HabitDatabase
 import com.example.habbittracker.domain.model.DayStatus
+import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
 import kotlinx.coroutines.flow.first
@@ -16,11 +19,15 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.time.Clock
 import java.time.LocalDate
+import java.time.ZoneOffset
 
 /**
  * Exercises the real Room implementation on the JVM, so the DAOs, type converters
@@ -30,9 +37,13 @@ import java.time.LocalDate
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.UPSIDE_DOWN_CAKE])
 class RoomHabitRepositoryTest {
+    @get:Rule
+    val folder = TemporaryFolder()
+
     private val date = LocalDate.of(2026, 8, 31)
 
     private lateinit var database: HabitDatabase
+    private lateinit var settings: DataStoreSettingsRepository
     private lateinit var repository: RoomHabitRepository
 
     @Before
@@ -42,12 +53,19 @@ class RoomHabitRepositoryTest {
                 .inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), HabitDatabase::class.java)
                 .allowMainThreadQueries()
                 .build()
+        settings =
+            DataStoreSettingsRepository(
+                PreferenceDataStoreFactory.create { folder.newFile("settings.preferences_pb") },
+            )
         repository =
             RoomHabitRepository(
                 database = database,
                 habitDao = database.habitDao(),
                 dayDao = database.dayDao(),
                 dayHabitDao = database.dayHabitDao(),
+                settings = settings.settings,
+                // Pin "today" so the past and the running day can both be exercised.
+                clock = Clock.fixed(date.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC),
             )
     }
 
@@ -306,6 +324,38 @@ class RoomHabitRepositoryTest {
 
             assertTrue(habitIdsOn(date.minusDays(3)).contains(id))
             assertTrue(habitIdsOn(date).contains(id))
+        }
+
+    @Test
+    fun `switching the default goal takes effect on today`() =
+        runBlocking {
+            val id = addHabit("Exercise", points = 1)
+            // The day gets a stored row the moment anything is tracked on it.
+            repository.setProgress(date, id, 1)
+            settings.setDefaultGoal(GoalType.MIN_COUNT, 1)
+
+            val day = repository.observeDay(date).first().day
+
+            assertEquals(GoalType.MIN_COUNT, day.goalType)
+        }
+
+    @Test
+    fun `switching the default goal leaves finished days alone`() =
+        runBlocking {
+            val yesterday = date.minusDays(1)
+            val id = addHabit("Exercise", points = 1)
+            repository.setProgress(yesterday, id, 1)
+
+            settings.setDefaultGoal(GoalType.MIN_COUNT, 1)
+
+            // History must not move under the user.
+            assertEquals(
+                GoalType.POINTS,
+                repository
+                    .observeDay(yesterday)
+                    .first()
+                    .day.goalType,
+            )
         }
 
     @Test

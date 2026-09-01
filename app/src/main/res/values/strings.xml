@@ -104,7 +104,7 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_goal_label">Default daily goal</string>
-    <string name="settings_goal_hint">Applies to new days. Days you already tracked keep their own goal.</string>
+    <string name="settings_goal_hint">Applies to today and the days ahead. Finished days keep the goal they were judged under.</string>
     <string name="settings_goal_rule_all_required">All required</string>
     <string name="settings_goal_rule_min_count">Habits</string>
     <string name="settings_goal_rule_points">Points</string>
