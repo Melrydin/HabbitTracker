@@ -6,6 +6,11 @@
     <string name="today_subtitle_separator">" · "</string>
     <string name="today_theme_placeholder">Add a theme for today</string>
     <string name="today_goal_label">Daily goal</string>
+    <string name="today_goal_own">Daily goal · own</string>
+    <string name="today_goal_edit">Change the goal for this day</string>
+    <string name="today_goal_dialog_title">Goal for this day</string>
+    <string name="today_goal_dialog_confirm">Set</string>
+    <string name="today_goal_dialog_default">Follow the default again</string>
     <string name="today_goal_points">%1$d of %2$d points</string>
     <string name="today_goal_min_count">%1$d of %2$d habits done</string>
     <string name="today_goal_all_required">%1$d of %2$d required habits done</string>

@@ -35,7 +35,7 @@ abstract class HabitDatabase : RoomDatabase() {
     abstract fun pauseDao(): PauseDao
 
     companion object {
-        const val SCHEMA_VERSION = 3
+        const val SCHEMA_VERSION = 4
         const val NAME = "habits.db"
     }
 }

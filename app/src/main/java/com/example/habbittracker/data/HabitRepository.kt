@@ -2,6 +2,7 @@ package com.example.habbittracker.data
 
 import com.example.habbittracker.domain.model.Day
 import com.example.habbittracker.domain.model.DayStatus
+import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
 import kotlinx.coroutines.flow.Flow
@@ -35,6 +36,12 @@ interface HabitRepository {
      * creates one, an empty name clears the link again.
      */
     suspend fun setDayTheme(date: LocalDate, themeName: String?)
+
+    /** Gives this one day a goal of its own, overriding the default (F2). */
+    suspend fun setDayGoal(date: LocalDate, goalType: GoalType, threshold: Int)
+
+    /** Drops that override again, so the day follows the setting once more. */
+    suspend fun clearDayGoal(date: LocalDate)
 
     /** Empty text clears the note, hence `null` rather than an empty string (F2). */
     suspend fun setDayNote(date: LocalDate, note: String?)

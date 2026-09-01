@@ -166,6 +166,9 @@ Three behaviors that are not obvious from the code and are pinned down by tests:
   `ALL_REQUIRED` for the ones marked as such, so neither can be set beyond reach. The points
   threshold is capped at the points the day actually holds — a bar above that would make the
   day impossible to pass.
+* A day can carry a **goal of its own** (`Day.goalOverridden`). Days without one follow the
+  setting, but only from today on: a day already behind keeps the goal it was judged under.
+  The flag is what tells "chosen by hand" apart from "happens to match the default".
 * A **today that is still open does not break the streak** — the run is counted up to
   yesterday. Otherwise the streak would read 0 every morning.
 * An **archived habit stays visible** on days that already have a value recorded. Archiving

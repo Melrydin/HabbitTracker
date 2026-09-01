@@ -1,5 +1,6 @@
 package com.example.habbittracker.ui.today
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +26,12 @@ import com.example.habbittracker.ui.theme.HabitTheme
 
 /** The daily goal with its progress bar and status marker (F2). */
 @Composable
-fun DayGoalCard(goal: DayGoalProgress, modifier: Modifier = Modifier) {
+fun DayGoalCard(
+    goal: DayGoalProgress,
+    overridden: Boolean,
+    onEditGoal: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val status = HabitTheme.status
     val label = goalLabel(goal)
 
@@ -34,10 +40,18 @@ fun DayGoalCard(goal: DayGoalProgress, modifier: Modifier = Modifier) {
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceContainer,
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
+        Column(
+            modifier =
+                Modifier
+                    .clickable(onClickLabel = stringResource(R.string.today_goal_edit), onClick = onEditGoal)
+                    .padding(20.dp),
+        ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = stringResource(R.string.today_goal_label),
+                    text =
+                        stringResource(
+                            if (overridden) R.string.today_goal_own else R.string.today_goal_label,
+                        ),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),

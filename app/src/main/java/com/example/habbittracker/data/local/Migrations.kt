@@ -102,3 +102,16 @@ val MIGRATION_2_3 =
             db.execSQL("UPDATE habits SET type = 'COUNTER' WHERE type = 'AMOUNT'")
         }
     }
+
+/**
+ * Schema 3 to 4: a day can carry a goal of its own (F2).
+ *
+ * The flag is added with a default, which is what the entity declares too, so the
+ * column matches what Room expects without rebuilding the table.
+ */
+val MIGRATION_3_4 =
+    object : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE days ADD COLUMN goal_overridden INTEGER NOT NULL DEFAULT 0")
+        }
+    }

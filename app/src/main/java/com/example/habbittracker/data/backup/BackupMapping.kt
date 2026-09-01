@@ -98,6 +98,7 @@ fun DayEntity.toBackup() =
         dayNote = dayNote,
         goalType = goalType.name,
         goalThreshold = goalThreshold,
+        goalOverridden = goalOverridden,
         status = status.name,
     )
 
@@ -108,6 +109,7 @@ fun BackupDay.toEntity() =
         dayNote = dayNote,
         goalType = goalType.toEnumOr(GoalType.POINTS),
         goalThreshold = goalThreshold,
+        goalOverridden = goalOverridden,
         status = status.toEnumOr(DayStatus.NEUTRAL),
     )
 

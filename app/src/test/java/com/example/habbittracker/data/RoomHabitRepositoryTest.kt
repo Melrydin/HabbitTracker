@@ -359,6 +359,57 @@ class RoomHabitRepositoryTest {
         }
 
     @Test
+    fun `a day with its own goal ignores the default`() =
+        runBlocking {
+            addHabit("Exercise", points = 1)
+            repository.setDayGoal(date, GoalType.MIN_COUNT, threshold = 1)
+
+            settings.setDefaultGoal(GoalType.ALL_REQUIRED, threshold = 9)
+
+            val day = repository.observeDay(date).first().day
+            assertEquals(GoalType.MIN_COUNT, day.goalType)
+            assertTrue(day.goalOverridden)
+        }
+
+    @Test
+    fun `an own goal decides the day status`() =
+        runBlocking {
+            val exercise = addHabit("Exercise", points = 3)
+            addHabit("Read", points = 4)
+            repository.setProgress(date, exercise, 1)
+            // Three of the five points asked for.
+            repository.setDayGoal(date, GoalType.POINTS, threshold = 5)
+            assertFalse(
+                repository
+                    .observeDay(date)
+                    .first()
+                    .day.status == DayStatus.PASSED,
+            )
+
+            repository.setDayGoal(date, GoalType.POINTS, threshold = 3)
+
+            assertTrue(
+                repository
+                    .observeDay(date)
+                    .first()
+                    .day.status == DayStatus.PASSED,
+            )
+        }
+
+    @Test
+    fun `dropping the override hands the day back to the default`() =
+        runBlocking {
+            addHabit("Exercise", points = 1)
+            repository.setDayGoal(date, GoalType.MIN_COUNT, threshold = 1)
+
+            repository.clearDayGoal(date)
+
+            val day = repository.observeDay(date).first().day
+            assertFalse(day.goalOverridden)
+            assertEquals(GoalType.POINTS, day.goalType)
+        }
+
+    @Test
     fun `the theme is stored and an empty theme clears it`() =
         runBlocking {
             repository.setDayTheme(date, "  Calm focus  ")

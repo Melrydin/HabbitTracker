@@ -76,6 +76,27 @@ class InMemoryHabitRepository(
             store.value = current.copy(days = current.days + (date to day.copy(themeHabitId = habitId)))
         }
 
+    override suspend fun setDayGoal(date: LocalDate, goalType: GoalType, threshold: Int) =
+        writeLock.withLock {
+            val current = store.value
+            val day = current.days[date] ?: defaultDay(date)
+            val own = day.copy(goalType = goalType, goalThreshold = threshold, goalOverridden = true)
+            store.value = current.copy(days = current.days + (date to own)).withRecalculatedDays()
+        }
+
+    override suspend fun clearDayGoal(date: LocalDate) =
+        writeLock.withLock {
+            val current = store.value
+            val day = current.days[date] ?: return@withLock
+            val followed =
+                day.copy(
+                    goalType = DEFAULT_GOAL_TYPE,
+                    goalThreshold = DEFAULT_GOAL_THRESHOLD,
+                    goalOverridden = false,
+                )
+            store.value = current.copy(days = current.days + (date to followed)).withRecalculatedDays()
+        }
+
     override suspend fun setDayNote(date: LocalDate, note: String?) =
         writeLock.withLock {
             val current = store.value

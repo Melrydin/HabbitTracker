@@ -81,6 +81,7 @@ data class DayEntity(
     @ColumnInfo(name = "day_note") val dayNote: String?,
     @ColumnInfo(name = "goal_type") val goalType: GoalType,
     @ColumnInfo(name = "goal_threshold") val goalThreshold: Int,
+    @ColumnInfo(name = "goal_overridden", defaultValue = "0") val goalOverridden: Boolean,
     val status: DayStatus,
 )
 
@@ -220,6 +221,7 @@ fun DayEntity.toDomain() =
         dayNote = dayNote,
         goalType = goalType,
         goalThreshold = goalThreshold,
+        goalOverridden = goalOverridden,
         status = status,
     )
 
@@ -230,5 +232,6 @@ fun Day.toEntity() =
         dayNote = dayNote,
         goalType = goalType,
         goalThreshold = goalThreshold,
+        goalOverridden = goalOverridden,
         status = status,
     )

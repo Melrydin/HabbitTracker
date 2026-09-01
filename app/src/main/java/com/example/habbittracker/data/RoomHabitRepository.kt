@@ -14,6 +14,7 @@ import com.example.habbittracker.domain.StreakCalculator
 import com.example.habbittracker.domain.model.AppSettings
 import com.example.habbittracker.domain.model.Day
 import com.example.habbittracker.domain.model.DayStatus
+import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
 import kotlinx.coroutines.flow.Flow
@@ -87,6 +88,24 @@ class RoomHabitRepository(
                     else -> renameOrCreateThemeHabit(day, date, cleaned)
                 }
             dayDao.upsert(day.copy(themeHabitId = themeHabitId).toEntity())
+            recalculate(date)
+        }
+    }
+
+    override suspend fun setDayGoal(date: LocalDate, goalType: GoalType, threshold: Int) {
+        database.withTransaction {
+            val day = dayDao.get(date)?.toDomain() ?: defaultDay(date, settings.first())
+            dayDao.upsert(
+                day.copy(goalType = goalType, goalThreshold = threshold, goalOverridden = true).toEntity(),
+            )
+            recalculate(date)
+        }
+    }
+
+    override suspend fun clearDayGoal(date: LocalDate) {
+        database.withTransaction {
+            val day = dayDao.get(date)?.toDomain() ?: return@withTransaction
+            dayDao.upsert(day.copy(goalOverridden = false).underCurrentGoal(settings.first()).toEntity())
             recalculate(date)
         }
     }
@@ -210,19 +229,16 @@ class RoomHabitRepository(
         )
 
     /**
-     * Today and anything ahead of it follow the goal currently set (F7); days
-     * already behind keep the goal they were judged under.
+     * A day with a goal of its own keeps it (F2). Everything else follows the
+     * setting, but only from today on: a day already behind keeps the goal it was
+     * judged under, for the same reason archiving cannot rewrite a day that had
+     * passed. History should not move under the user.
      *
-     * Without this the setting would look dead: a day gets its row the moment
-     * anything is tracked on it, and from then on it would ignore every later
-     * change. Past days stay untouched for the same reason archiving cannot
-     * rewrite a day that had passed - history should not move under the user.
-     *
-     * TODO(F2): once a day can override its goal by hand, only days without such
-     *  an override should follow the setting.
+     * Without this the setting would look dead, because a day gets its row the
+     * moment anything is tracked on it and would ignore every later change.
      */
     private fun Day.underCurrentGoal(current: AppSettings): Day =
-        if (date < LocalDate.now(clock)) {
+        if (goalOverridden || date < LocalDate.now(clock)) {
             this
         } else {
             copy(goalType = current.defaultGoalType, goalThreshold = current.defaultGoalThreshold)

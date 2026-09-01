@@ -38,6 +38,12 @@ data class Day(
     val dayNote: String? = null,
     val goalType: GoalType = GoalType.POINTS,
     val goalThreshold: Int = 0,
+    /**
+     * Set once the day carries a goal of its own (F2). Days without it follow the
+     * default from the settings, which is why "the same as the default" and
+     * "chosen by hand" have to be told apart.
+     */
+    val goalOverridden: Boolean = false,
     val status: DayStatus = DayStatus.NEUTRAL,
 ) {
     init {

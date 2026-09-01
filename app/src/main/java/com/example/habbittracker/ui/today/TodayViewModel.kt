@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.habbittracker.data.HabitRepository
 import com.example.habbittracker.domain.DayEvaluator
 import com.example.habbittracker.domain.model.Day
+import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -52,6 +53,7 @@ class TodayViewModel(
                     dayNote = noteDraft ?: snapshot.day.dayNote.orEmpty(),
                     goal = DayEvaluator.evaluate(snapshot.day, snapshot.entries),
                     habits = snapshot.entries.map(::HabitItem),
+                    goalOverridden = snapshot.day.goalOverridden,
                     currentStreak = snapshot.currentStreak,
                     isToday = snapshot.day.date == LocalDate.now(clock),
                     loaded = true,
@@ -81,6 +83,14 @@ class TodayViewModel(
         val limited = text.take(Habit.NAME_MAX_LENGTH)
         themeDraft.value = limited
         viewModelScope.launch { repository.setDayTheme(date.value, limited) }
+    }
+
+    fun onSetDayGoal(goalType: GoalType, threshold: Int) {
+        viewModelScope.launch { repository.setDayGoal(date.value, goalType, threshold) }
+    }
+
+    fun onUseDefaultGoal() {
+        viewModelScope.launch { repository.clearDayGoal(date.value) }
     }
 
     fun onDayNoteChange(text: String) {

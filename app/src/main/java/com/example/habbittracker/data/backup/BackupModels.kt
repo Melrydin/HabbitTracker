@@ -56,6 +56,7 @@ data class BackupDay(
     val dayNote: String? = null,
     val goalType: String,
     val goalThreshold: Int,
+    val goalOverridden: Boolean = false,
     val status: String,
 )
 

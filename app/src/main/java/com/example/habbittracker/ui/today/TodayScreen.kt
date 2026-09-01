@@ -34,7 +34,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -47,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.DayGoalProgress
+import com.example.habbittracker.domain.model.AppSettings
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
@@ -91,6 +94,8 @@ fun TodayRoute(
         onIncrement = viewModel::onIncrement,
         onDecrement = viewModel::onDecrement,
         onSetProgress = viewModel::onSetProgress,
+        onSetDayGoal = viewModel::onSetDayGoal,
+        onUseDefaultGoal = viewModel::onUseDefaultGoal,
         onAddHabit = onAddHabit,
         onEditHabit = onEditHabit,
         onOpenHabits = onOpenHabits,
@@ -110,6 +115,8 @@ fun TodayScreen(
     onIncrement: (HabitItem) -> Unit,
     onDecrement: (HabitItem) -> Unit,
     onSetProgress: (HabitItem, Int) -> Unit,
+    onSetDayGoal: (GoalType, Int) -> Unit,
+    onUseDefaultGoal: () -> Unit,
     onAddHabit: () -> Unit,
     onEditHabit: (Long) -> Unit,
     onOpenHabits: () -> Unit,
@@ -117,6 +124,8 @@ fun TodayScreen(
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var editingGoal by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier.imePadding(),
         containerColor = MaterialTheme.colorScheme.background,
@@ -161,7 +170,12 @@ fun TodayScreen(
             }
 
             item(key = "goal") {
-                DayGoalCard(goal = state.goal, modifier = Modifier.padding(top = 4.dp))
+                DayGoalCard(
+                    goal = state.goal,
+                    overridden = state.goalOverridden,
+                    onEditGoal = { editingGoal = true },
+                    modifier = Modifier.padding(top = 4.dp),
+                )
             }
 
             if (state.habits.isEmpty()) {
@@ -205,6 +219,23 @@ fun TodayScreen(
                 )
             }
         }
+    }
+
+    if (editingGoal) {
+        DayGoalDialog(
+            goalType = state.goal.goalType,
+            threshold = state.goal.threshold.coerceAtLeast(AppSettings.GOAL_THRESHOLD_MIN),
+            overridden = state.goalOverridden,
+            onConfirm = { rule, points ->
+                editingGoal = false
+                onSetDayGoal(rule, points)
+            },
+            onUseDefault = {
+                editingGoal = false
+                onUseDefaultGoal()
+            },
+            onDismiss = { editingGoal = false },
+        )
     }
 }
 
@@ -414,6 +445,8 @@ private fun TodayScreenPreview() {
             onIncrement = {},
             onDecrement = {},
             onSetProgress = { _, _ -> },
+            onSetDayGoal = { _, _ -> },
+            onUseDefaultGoal = {},
             onAddHabit = {},
             onEditHabit = {},
             onOpenHabits = {},
@@ -436,6 +469,8 @@ private fun TodayScreenDarkPreview() {
             onIncrement = {},
             onDecrement = {},
             onSetProgress = { _, _ -> },
+            onSetDayGoal = { _, _ -> },
+            onUseDefaultGoal = {},
             onAddHabit = {},
             onEditHabit = {},
             onOpenHabits = {},
@@ -458,6 +493,8 @@ private fun TodayScreenEmptyPreview() {
             onIncrement = {},
             onDecrement = {},
             onSetProgress = { _, _ -> },
+            onSetDayGoal = { _, _ -> },
+            onUseDefaultGoal = {},
             onAddHabit = {},
             onEditHabit = {},
             onOpenHabits = {},

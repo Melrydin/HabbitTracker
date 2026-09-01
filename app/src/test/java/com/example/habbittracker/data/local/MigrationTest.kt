@@ -13,6 +13,7 @@ import com.example.habbittracker.domain.model.StreakRule
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
@@ -77,7 +78,7 @@ class MigrationTest {
     private fun openMigrated(): HabitDatabase =
         Room
             .databaseBuilder(context, HabitDatabase::class.java, name)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
             .allowMainThreadQueries()
             .build()
 
@@ -148,6 +149,19 @@ class MigrationTest {
             assertEquals(HabitType.COUNTER, habit.type)
             assertEquals(30, habit.target)
             assertEquals("min", habit.unit)
+        }
+
+    @Test
+    fun `an upgraded day follows the default until it is given its own goal`() =
+        runBlocking {
+            createSchemaOne()
+
+            val db = openMigrated()
+            val day = db.dayDao().get(LocalDate.of(2026, 8, 30))!!.toDomain()
+            db.close()
+
+            // Days that existed before the flag never chose a goal of their own.
+            assertFalse(day.goalOverridden)
         }
 
     @Test
