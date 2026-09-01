@@ -6,10 +6,12 @@ import com.example.habbittracker.data.local.DayHabitDao
 import com.example.habbittracker.data.local.DayHabitEntity
 import com.example.habbittracker.data.local.HabitDao
 import com.example.habbittracker.data.local.HabitDatabase
+import com.example.habbittracker.data.local.PauseDao
 import com.example.habbittracker.data.local.toDomain
 import com.example.habbittracker.data.local.toEntity
 import com.example.habbittracker.domain.DayEvaluator
 import com.example.habbittracker.domain.DayHabits
+import com.example.habbittracker.domain.Pauses
 import com.example.habbittracker.domain.StreakCalculator
 import com.example.habbittracker.domain.model.AppSettings
 import com.example.habbittracker.domain.model.Day
@@ -17,6 +19,7 @@ import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.Pause
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -36,6 +39,7 @@ class RoomHabitRepository(
     private val habitDao: HabitDao,
     private val dayDao: DayDao,
     private val dayHabitDao: DayHabitDao,
+    private val pauseDao: PauseDao,
     private val settings: Flow<AppSettings> = flowOf(AppSettings()),
     private val clock: Clock = Clock.systemDefaultZone(),
 ) : HabitRepository {
@@ -45,14 +49,17 @@ class RoomHabitRepository(
             habitDao.observeAll(),
             dayHabitDao.observeForDate(date),
             dayDao.observeStatuses(),
-            settings,
-        ) { day, habits, recorded, statuses, current ->
+            combine(settings, pauseDao.observeAll()) { current, pauses -> current to pauses },
+        ) { day, habits, recorded, statuses, settingsAndPauses ->
+            val (current, pauseRows) = settingsAndPauses
+            val pauses = pauseRows.map { it.toDomain() }
             DaySnapshot(
                 day = (day?.toDomain() ?: defaultDay(date, current)).underCurrentGoal(current),
                 entries =
                     DayHabits.entriesFor(
                         habits = habits.map { it.toDomain() },
                         progressByHabitId = recorded.associate { it.habitId to it.progress },
+                        pausedHabits = Pauses.pausedHabits(pauses, date),
                     ),
                 currentStreak =
                     StreakCalculator.currentStreak(
@@ -64,6 +71,21 @@ class RoomHabitRepository(
 
     override fun observeDayStatuses(): Flow<Map<LocalDate, DayStatus>> =
         dayDao.observeStatuses().map { rows -> rows.associate { it.date to it.status } }
+
+    override fun observePauses(): Flow<List<Pause>> =
+        pauseDao.observeAll().map { pauses -> pauses.map { it.toDomain() } }
+
+    override suspend fun upsertPause(pause: Pause): Long {
+        val id = pauseDao.upsert(pause.toEntity())
+        // A break changes what past days asked for, so every day is judged again.
+        recalculateAll()
+        return id
+    }
+
+    override suspend fun deletePause(id: Long) {
+        pauseDao.deleteById(id)
+        recalculateAll()
+    }
 
     override fun observeHabitHistory(habitId: Long): Flow<Map<LocalDate, Boolean>> =
         combine(dayDao.observeStatuses(), habitDao.observeAll(), dayHabitDao.observeAll()) {
@@ -220,13 +242,16 @@ class RoomHabitRepository(
 
     private suspend fun recalculate(date: LocalDate) {
         val current = settings.first()
+        val pauses = pauseDao.getAll().map { it.toDomain() }
         val day = (dayDao.get(date)?.toDomain() ?: defaultDay(date, current)).underCurrentGoal(current)
         val entries =
             DayHabits.entriesFor(
                 habits = habitDao.getAll().map { it.toDomain() },
                 progressByHabitId = dayHabitDao.getForDate(date).associate { it.habitId to it.progress },
+                pausedHabits = Pauses.pausedHabits(pauses, date),
             )
-        dayDao.upsert(day.copy(status = DayEvaluator.evaluate(day, entries).status).toEntity())
+        val status = DayEvaluator.evaluate(day, entries, Pauses.isPaused(pauses, date)).status
+        dayDao.upsert(day.copy(status = status).toEntity())
     }
 
     /**
@@ -235,6 +260,7 @@ class RoomHabitRepository(
      */
     private suspend fun recalculateAll() {
         val current = settings.first()
+        val pauses = pauseDao.getAll().map { it.toDomain() }
         val habits = habitDao.getAll().map { it.toDomain() }
         val recordedByDate = dayHabitDao.getAll().groupBy { it.date }
         val updated =
@@ -244,8 +270,10 @@ class RoomHabitRepository(
                     DayHabits.entriesFor(
                         habits = habits,
                         progressByHabitId = recordedByDate[day.date].orEmpty().associate { it.habitId to it.progress },
+                        pausedHabits = Pauses.pausedHabits(pauses, day.date),
                     )
-                day.copy(status = DayEvaluator.evaluate(day, entries).status).toEntity()
+                val status = DayEvaluator.evaluate(day, entries, Pauses.isPaused(pauses, day.date)).status
+                day.copy(status = status).toEntity()
             }
         dayDao.upsertAll(updated)
     }

@@ -153,6 +153,25 @@
     <string name="reminders_minute">Minute</string>
     <string name="reminders_permission_denied">Without the notification permission a reminder cannot show up.</string>
 
+    <!-- Pauses -->
+    <string name="pauses_title">Breaks</string>
+    <string name="pauses_manage">Breaks and holidays</string>
+    <string name="pauses_manage_hint">Days nothing is asked of you and no streak breaks.</string>
+    <string name="pauses_add">Add a break</string>
+    <string name="pauses_empty_title">No breaks</string>
+    <string name="pauses_empty_body">Add one for a holiday or a week off.</string>
+    <string name="pauses_everything">Everything</string>
+    <string name="pauses_range">%1$s to %2$s</string>
+    <string name="pauses_dialog_title">Break</string>
+    <string name="pauses_dialog_from">Starts in days from today</string>
+    <string name="pauses_dialog_length">Length in days</string>
+    <string name="pauses_dialog_applies">Applies to</string>
+    <string name="pauses_earlier">Earlier</string>
+    <string name="pauses_later">Later</string>
+    <string name="pauses_shorter">Shorter</string>
+    <string name="pauses_longer">Longer</string>
+    <string name="pauses_delete">Delete this break</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_theme_label">Theme</string>

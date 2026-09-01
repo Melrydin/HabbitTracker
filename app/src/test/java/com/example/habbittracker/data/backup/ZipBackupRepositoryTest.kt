@@ -61,6 +61,7 @@ class ZipBackupRepositoryTest {
                 habitDao = database.habitDao(),
                 dayDao = database.dayDao(),
                 dayHabitDao = database.dayHabitDao(),
+                pauseDao = database.pauseDao(),
                 settings = settings.settings,
             )
         backup =

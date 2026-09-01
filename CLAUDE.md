@@ -99,6 +99,7 @@ app/src/main/java/com/example/habbittracker/
 │   ├── history/      heatmap, streaks, completion rate (F4)
 │   ├── settings/     theme, default goal, backup (F6, F7)
 │   ├── reminder/     managing the local reminders (F5)
+│   ├── pause/        breaks and holidays (F4)
 │   └── widget/       home screen widget and quick settings tile (F9)
 ├── HabbitTrackerApp  Application + AppContainer (service locator)
 └── MainActivity
@@ -200,6 +201,9 @@ written just to be counted later.
 * The day or week in progress never breaks a run. A streak that read zero every morning would
   tell the user nothing.
 * Weeks run Monday to Sunday, matching the week habits of F8.
+* A **break** ([Pauses]) makes a day neutral whatever was recorded: during a holiday nothing
+  is asked, so nothing can be missed. A break for one habit only takes that habit out of the
+  day, which lowers the goal instead of failing it.
 
 ## Business rules
 

@@ -2,12 +2,10 @@ package com.example.habbittracker.data.local
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Pause and holiday periods (F4, V2). The table exists from the MVP on so that
- * the feature needs no migration; only reads are defined until it lands.
- */
+/** Pause and holiday periods (F4). */
 @Dao
 interface PauseDao {
     @Query("SELECT * FROM pauses")
@@ -15,6 +13,12 @@ interface PauseDao {
 
     @Query("SELECT * FROM pauses")
     suspend fun getAll(): List<PauseEntity>
+
+    @Upsert
+    suspend fun upsert(pause: PauseEntity): Long
+
+    @Query("DELETE FROM pauses WHERE id = :id")
+    suspend fun deleteById(id: Long)
 
     @Query("DELETE FROM pauses")
     suspend fun deleteAll()

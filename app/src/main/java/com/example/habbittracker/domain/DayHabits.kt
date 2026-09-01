@@ -14,8 +14,14 @@ import com.example.habbittracker.domain.model.HabitEntry
  * as the habit having no row at all.
  */
 object DayHabits {
-    fun entriesFor(habits: List<Habit>, progressByHabitId: Map<Long, Int>): List<HabitEntry> =
+    fun entriesFor(
+        habits: List<Habit>,
+        progressByHabitId: Map<Long, Int>,
+        pausedHabits: Set<Long> = emptySet(),
+    ): List<HabitEntry> =
         habits
+            // A paused habit is not asked for that day, so it leaves the goal alone (F4).
+            .filterNot { it.id in pausedHabits }
             .filter { it.belongsTo(progressByHabitId) }
             .map { habit -> HabitEntry(habit, progressByHabitId[habit.id] ?: 0) }
 

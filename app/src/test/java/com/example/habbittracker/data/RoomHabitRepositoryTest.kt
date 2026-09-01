@@ -11,6 +11,7 @@ import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.Pause
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -63,6 +64,7 @@ class RoomHabitRepositoryTest {
                 habitDao = database.habitDao(),
                 dayDao = database.dayDao(),
                 dayHabitDao = database.dayHabitDao(),
+                pauseDao = database.pauseDao(),
                 settings = settings.settings,
                 // Pin "today" so the past and the running day can both be exercised.
                 clock = Clock.fixed(date.atStartOfDay(ZoneOffset.UTC).toInstant(), ZoneOffset.UTC),
@@ -101,6 +103,7 @@ class RoomHabitRepositoryTest {
                     habitDao = database.habitDao(),
                     dayDao = database.dayDao(),
                     dayHabitDao = database.dayHabitDao(),
+                    pauseDao = database.pauseDao(),
                 )
 
             assertEquals("Exercise", reopened.getHabit(id)?.name)
@@ -427,6 +430,75 @@ class RoomHabitRepositoryTest {
     fun `the history of an unknown habit is empty`() =
         runBlocking {
             assertTrue(repository.observeHabitHistory(999).first().isEmpty())
+        }
+
+    @Test
+    fun `a global pause makes the day neutral however it was tracked`() =
+        runBlocking {
+            val id = addHabit("Exercise", points = 1)
+            repository.setProgress(date, id, 1)
+            assertTrue(
+                repository
+                    .observeDay(date)
+                    .first()
+                    .day.status == DayStatus.PASSED,
+            )
+
+            repository.upsertPause(Pause(id = 0, from = date, to = date))
+
+            assertEquals(
+                DayStatus.NEUTRAL,
+                repository
+                    .observeDay(date)
+                    .first()
+                    .day.status,
+            )
+        }
+
+    @Test
+    fun `a paused habit leaves the goal alone`() =
+        runBlocking {
+            val exercise = addHabit("Exercise", points = 3)
+            val read = addHabit("Read", points = 5)
+            repository.setProgress(date, exercise, 1)
+            // Three of the eight points the day holds: still open.
+            assertFalse(
+                repository
+                    .observeDay(date)
+                    .first()
+                    .day.status == DayStatus.PASSED,
+            )
+
+            repository.upsertPause(Pause(id = 0, from = date, to = date, habitId = read))
+
+            val snapshot = repository.observeDay(date).first()
+            assertEquals(DayStatus.PASSED, snapshot.day.status)
+            assertTrue(snapshot.entries.none { it.habit.id == read })
+        }
+
+    @Test
+    fun `removing a pause judges the days again`() =
+        runBlocking {
+            val id = addHabit("Exercise", points = 1)
+            repository.setProgress(date, id, 1)
+            val pauseId = repository.upsertPause(Pause(id = 0, from = date, to = date))
+            assertEquals(
+                DayStatus.NEUTRAL,
+                repository
+                    .observeDay(date)
+                    .first()
+                    .day.status,
+            )
+
+            repository.deletePause(pauseId)
+
+            assertEquals(
+                DayStatus.PASSED,
+                repository
+                    .observeDay(date)
+                    .first()
+                    .day.status,
+            )
         }
 
     @Test

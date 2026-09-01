@@ -68,6 +68,7 @@ class AppContainer(private val context: Context) {
             habitDao = database.habitDao(),
             dayDao = database.dayDao(),
             dayHabitDao = database.dayHabitDao(),
+            pauseDao = database.pauseDao(),
             settings = settingsRepository.settings,
         )
     }

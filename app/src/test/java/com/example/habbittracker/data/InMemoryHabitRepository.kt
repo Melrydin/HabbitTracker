@@ -3,6 +3,7 @@ package com.example.habbittracker.data
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
 import com.example.habbittracker.domain.DayEvaluator
 import com.example.habbittracker.domain.DayHabits
+import com.example.habbittracker.domain.Pauses
 import com.example.habbittracker.domain.StreakCalculator
 import com.example.habbittracker.domain.model.Day
 import com.example.habbittracker.domain.model.DayStatus
@@ -10,6 +11,7 @@ import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.Pause
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -33,6 +35,7 @@ class InMemoryHabitRepository(
         val days: Map<LocalDate, Day>,
         val progress: Map<Pair<LocalDate, Long>, Int>,
         val nextId: Long,
+        val pauses: List<Pause> = emptyList(),
     )
 
     private val writeLock = Mutex()
@@ -125,6 +128,29 @@ class InMemoryHabitRepository(
             }
         }
 
+    override fun observePauses(): Flow<List<Pause>> = store.map { it.pauses }
+
+    override suspend fun upsertPause(pause: Pause): Long =
+        writeLock.withLock {
+            val current = store.value
+            val id = if (pause.id == 0L) current.nextId else pause.id
+            val stored = pause.copy(id = id)
+            store.value =
+                current
+                    .copy(
+                        pauses = current.pauses.filterNot { it.id == id } + stored,
+                        nextId = maxOf(current.nextId, id + 1),
+                    ).withRecalculatedDays()
+            id
+        }
+
+    override suspend fun deletePause(id: Long) =
+        writeLock.withLock {
+            val current = store.value
+            store.value =
+                current.copy(pauses = current.pauses.filterNot { it.id == id }).withRecalculatedDays()
+        }
+
     override fun observeHabits(): Flow<List<Habit>> = store.map { it.habits }
 
     override suspend fun getHabit(id: Long): Habit? = store.value.habits.firstOrNull { it.id == id }
@@ -176,6 +202,7 @@ class InMemoryHabitRepository(
      */
     private fun Store.entriesFor(date: LocalDate): List<HabitEntry> =
         DayHabits.entriesFor(
+            pausedHabits = Pauses.pausedHabits(pauses, date),
             habits = habits,
             // Only the rows of this day, so a missing row stays distinguishable
             // from a recorded zero.
@@ -190,7 +217,12 @@ class InMemoryHabitRepository(
         copy(
             days =
                 days.mapValues { (date, day) ->
-                    day.copy(status = DayEvaluator.evaluate(day, entriesFor(date)).status)
+                    day.copy(
+                        status =
+                            DayEvaluator
+                                .evaluate(day, entriesFor(date), Pauses.isPaused(pauses, date))
+                                .status,
+                    )
                 },
         )
 

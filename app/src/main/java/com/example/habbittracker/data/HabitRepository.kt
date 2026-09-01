@@ -5,6 +5,7 @@ import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
+import com.example.habbittracker.domain.model.Pause
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -65,6 +66,15 @@ interface HabitRepository {
     fun observeHabitHistory(habitId: Long): Flow<Map<LocalDate, Boolean>>
 
     // --- Habit management (F1) ---
+
+    // --- Pauses (F4) ---
+
+    fun observePauses(): Flow<List<Pause>>
+
+    /** A pause without a habit stops the whole app for those days. */
+    suspend fun upsertPause(pause: Pause): Long
+
+    suspend fun deletePause(id: Long)
 
     /** Every habit including archived ones. Callers that want only active ones filter themselves. */
     fun observeHabits(): Flow<List<Habit>>

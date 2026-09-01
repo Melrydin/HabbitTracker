@@ -29,7 +29,21 @@ data class DayGoalProgress(
  * view model and tests all share the same rule.
  */
 object DayEvaluator {
-    fun evaluate(day: Day, entries: List<HabitEntry>): DayGoalProgress =
+    /**
+     * [paused] makes the day neutral whatever was recorded (F4): during a break
+     * nothing is asked, so nothing can be missed.
+     */
+    fun evaluate(day: Day, entries: List<HabitEntry>, paused: Boolean = false): DayGoalProgress =
+        if (paused) {
+            paused(day, entries)
+        } else {
+            evaluateByRule(day, entries)
+        }
+
+    private fun paused(day: Day, entries: List<HabitEntry>) =
+        evaluateByRule(day, entries).copy(status = DayStatus.NEUTRAL)
+
+    private fun evaluateByRule(day: Day, entries: List<HabitEntry>): DayGoalProgress =
         when (day.goalType) {
             GoalType.ALL_REQUIRED -> evaluateAllRequired(day, entries)
             GoalType.MIN_COUNT -> evaluateMinCount(day, entries)

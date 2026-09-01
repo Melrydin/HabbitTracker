@@ -139,6 +139,10 @@ data class ReminderEntity(
     val enabled: Boolean,
 )
 
+fun PauseEntity.toDomain() = Pause(id = id, from = from, to = to, habitId = habitId)
+
+fun Pause.toEntity() = PauseEntity(id = id, from = from, to = to, habitId = habitId)
+
 fun ReminderEntity.toDomain() =
     Reminder(id = id, time = time, daysOfWeek = daysOfWeek, habitId = habitId, enabled = enabled)
 
@@ -168,7 +172,7 @@ data class GoalEntity(
     val achieved: Boolean,
 )
 
-/** Stored form of [Pause] (F4, V2). Empty until that feature lands. */
+/** Stored form of [Pause] (F4). */
 @Entity(
     tableName = "pauses",
     foreignKeys = [

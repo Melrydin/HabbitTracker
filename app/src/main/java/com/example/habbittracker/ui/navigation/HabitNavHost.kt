@@ -28,6 +28,8 @@ import com.example.habbittracker.ui.habit.HabitListScreen
 import com.example.habbittracker.ui.habit.HabitListViewModel
 import com.example.habbittracker.ui.history.HistoryScreen
 import com.example.habbittracker.ui.history.HistoryViewModel
+import com.example.habbittracker.ui.pause.PauseScreen
+import com.example.habbittracker.ui.pause.PauseViewModel
 import com.example.habbittracker.ui.reminder.ReminderScreen
 import com.example.habbittracker.ui.reminder.ReminderViewModel
 import com.example.habbittracker.ui.settings.SettingsRoute
@@ -41,6 +43,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val HISTORY = "history"
     const val REMINDERS = "reminders"
+    const val PAUSES = "pauses"
 
     const val DATE_ARG = "date"
 
@@ -124,6 +127,24 @@ fun HabitNavHost(
             )
         }
 
+        composable(Routes.PAUSES) {
+            val viewModel: PauseViewModel =
+                viewModel(
+                    factory =
+                        viewModelFactory {
+                            initializer { PauseViewModel(container.habitRepository) }
+                        },
+                )
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            PauseScreen(
+                state = state,
+                today = LocalDate.now(),
+                onSave = viewModel::onSave,
+                onDelete = viewModel::onDelete,
+                onBack = { navController.popBackStack() },
+            )
+        }
+
         composable(Routes.HISTORY) {
             val viewModel: HistoryViewModel =
                 viewModel(
@@ -159,6 +180,7 @@ fun HabitNavHost(
             SettingsRoute(
                 viewModel = viewModel,
                 onOpenReminders = { navController.navigate(Routes.REMINDERS) },
+                onOpenPauses = { navController.navigate(Routes.PAUSES) },
                 onBack = { navController.popBackStack() },
             )
         }
