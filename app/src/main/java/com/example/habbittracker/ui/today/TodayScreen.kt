@@ -51,6 +51,7 @@ import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
+import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.ui.icons.HabitIcons
 import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 import java.time.LocalDate
@@ -85,6 +86,7 @@ fun TodayRoute(
         snackbarHostState = snackbarHostState,
         onThemeChange = viewModel::onThemeChange,
         onDayNoteChange = viewModel::onDayNoteChange,
+        onToggleCheck = viewModel::onToggleCheck,
         onIncrement = viewModel::onIncrement,
         onDecrement = viewModel::onDecrement,
         onAddHabit = onAddHabit,
@@ -102,6 +104,7 @@ fun TodayScreen(
     snackbarHostState: SnackbarHostState,
     onThemeChange: (String) -> Unit,
     onDayNoteChange: (String) -> Unit,
+    onToggleCheck: (HabitItem) -> Unit,
     onIncrement: (HabitItem) -> Unit,
     onDecrement: (HabitItem) -> Unit,
     onAddHabit: () -> Unit,
@@ -175,6 +178,7 @@ fun TodayScreen(
                     HabitRow(
                         item = item,
                         goalType = state.goal.goalType,
+                        onToggle = onToggleCheck,
                         onIncrement = onIncrement,
                         onDecrement = onDecrement,
                         onEdit = { onEditHabit(it.id) },
@@ -397,7 +401,7 @@ private fun previewState(passed: Boolean = false) =
         habits =
             listOf(
                 HabitEntry(
-                    Habit(1, "Drink water", 8, "glasses", points = 2, icon = "water_drop"),
+                    Habit(1, "Drink water", HabitType.COUNTER, 8, "glasses", points = 2, icon = "water_drop"),
                     3,
                 ),
                 HabitEntry(
@@ -405,6 +409,7 @@ private fun previewState(passed: Boolean = false) =
                         Habit(
                             2,
                             "Exercise",
+                            HabitType.CHECK,
                             1,
                             points = 3,
                             required = true,
@@ -412,8 +417,8 @@ private fun previewState(passed: Boolean = false) =
                         ),
                     progress = if (passed) 1 else 0,
                 ),
-                HabitEntry(Habit(3, "Read", 30, "min", points = 2, icon = "menu_book"), 30),
-                HabitEntry(Habit(4, "Meditation", 1, points = 1, icon = "self_improvement"), 0),
+                HabitEntry(Habit(3, "Read", HabitType.COUNTER, 30, "min", points = 2, icon = "menu_book"), 30),
+                HabitEntry(Habit(4, "Meditation", HabitType.CHECK, 1, points = 1, icon = "self_improvement"), 0),
             ).map(::HabitItem),
         currentStreak = 4,
         loaded = true,
@@ -428,6 +433,7 @@ private fun TodayScreenPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             onThemeChange = {},
             onDayNoteChange = {},
+            onToggleCheck = {},
             onIncrement = {},
             onDecrement = {},
             onAddHabit = {},
@@ -448,6 +454,7 @@ private fun TodayScreenDarkPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             onThemeChange = {},
             onDayNoteChange = {},
+            onToggleCheck = {},
             onIncrement = {},
             onDecrement = {},
             onAddHabit = {},
@@ -468,6 +475,7 @@ private fun TodayScreenEmptyPreview() {
             snackbarHostState = remember { SnackbarHostState() },
             onThemeChange = {},
             onDayNoteChange = {},
+            onToggleCheck = {},
             onIncrement = {},
             onDecrement = {},
             onAddHabit = {},

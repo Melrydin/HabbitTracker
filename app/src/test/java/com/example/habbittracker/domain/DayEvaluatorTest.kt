@@ -5,6 +5,7 @@ import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
+import com.example.habbittracker.domain.model.HabitType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -15,10 +16,10 @@ class DayEvaluatorTest {
     private val date = LocalDate.of(2026, 8, 31)
 
     private fun check(id: Long, points: Int = 1, required: Boolean = false) =
-        Habit(id, "Habit $id", target = 1, points = points, required = required, icon = "task_alt")
+        Habit(id, "Habit $id", HabitType.CHECK, target = 1, points = points, required = required, icon = "task_alt")
 
     private fun counter(id: Long, target: Int, points: Int = 1) =
-        Habit(id, "Habit $id", target = target, unit = "x", points = points, icon = "task_alt")
+        Habit(id, "Habit $id", HabitType.COUNTER, target = target, unit = "x", points = points, icon = "task_alt")
 
     @Test
     fun `a points goal passes once the sum reaches the threshold`() {

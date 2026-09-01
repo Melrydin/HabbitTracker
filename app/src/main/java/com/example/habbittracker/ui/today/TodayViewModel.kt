@@ -6,6 +6,7 @@ import com.example.habbittracker.data.HabitRepository
 import com.example.habbittracker.domain.DayEvaluator
 import com.example.habbittracker.domain.model.Day
 import com.example.habbittracker.domain.model.Habit
+import com.example.habbittracker.domain.model.HabitType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -66,9 +67,13 @@ class TodayViewModel(
                 initialValue = TodayUiState(date = date.value),
             )
 
-    fun onIncrement(item: HabitItem) = setProgress(item, item.entry.progress + STEP)
+    fun onToggleCheck(item: HabitItem) {
+        setProgress(item, if (item.fulfilled) 0 else item.entry.habit.target)
+    }
 
-    fun onDecrement(item: HabitItem) = setProgress(item, item.entry.progress - STEP)
+    fun onIncrement(item: HabitItem) = setProgress(item, item.entry.progress + item.step)
+
+    fun onDecrement(item: HabitItem) = setProgress(item, item.entry.progress - item.step)
 
     fun onThemeChange(text: String) {
         val limited = text.take(Habit.NAME_MAX_LENGTH)
@@ -86,10 +91,21 @@ class TodayViewModel(
         viewModelScope.launch { repository.setProgress(date.value, item.id, progress) }
     }
 
+    /**
+     * Larger targets step coarser, so a 30 minute habit is not 30 taps. The cut-off
+     * is a judgement call: below it a single step still feels like one unit.
+     */
+    private val HabitItem.step: Int
+        get() =
+            when {
+                entry.habit.type == HabitType.CHECK -> 1
+                entry.habit.target > COARSE_STEP_FROM -> COARSE_STEP
+                else -> 1
+            }
+
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L
-
-        /** Counts start at zero and move one at a time. */
-        const val STEP = 1
+        const val COARSE_STEP = 5
+        const val COARSE_STEP_FROM = 12
     }
 }

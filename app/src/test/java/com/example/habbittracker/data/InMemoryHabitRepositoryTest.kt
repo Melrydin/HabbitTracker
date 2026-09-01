@@ -3,6 +3,7 @@ package com.example.habbittracker.data
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.Habit
+import com.example.habbittracker.domain.model.HabitType
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -25,7 +26,7 @@ class InMemoryHabitRepositoryTest {
     fun `a new habit receives an id and appears in the list`() =
         runBlocking {
             val repository = repository()
-            val newHabit = Habit(NEW_HABIT_ID, "Walk", target = 1, icon = "directions_run")
+            val newHabit = Habit(NEW_HABIT_ID, "Walk", HabitType.CHECK, target = 1, icon = "directions_run")
 
             val id = repository.upsertHabit(newHabit)
 
@@ -154,7 +155,7 @@ class InMemoryHabitRepositoryTest {
             // The same id is handed out again: the old value must not reappear.
             val id =
                 repository.upsertHabit(
-                    Habit(NEW_HABIT_ID, "New", target = 8, unit = "x", icon = "water_drop"),
+                    Habit(NEW_HABIT_ID, "New", HabitType.COUNTER, target = 8, unit = "x", icon = "water_drop"),
                 )
             val entry =
                 repository

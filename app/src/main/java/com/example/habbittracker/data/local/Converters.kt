@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.HabitKind
+import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.domain.model.Recurrence
 import com.example.habbittracker.domain.model.StreakRule
@@ -24,6 +25,12 @@ class Converters {
 
     @TypeConverter
     fun textToDate(value: String?): LocalDate? = value?.let(LocalDate::parse)
+
+    @TypeConverter
+    fun habitTypeToText(value: HabitType): String = value.name
+
+    @TypeConverter
+    fun textToHabitType(value: String): HabitType = HabitType.valueOf(value)
 
     @TypeConverter
     fun goalTypeToText(value: GoalType): String = value.name
