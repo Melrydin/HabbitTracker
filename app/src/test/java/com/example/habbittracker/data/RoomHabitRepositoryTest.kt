@@ -413,6 +413,41 @@ class RoomHabitRepositoryTest {
         }
 
     @Test
+    fun `a step from the widget counts up by one instead of finishing the habit`() =
+        runBlocking {
+            val id = addHabit("Water", type = HabitType.COUNTER, target = 5)
+
+            repository.incrementHabit(date, id)
+            repository.incrementHabit(date, id)
+
+            val entry =
+                repository
+                    .observeDay(date)
+                    .first()
+                    .entries
+                    .first { it.habit.id == id }
+            assertEquals(2, entry.progress)
+            assertFalse(entry.fulfilled)
+        }
+
+    @Test
+    fun `a step ticks a check habit off`() =
+        runBlocking {
+            val id = addHabit("Exercise")
+
+            repository.incrementHabit(date, id)
+
+            assertTrue(
+                repository
+                    .observeDay(date)
+                    .first()
+                    .entries
+                    .first { it.habit.id == id }
+                    .fulfilled,
+            )
+        }
+
+    @Test
     fun `a missed day spends a grace day and the run survives it`() =
         runBlocking {
             val id = addHabit("Exercise", points = 6)

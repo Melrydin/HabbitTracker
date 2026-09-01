@@ -41,6 +41,14 @@ interface HabitRepository {
     suspend fun completeHabit(date: LocalDate, habitId: Long)
 
     /**
+     * Adds one step to a habit (F9). A check is ticked, a counter goes up by one.
+     *
+     * What the widget does on a tap: a counter of five glasses is filled glass by
+     * glass there just as it is in the app, rather than jumping to done.
+     */
+    suspend fun incrementHabit(date: LocalDate, habitId: Long)
+
+    /**
      * Sets the day theme (F2). The theme is always backed by a habit: a new name
      * creates one, an empty name clears the link again.
      */

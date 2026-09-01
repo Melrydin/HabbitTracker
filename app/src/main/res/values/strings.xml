@@ -131,6 +131,7 @@
     <string name="reminder_general_title">Habit Tracker</string>
     <string name="reminder_general_text">Time to record your day.</string>
     <string name="reminder_done">Done</string>
+    <string name="widget_counter">%1$d/%2$d</string>
     <string name="widget_description">The habits of the day with a one-tap check-in.</string>
     <string name="tile_label">Record the day</string>
 

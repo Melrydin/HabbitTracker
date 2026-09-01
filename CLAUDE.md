@@ -181,12 +181,21 @@ notification itself.
 Three ways to tick a habit off without opening a screen (F9): the home screen widget
 (Jetpack Glance), a quick settings tile, and an action on a habit reminder.
 
-* All three call `HabitRepository.completeHabit`, so none of them reinvents what "done"
-  means or skips the status recalculation.
+* All of them go through the repository, so none of them reinvents what "done" means or
+  skips the status recalculation. The tile and the notification action call `completeHabit`,
+  the widget `incrementHabit`.
 * The tile finishes **everything the day still asks for** rather than one habit: it has
   nowhere to choose one.
-* The widget follows the host's palette, so a finished habit is marked with a check rather
-  than the app's accent, which is not available there.
+* A tap in the widget adds **one step**, it does not finish the habit. Five glasses of water
+  are filled glass by glass there just as they are in the app, so the widget shows the count
+  next to the name.
+* The widget follows the host's palette, so a finished habit is marked with a check and a
+  filled surface rather than the app's accent, which is not available there. The rounded
+  corner behind it needs Android 12; below that the fill is square.
+* Glance only keeps its content current while its own session runs, so the widget collects
+  the day as a flow **and** `MainActivity.onStop` pushes it once. Without the push a habit
+  ticked off in the app would leave a stale home screen behind at the very moment the user
+  goes to look at it.
 * `Tile.setSubtitle` only exists from Android 10 on and is guarded; below that the label
   carries the state on its own.
 

@@ -142,6 +142,13 @@ class RoomHabitRepository(
      * counts towards the daily goal like any other, which is the whole point of
      * tying theme and habit together.
      */
+    override suspend fun incrementHabit(date: LocalDate, habitId: Long) {
+        database.withTransaction {
+            val recorded = dayHabitDao.get(date, habitId)?.progress ?: 0
+            setProgress(date, habitId, recorded + 1)
+        }
+    }
+
     override suspend fun setDayTheme(date: LocalDate, themeName: String?) {
         database.withTransaction {
             val day = dayDao.get(date)?.toDomain() ?: defaultDay(date, settings.first())

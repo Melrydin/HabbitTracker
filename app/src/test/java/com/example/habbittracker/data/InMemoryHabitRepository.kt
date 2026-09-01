@@ -79,6 +79,10 @@ class InMemoryHabitRepository(
     }
 
     /** The fake only stores the link; creating a theme habit is the real repository's job. */
+    override suspend fun incrementHabit(date: LocalDate, habitId: Long) {
+        setProgress(date, habitId, (store.value.progress[date to habitId] ?: 0) + 1)
+    }
+
     override suspend fun setDayTheme(date: LocalDate, themeName: String?) =
         writeLock.withLock {
             val current = store.value
