@@ -70,9 +70,11 @@ Everything at once, exactly what CI runs:
 ```
 app/src/main/java/com/example/habbittracker/
 ├── domain/           business rules, plain Kotlin, no Android imports
-│   ├── model/        Habit, Day, HabitEntry
+│   ├── model/        Habit, Day, HabitEntry, Goal, Pause
 │   ├── DayEvaluator      daily goal evaluation (F2)
-│   └── StreakCalculator  current and longest streak (F4)
+│   ├── DayHabits         which habits belong to a day (F1, F3)
+│   ├── StreakCalculator  current and longest streak (F4)
+│   └── CompletionRate    share of passed among judged days (F4)
 ├── data/             HabitRepository (interface) + RoomHabitRepository
 │   └── local/        entities, DAOs, type converters, HabitDatabase
 ├── ui/
@@ -96,7 +98,12 @@ entities, DAOs and converters; `RoomHabitRepository` maps them onto the domain m
 keeps `Day.passed` in step.
 
 * Dates are stored as ISO-8601 text and enums by name, so the database stays readable when
-  inspected by hand and dates still sort correctly.
+  inspected by hand and dates still sort correctly. Sets (`assignedDows`, `tags`) are stored
+  as comma separated text.
+* **Every V2 and V3 field is already in the schema** (F4 `streakRule`/`perWeekTarget`, F8
+  hierarchy and theme coupling, F11 `polarity`, F12 `category`/`tags`/`sortIndex`), and the
+  `goals` and `pauses` tables exist empty. That is what the roadmap asks for, so those
+  features land without another migration.
 * `day_habits` has a foreign key onto `habits` with `ON DELETE CASCADE`. Deleting a habit
   takes its recorded values with it; archiving leaves those rows untouched, which is what
   keeps old entries visible.
@@ -122,14 +129,16 @@ a composable.
 
 Three behaviors that are not obvious from the code and are pinned down by tests:
 
-* A day with no reachable goal is **neutral**, not failed. The UI then shows no status marker
-  at all rather than claiming failure.
+* `Day.status` is three-valued: `PASSED`, `FAILED`, `NEUTRAL`. A day with no reachable goal is
+  **neutral**, not failed, and the UI then shows no status marker at all.
+* A **neutral day is skipped** by the streak: it neither extends nor breaks a run. Only
+  `FAILED` resets it.
 * A **today that is still open does not break the streak** — the run is counted up to
   yesterday. Otherwise the streak would read 0 every morning.
 * An **archived habit stays visible** on days that already have a value recorded. Archiving
   therefore cannot retroactively ruin a day that had passed.
 
-`Day.passed` is recomputed and stored after every change — not only after tracking a value,
+`Day.status` is recomputed and stored after every change — not only after tracking a value,
 but also after edited points or an archived habit.
 
 ## Design system
@@ -137,13 +146,12 @@ but also after edited points or an archived habit.
 Guiding idea: modern, plain, calm. Plenty of whitespace, flat, separation through color and
 spacing rather than shadow.
 
-* **Exactly one color plus neutrals.** The accent is green, swappable in one place in
-  `ui/theme/Color.kt`.
-* The "passed" status marker shares that tone with the accent. The two are told apart by
-  **shape** — a pill with a check for the day, a circle with a check for the habit — never by
-  color.
-* Green means "done" and nothing else. Open elements stay neutral grey. There is **no red**
-  for "not fulfilled", so that nothing is being judged.
+* **One accent plus one status tone, on top of neutrals.** The accent is Indigo, the "passed"
+  marker a restrained green. Both live in `ui/theme/Color.kt` and are swappable there.
+* Green is a marker only and never fills an area, so "done" reads at a glance without the
+  screen turning green.
+* Open elements stay neutral grey. There is **no red** for "not fulfilled", so that nothing is
+  being judged.
 * A uniform 16 dp radius, an 8 dp grid, 16 to 24 dp of inner padding.
 * One icon set: Material Symbols outlined, never mixed.
 * Dark mode is fully supported and follows the system.
@@ -318,6 +326,10 @@ archive and delete.
 
 Open:
 
+* **Phase 1 is not finished.** Still open from the roadmap: the history screen with heatmap
+  and completion rate (F4), the settings screen (F7), the ZIP backup and restore (F6), and the
+  note fields for habit and day in the UI. The data and rules behind all of them already
+  exist.
 * History and settings are still empty callbacks in `HabitNavHost`.
 * `Habit.colorTag` exists in the data model but deliberately not in the editor — a per-habit
   color picker contradicts the one-color rule above.
