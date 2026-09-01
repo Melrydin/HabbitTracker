@@ -48,18 +48,25 @@ object DayEvaluator {
 
     private fun evaluateMinCount(day: Day, entries: List<HabitEntry>): DayGoalProgress {
         val fulfilled = entries.count { it.fulfilled }
-        return progress(day, fulfilled, day.goalThreshold, fulfilled >= day.goalThreshold)
+        val threshold = day.goalThreshold.coerceAtMost(entries.size)
+        return progress(day, fulfilled, threshold, fulfilled >= threshold)
     }
 
     private fun evaluatePoints(day: Day, entries: List<HabitEntry>): DayGoalProgress {
         val points = entries.filter { it.fulfilled }.sumOf { it.habit.points }
-        return progress(day, points, day.goalThreshold, points >= day.goalThreshold)
+        val threshold = day.goalThreshold.coerceAtMost(entries.sumOf { it.habit.points })
+        return progress(day, points, threshold, points >= threshold)
     }
 
     /**
      * A day is only judged once something was actually asked of it. Without a
      * reachable goal it stays [DayStatus.NEUTRAL] rather than counting as failed,
      * which is what keeps an empty day from breaking a streak.
+     *
+     * [threshold] is the effective one, capped at what the day can actually offer.
+     * A setting of six points means nothing on a day that holds a single one-point
+     * habit; taken literally it would make that day impossible to pass, so the goal
+     * becomes "everything this day asks of you" instead.
      */
     private fun progress(day: Day, current: Int, threshold: Int, reached: Boolean) =
         DayGoalProgress(

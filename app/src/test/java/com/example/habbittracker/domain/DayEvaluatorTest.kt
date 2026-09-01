@@ -88,12 +88,54 @@ class DayEvaluatorTest {
     @Test
     fun `a day with habits that misses its goal is failed`() {
         val day = Day(date, goalType = GoalType.POINTS, goalThreshold = 5)
-        val entries = listOf(HabitEntry(check(1, points = 2), progress = 1))
+        val entries =
+            listOf(
+                HabitEntry(check(1, points = 2), progress = 1),
+                HabitEntry(check(2, points = 4), progress = 0),
+            )
 
         val result = DayEvaluator.evaluate(day, entries)
 
         assertEquals(DayStatus.FAILED, result.status)
         assertFalse(result.passed)
+    }
+
+    @Test
+    fun `a threshold beyond reach is capped at what the day offers`() {
+        // One habit worth a single point cannot add up to six, so six is not the ask.
+        val day = Day(date, goalType = GoalType.POINTS, goalThreshold = 6)
+        val entries = listOf(HabitEntry(check(1, points = 1), progress = 1))
+
+        val result = DayEvaluator.evaluate(day, entries)
+
+        assertEquals(1, result.threshold)
+        assertEquals(DayStatus.PASSED, result.status)
+    }
+
+    @Test
+    fun `the capped threshold still has to be met`() {
+        val day = Day(date, goalType = GoalType.POINTS, goalThreshold = 6)
+        val entries =
+            listOf(
+                HabitEntry(check(1, points = 1), progress = 1),
+                HabitEntry(check(2, points = 1), progress = 0),
+            )
+
+        val result = DayEvaluator.evaluate(day, entries)
+
+        assertEquals(2, result.threshold)
+        assertEquals(DayStatus.FAILED, result.status)
+    }
+
+    @Test
+    fun `min count caps its threshold at the number of habits`() {
+        val day = Day(date, goalType = GoalType.MIN_COUNT, goalThreshold = 5)
+        val entries = listOf(HabitEntry(check(1), progress = 1), HabitEntry(check(2), progress = 1))
+
+        val result = DayEvaluator.evaluate(day, entries)
+
+        assertEquals(2, result.threshold)
+        assertEquals(DayStatus.PASSED, result.status)
     }
 
     @Test

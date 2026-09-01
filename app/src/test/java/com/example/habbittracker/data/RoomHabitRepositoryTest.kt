@@ -202,8 +202,11 @@ class RoomHabitRepositoryTest {
     @Test
     fun `changed points recompute the day status`() =
         runBlocking {
-            val id = addHabit("Exercise", points = 3)
-            repository.setProgress(date, id, 1)
+            // A second habit keeps the day worth more than the threshold, so the
+            // threshold is not capped and the points actually decide the outcome.
+            val exercise = addHabit("Exercise", points = 3)
+            addHabit("Read", points = 5)
+            repository.setProgress(date, exercise, 1)
             assertFalse(
                 repository
                     .observeDay(date)
@@ -211,7 +214,24 @@ class RoomHabitRepositoryTest {
                     .day.status == DayStatus.PASSED,
             )
 
-            repository.upsertHabit(repository.getHabit(id)!!.copy(points = 6))
+            repository.upsertHabit(repository.getHabit(exercise)!!.copy(points = 6))
+
+            assertTrue(
+                repository
+                    .observeDay(date)
+                    .first()
+                    .day.status == DayStatus.PASSED,
+            )
+        }
+
+    @Test
+    fun `a single small habit can still finish the day`() =
+        runBlocking {
+            // The default threshold is six points; one habit worth one point must
+            // not make the day impossible to pass.
+            val id = addHabit("Exercise", points = 1)
+
+            repository.setProgress(date, id, 1)
 
             assertTrue(
                 repository
