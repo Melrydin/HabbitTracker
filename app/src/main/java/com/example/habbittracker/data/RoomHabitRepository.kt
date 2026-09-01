@@ -11,13 +11,15 @@ import com.example.habbittracker.data.local.toEntity
 import com.example.habbittracker.domain.DayEvaluator
 import com.example.habbittracker.domain.DayHabits
 import com.example.habbittracker.domain.StreakCalculator
+import com.example.habbittracker.domain.model.AppSettings
 import com.example.habbittracker.domain.model.Day
 import com.example.habbittracker.domain.model.DayStatus
-import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 
@@ -32,9 +34,7 @@ class RoomHabitRepository(
     private val habitDao: HabitDao,
     private val dayDao: DayDao,
     private val dayHabitDao: DayHabitDao,
-    // TODO(F7): read the default goal from the settings instead of hard-coding it.
-    private val defaultGoalType: GoalType = GoalType.POINTS,
-    private val defaultGoalThreshold: Int = DEFAULT_GOAL_THRESHOLD,
+    private val settings: Flow<AppSettings> = flowOf(AppSettings()),
 ) : HabitRepository {
     override fun observeDay(date: LocalDate): Flow<DaySnapshot> =
         combine(
@@ -42,9 +42,10 @@ class RoomHabitRepository(
             habitDao.observeAll(),
             dayHabitDao.observeForDate(date),
             dayDao.observeStatuses(),
-        ) { day, habits, recorded, statuses ->
+            settings,
+        ) { day, habits, recorded, statuses, current ->
             DaySnapshot(
-                day = day?.toDomain() ?: defaultDay(date),
+                day = day?.toDomain() ?: defaultDay(date, current),
                 entries =
                     DayHabits.entriesFor(
                         habits = habits.map { it.toDomain() },
@@ -197,15 +198,17 @@ class RoomHabitRepository(
         dayDao.upsertAll(updated)
     }
 
-    private fun defaultDay(date: LocalDate) =
+    /** New days start from the settings; days that already exist keep their own goal. */
+    private suspend fun defaultDay(date: LocalDate) = defaultDay(date, settings.first())
+
+    private fun defaultDay(date: LocalDate, current: AppSettings) =
         Day(
             date = date,
-            goalType = defaultGoalType,
-            goalThreshold = defaultGoalThreshold,
+            goalType = current.defaultGoalType,
+            goalThreshold = current.defaultGoalThreshold,
         )
 
     private companion object {
-        const val DEFAULT_GOAL_THRESHOLD = 6
         const val PROGRESS_MAX = 9_999
     }
 }

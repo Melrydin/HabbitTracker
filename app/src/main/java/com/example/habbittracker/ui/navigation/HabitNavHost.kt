@@ -26,12 +26,15 @@ import com.example.habbittracker.ui.habit.HabitEditorScreen
 import com.example.habbittracker.ui.habit.HabitEditorViewModel
 import com.example.habbittracker.ui.habit.HabitListScreen
 import com.example.habbittracker.ui.habit.HabitListViewModel
+import com.example.habbittracker.ui.settings.SettingsScreen
+import com.example.habbittracker.ui.settings.SettingsViewModel
 import com.example.habbittracker.ui.today.TodayRoute
 import com.example.habbittracker.ui.today.TodayViewModel
 
 object Routes {
     const val TODAY = "today"
     const val HABITS = "habits"
+    const val SETTINGS = "settings"
 
     const val HABIT_ID_ARG = "habitId"
     const val HABIT_EDITOR = "habit_editor?$HABIT_ID_ARG={$HABIT_ID_ARG}"
@@ -64,9 +67,27 @@ fun HabitNavHost(
                 onAddHabit = { navController.navigate(Routes.habitEditor()) },
                 onEditHabit = { habitId -> navController.navigate(Routes.habitEditor(habitId)) },
                 onOpenHabits = { navController.navigate(Routes.HABITS) },
-                // TODO: hook up history and settings once those screens exist.
+                // TODO: hook up the history screen once it exists.
                 onOpenHistory = {},
-                onOpenSettings = {},
+                onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+            )
+        }
+
+        composable(Routes.SETTINGS) {
+            val viewModel: SettingsViewModel =
+                viewModel(
+                    factory =
+                        viewModelFactory {
+                            initializer { SettingsViewModel(container.settingsRepository) }
+                        },
+                )
+            val settings by viewModel.settings.collectAsStateWithLifecycle()
+            SettingsScreen(
+                settings = settings,
+                onThemeModeChange = viewModel::onThemeModeChange,
+                onGoalTypeChange = viewModel::onGoalTypeChange,
+                onThresholdChange = viewModel::onThresholdChange,
+                onBack = { navController.popBackStack() },
             )
         }
 

@@ -2,11 +2,18 @@ package com.example.habbittracker
 
 import android.app.Application
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.example.habbittracker.data.HabitRepository
 import com.example.habbittracker.data.RoomHabitRepository
+import com.example.habbittracker.data.SettingsRepository
+import com.example.habbittracker.data.local.DataStoreSettingsRepository
 import com.example.habbittracker.data.local.HabitDatabase
 import com.example.habbittracker.data.local.MIGRATION_1_2
+
+private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 /**
  * A simple service locator. Everything is built lazily, so a screen that never
@@ -20,12 +27,17 @@ class AppContainer(private val context: Context) {
             .build()
     }
 
+    val settingsRepository: SettingsRepository by lazy {
+        DataStoreSettingsRepository(context.settingsDataStore)
+    }
+
     val habitRepository: HabitRepository by lazy {
         RoomHabitRepository(
             database = database,
             habitDao = database.habitDao(),
             dayDao = database.dayDao(),
             dayHabitDao = database.dayHabitDao(),
+            settings = settingsRepository.settings,
         )
     }
 }

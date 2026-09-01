@@ -78,6 +78,24 @@
     <string name="habit_editor_delete_title">Delete habit?</string>
     <string name="habit_editor_delete_message">%s and every recorded value will be removed. Archiving keeps the history.</string>
 
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme_label">Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_goal_label">Default daily goal</string>
+    <string name="settings_goal_hint">Applies to new days. Days you already tracked keep their own goal.</string>
+    <string name="settings_goal_rule_all_required">All required</string>
+    <string name="settings_goal_rule_min_count">Number of habits</string>
+    <string name="settings_goal_rule_points">Points</string>
+    <string name="settings_goal_threshold_label">Threshold</string>
+    <string name="settings_goal_threshold_points">%d points</string>
+    <string name="settings_goal_threshold_habits">%d habits</string>
+    <string name="settings_goal_threshold_unused">Set by the required habits of the day</string>
+    <string name="settings_threshold_decrease">Lower the threshold</string>
+    <string name="settings_threshold_increase">Raise the threshold</string>
+
     <string name="habit_type_check">Yes/No</string>
     <string name="habit_type_counter">Count</string>
     <string name="habit_type_amount">Amount</string>
