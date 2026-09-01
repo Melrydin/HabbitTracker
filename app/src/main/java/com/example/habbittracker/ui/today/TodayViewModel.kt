@@ -53,6 +53,7 @@ class TodayViewModel(
                     dayNote = noteDraft ?: snapshot.day.dayNote.orEmpty(),
                     goal = DayEvaluator.evaluate(snapshot.day, snapshot.entries),
                     habits = snapshot.entries.map(::HabitItem),
+                    themeChoice = snapshot.themeChoice,
                     goalOverridden = snapshot.day.goalOverridden,
                     currentStreak = snapshot.currentStreak,
                     isToday = snapshot.day.date == LocalDate.now(clock),
@@ -78,6 +79,13 @@ class TodayViewModel(
 
     /** A value typed in directly; the repository clamps it to what the habit allows. */
     fun onSetProgress(item: HabitItem, progress: Int) = setProgress(item, progress)
+
+    fun onChooseTheme(habit: Habit) {
+        viewModelScope.launch {
+            themeDraft.value = null
+            repository.chooseDayTheme(date.value, habit.id)
+        }
+    }
 
     fun onThemeChange(text: String) {
         val limited = text.take(Habit.NAME_MAX_LENGTH)

@@ -3,6 +3,7 @@ package com.example.habbittracker.ui.today
 import com.example.habbittracker.domain.DayGoalProgress
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
+import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
 import java.time.LocalDate
 
@@ -21,6 +22,8 @@ data class TodayUiState(
     val goal: DayGoalProgress =
         DayGoalProgress(GoalType.POINTS, current = 0, threshold = 0, status = DayStatus.NEUTRAL),
     val habits: List<HabitItem> = emptyList(),
+    /** More than one habit offers today a theme, so the user has to pick one (F8). */
+    val themeChoice: List<Habit> = emptyList(),
     val goalOverridden: Boolean = false,
     val currentStreak: Int = 0,
     val isToday: Boolean = true,

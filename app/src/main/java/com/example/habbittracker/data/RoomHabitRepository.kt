@@ -160,6 +160,16 @@ class RoomHabitRepository(
         }
     }
 
+    override suspend fun chooseDayTheme(date: LocalDate, habitId: Long) {
+        database.withTransaction {
+            val day = dayDao.get(date)?.toDomain() ?: defaultDay(date, settings.first())
+            // Picking an offered habit drops a theme the user had typed before.
+            discardGeneratedTheme(day, date)
+            dayDao.upsert(day.copy(themeHabitId = habitId).toEntity())
+            recalculate(date)
+        }
+    }
+
     override suspend fun setDayGoal(date: LocalDate, goalType: GoalType, threshold: Int) {
         database.withTransaction {
             val day = dayDao.get(date)?.toDomain() ?: defaultDay(date, settings.first())

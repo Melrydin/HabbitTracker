@@ -92,6 +92,13 @@ class InMemoryHabitRepository(
             store.value = current.copy(days = current.days + (date to day.copy(themeHabitId = habitId)))
         }
 
+    override suspend fun chooseDayTheme(date: LocalDate, habitId: Long) =
+        writeLock.withLock {
+            val current = store.value
+            val day = current.days[date] ?: defaultDay(date)
+            store.value = current.copy(days = current.days + (date to day.copy(themeHabitId = habitId)))
+        }
+
     override suspend fun setDayGoal(date: LocalDate, goalType: GoalType, threshold: Int) =
         writeLock.withLock {
             val current = store.value

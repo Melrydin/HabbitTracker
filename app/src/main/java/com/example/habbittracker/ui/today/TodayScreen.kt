@@ -2,6 +2,7 @@ package com.example.habbittracker.ui.today
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -89,6 +91,7 @@ fun TodayRoute(
         state = state,
         snackbarHostState = snackbarHostState,
         onThemeChange = viewModel::onThemeChange,
+        onChooseTheme = viewModel::onChooseTheme,
         onDayNoteChange = viewModel::onDayNoteChange,
         onToggleCheck = viewModel::onToggleCheck,
         onIncrement = viewModel::onIncrement,
@@ -110,6 +113,7 @@ fun TodayScreen(
     state: TodayUiState,
     snackbarHostState: SnackbarHostState,
     onThemeChange: (String) -> Unit,
+    onChooseTheme: (Habit) -> Unit,
     onDayNoteChange: (String) -> Unit,
     onToggleCheck: (HabitItem) -> Unit,
     onIncrement: (HabitItem) -> Unit,
@@ -167,6 +171,12 @@ fun TodayScreen(
 
             item(key = "theme") {
                 ThemeField(theme = state.theme, onThemeChange = onThemeChange)
+            }
+
+            if (state.themeChoice.isNotEmpty()) {
+                item(key = "theme_choice") {
+                    ThemeChoice(candidates = state.themeChoice, onChoose = onChooseTheme)
+                }
             }
 
             item(key = "goal") {
@@ -352,6 +362,27 @@ private fun TodayHeader(
     }
 }
 
+/**
+ * The pick between several habits that offer today a theme (F8). Until one is
+ * chosen the day has no theme, because guessing one would be arbitrary.
+ */
+@Composable
+private fun ThemeChoice(candidates: List<Habit>, onChoose: (Habit) -> Unit, modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxWidth().padding(top = 8.dp)) {
+        Text(
+            text = stringResource(R.string.today_theme_choice),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
+        )
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            candidates.forEach { habit ->
+                AssistChip(onClick = { onChoose(habit) }, label = { Text(habit.name) })
+            }
+        }
+    }
+}
+
 /** The day theme, editable inline. A pure label with no effect on the goal (F2). */
 @Composable
 private fun ThemeField(
@@ -440,6 +471,7 @@ private fun TodayScreenPreview() {
             state = previewState(),
             snackbarHostState = remember { SnackbarHostState() },
             onThemeChange = {},
+            onChooseTheme = {},
             onDayNoteChange = {},
             onToggleCheck = {},
             onIncrement = {},
@@ -464,6 +496,7 @@ private fun TodayScreenDarkPreview() {
             state = previewState(passed = true),
             snackbarHostState = remember { SnackbarHostState() },
             onThemeChange = {},
+            onChooseTheme = {},
             onDayNoteChange = {},
             onToggleCheck = {},
             onIncrement = {},
@@ -488,6 +521,7 @@ private fun TodayScreenEmptyPreview() {
             state = TodayUiState(date = LocalDate.of(2026, 8, 31), loaded = true),
             snackbarHostState = remember { SnackbarHostState() },
             onThemeChange = {},
+            onChooseTheme = {},
             onDayNoteChange = {},
             onToggleCheck = {},
             onIncrement = {},

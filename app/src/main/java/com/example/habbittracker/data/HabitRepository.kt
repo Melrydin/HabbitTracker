@@ -1,5 +1,6 @@
 package com.example.habbittracker.data
 
+import com.example.habbittracker.domain.DayTheme
 import com.example.habbittracker.domain.model.Day
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
@@ -15,9 +16,17 @@ data class DaySnapshot(
     val entries: List<HabitEntry>,
     val currentStreak: Int,
 ) {
+    /** The habit the day takes its theme from, chosen by hand or offered by a habit (F2, F8). */
+    val themeHabit: Habit?
+        get() = DayTheme.of(day.themeHabitId, entries)
+
     /** Display name of the day theme, which is the name of its theme habit (F2). */
     val themeName: String?
-        get() = entries.firstOrNull { it.habit.id == day.themeHabitId }?.habit?.name
+        get() = themeHabit?.name
+
+    /** More than one habit offers a theme and none was picked yet, so the user decides (F8). */
+    val themeChoice: List<Habit>
+        get() = DayTheme.openChoice(day.themeHabitId, entries)
 }
 
 /**
@@ -53,6 +62,12 @@ interface HabitRepository {
      * creates one, an empty name clears the link again.
      */
     suspend fun setDayTheme(date: LocalDate, themeName: String?)
+
+    /**
+     * Picks which of several habits offering a theme gives it to this day (F8).
+     * A day that already decides on its own has nothing to pick.
+     */
+    suspend fun chooseDayTheme(date: LocalDate, habitId: Long)
 
     /** Gives this one day a goal of its own, overriding the default (F2). */
     suspend fun setDayGoal(date: LocalDate, goalType: GoalType, threshold: Int)

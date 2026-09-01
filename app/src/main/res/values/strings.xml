@@ -4,6 +4,7 @@
     <!-- Today screen -->
     <string name="today_title">Today</string>
     <string name="today_subtitle_separator">" · "</string>
+    <string name="today_theme_choice">Which habit gives today its theme?</string>
     <string name="today_theme_placeholder">Add a theme for today</string>
     <string name="today_goal_label">Daily goal</string>
     <string name="today_goal_own">Daily goal · own</string>

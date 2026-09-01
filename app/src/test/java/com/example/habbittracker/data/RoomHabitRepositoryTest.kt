@@ -85,6 +85,9 @@ class RoomHabitRepositoryTest {
             Habit(NEW_HABIT_ID, name, type, target, points = points, required = required, icon = "task_alt"),
         )
 
+    private fun themeGiver(name: String) =
+        Habit(NEW_HABIT_ID, name, HabitType.CHECK, target = 1, icon = "task_alt", givesTheme = true)
+
     private suspend fun habitIdsOn(day: LocalDate) =
         repository
             .observeDay(day)
@@ -410,6 +413,43 @@ class RoomHabitRepositoryTest {
             val day = repository.observeDay(date).first().day
             assertFalse(day.goalOverridden)
             assertEquals(GoalType.POINTS, day.goalType)
+        }
+
+    @Test
+    fun `a habit that offers a theme gives it to the day`() =
+        runBlocking {
+            val id = repository.upsertHabit(themeGiver("Reading week"))
+
+            assertEquals("Reading week", repository.observeDay(date).first().themeName)
+        }
+
+    @Test
+    fun `two offers wait for the user to pick one`() =
+        runBlocking {
+            repository.upsertHabit(themeGiver("Reading week"))
+            val cooking = repository.upsertHabit(themeGiver("Cooking"))
+
+            val open = repository.observeDay(date).first()
+            assertNull(open.themeName)
+            assertEquals(2, open.themeChoice.size)
+
+            repository.chooseDayTheme(date, cooking)
+
+            assertEquals("Cooking", repository.observeDay(date).first().themeName)
+        }
+
+    @Test
+    fun `picking an offered theme drops the one that was typed`() =
+        runBlocking {
+            val id = repository.upsertHabit(themeGiver("Reading week"))
+            repository.setDayTheme(date, "Spring cleaning")
+
+            repository.chooseDayTheme(date, id)
+
+            val day = repository.observeDay(date).first()
+            assertEquals("Reading week", day.themeName)
+            // The habit generated from the typed theme was never tracked on, so it goes.
+            assertTrue(day.entries.none { it.habit.name == "Spring cleaning" })
         }
 
     @Test
