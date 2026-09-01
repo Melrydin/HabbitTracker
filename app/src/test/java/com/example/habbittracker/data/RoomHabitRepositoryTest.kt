@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
 import com.example.habbittracker.data.local.HabitDatabase
+import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
 import kotlinx.coroutines.flow.first
@@ -185,7 +186,7 @@ class RoomHabitRepositoryTest {
                 repository
                     .observeDay(date)
                     .first()
-                    .day.passed,
+                    .day.status == DayStatus.PASSED,
             )
 
             repository.setProgress(date, id, 1)
@@ -194,7 +195,7 @@ class RoomHabitRepositoryTest {
                 repository
                     .observeDay(date)
                     .first()
-                    .day.passed,
+                    .day.status == DayStatus.PASSED,
             )
         }
 
@@ -207,7 +208,7 @@ class RoomHabitRepositoryTest {
                 repository
                     .observeDay(date)
                     .first()
-                    .day.passed,
+                    .day.status == DayStatus.PASSED,
             )
 
             repository.upsertHabit(repository.getHabit(id)!!.copy(points = 6))
@@ -216,7 +217,7 @@ class RoomHabitRepositoryTest {
                 repository
                     .observeDay(date)
                     .first()
-                    .day.passed,
+                    .day.status == DayStatus.PASSED,
             )
         }
 
@@ -263,7 +264,7 @@ class RoomHabitRepositoryTest {
                 repository
                     .observeDay(date)
                     .first()
-                    .day.theme,
+                    .themeName,
             )
 
             repository.setDayTheme(date, "   ")
@@ -272,7 +273,7 @@ class RoomHabitRepositoryTest {
                 repository
                     .observeDay(date)
                     .first()
-                    .day.theme,
+                    .themeName,
             )
         }
 

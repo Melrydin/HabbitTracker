@@ -7,6 +7,9 @@ habbit
 habbittracker
 featureliste
 
+# SQL keywords the migrations spell out
+autoincrement
+
 # Android, Gradle and Kotlin toolchain
 aapt
 androidx

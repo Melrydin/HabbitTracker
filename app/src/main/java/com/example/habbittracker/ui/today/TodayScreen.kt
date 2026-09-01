@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.DayGoalProgress
+import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
@@ -323,7 +324,13 @@ private fun previewState(passed: Boolean = false) =
     TodayUiState(
         date = LocalDate.of(2026, 8, 31),
         theme = if (passed) "Calm focus" else "",
-        goal = DayGoalProgress(GoalType.POINTS, current = if (passed) 6 else 3, threshold = 6, passed = passed),
+        goal =
+            DayGoalProgress(
+                goalType = GoalType.POINTS,
+                current = if (passed) 6 else 3,
+                threshold = 6,
+                status = if (passed) DayStatus.PASSED else DayStatus.FAILED,
+            ),
         habits =
             listOf(
                 HabitEntry(

@@ -1,6 +1,7 @@
 package com.example.habbittracker.domain
 
 import com.example.habbittracker.domain.model.Day
+import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.HabitEntry
 
@@ -12,14 +13,15 @@ data class DayGoalProgress(
     val goalType: GoalType,
     val current: Int,
     val threshold: Int,
-    val passed: Boolean,
+    val status: DayStatus,
 ) {
     /** 0f to 1f, for the progress bar. Without a threshold the bar stays empty. */
     val fraction: Float
         get() = if (threshold <= 0) 0f else (current.toFloat() / threshold).coerceIn(0f, 1f)
 
-    /** No goal is reachable because the day has no matching habits: neutral rather than failed. */
-    val isNeutral: Boolean get() = threshold <= 0
+    val passed: Boolean get() = status == DayStatus.PASSED
+
+    val isNeutral: Boolean get() = status == DayStatus.NEUTRAL
 }
 
 /**
@@ -36,32 +38,39 @@ object DayEvaluator {
 
     private fun evaluateAllRequired(day: Day, entries: List<HabitEntry>): DayGoalProgress {
         val required = entries.filter { it.habit.required }
-        return DayGoalProgress(
-            goalType = day.goalType,
+        return progress(
+            day = day,
             current = required.count { it.fulfilled },
             threshold = required.size,
-            // Without required habits there is nothing to fulfill, so the day stays neutral.
-            passed = required.isNotEmpty() && required.all { it.fulfilled },
+            reached = required.isNotEmpty() && required.all { it.fulfilled },
         )
     }
 
     private fun evaluateMinCount(day: Day, entries: List<HabitEntry>): DayGoalProgress {
         val fulfilled = entries.count { it.fulfilled }
-        return DayGoalProgress(
-            goalType = day.goalType,
-            current = fulfilled,
-            threshold = day.goalThreshold,
-            passed = day.goalThreshold > 0 && fulfilled >= day.goalThreshold,
-        )
+        return progress(day, fulfilled, day.goalThreshold, fulfilled >= day.goalThreshold)
     }
 
     private fun evaluatePoints(day: Day, entries: List<HabitEntry>): DayGoalProgress {
         val points = entries.filter { it.fulfilled }.sumOf { it.habit.points }
-        return DayGoalProgress(
-            goalType = day.goalType,
-            current = points,
-            threshold = day.goalThreshold,
-            passed = day.goalThreshold > 0 && points >= day.goalThreshold,
-        )
+        return progress(day, points, day.goalThreshold, points >= day.goalThreshold)
     }
+
+    /**
+     * A day is only judged once something was actually asked of it. Without a
+     * reachable goal it stays [DayStatus.NEUTRAL] rather than counting as failed,
+     * which is what keeps an empty day from breaking a streak.
+     */
+    private fun progress(day: Day, current: Int, threshold: Int, reached: Boolean) =
+        DayGoalProgress(
+            goalType = day.goalType,
+            current = current,
+            threshold = threshold,
+            status =
+                when {
+                    threshold <= 0 -> DayStatus.NEUTRAL
+                    reached -> DayStatus.PASSED
+                    else -> DayStatus.FAILED
+                },
+        )
 }

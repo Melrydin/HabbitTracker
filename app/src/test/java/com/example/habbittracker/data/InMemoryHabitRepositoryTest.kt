@@ -1,6 +1,7 @@
 package com.example.habbittracker.data
 
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
+import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
 import kotlinx.coroutines.flow.first
@@ -91,7 +92,7 @@ class InMemoryHabitRepositoryTest {
                 repository
                     .observeDay(today)
                     .first()
-                    .day.passed,
+                    .day.status == DayStatus.PASSED,
             )
 
             val exercise = repository.getHabit(2)!!
@@ -101,7 +102,7 @@ class InMemoryHabitRepositoryTest {
                 repository
                     .observeDay(today)
                     .first()
-                    .day.passed,
+                    .day.status == DayStatus.PASSED,
             )
         }
 
@@ -116,7 +117,7 @@ class InMemoryHabitRepositoryTest {
                 repository
                     .observeDay(today)
                     .first()
-                    .day.passed,
+                    .day.status == DayStatus.PASSED,
             )
 
             // Exercise already counted today, so the day stays passed (F1: old entries remain).
@@ -126,7 +127,7 @@ class InMemoryHabitRepositoryTest {
                 repository
                     .observeDay(today)
                     .first()
-                    .day.passed,
+                    .day.status == DayStatus.PASSED,
             )
             assertTrue(repository.habitIdsToday().contains(2L))
         }

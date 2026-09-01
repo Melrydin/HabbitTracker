@@ -5,6 +5,7 @@ import com.example.habbittracker.domain.DayEvaluator
 import com.example.habbittracker.domain.DayHabits
 import com.example.habbittracker.domain.StreakCalculator
 import com.example.habbittracker.domain.model.Day
+import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
@@ -44,7 +45,7 @@ class InMemoryHabitRepository(
                 entries = current.entriesFor(date),
                 currentStreak =
                     StreakCalculator.currentStreak(
-                        passedDates = current.days.filterValues { it.passed }.keys,
+                        statuses = current.days.mapValues { (_, day) -> day.status },
                         today = date,
                     ),
             )
@@ -65,13 +66,26 @@ class InMemoryHabitRepository(
             store.value = updated.withRecalculatedDays()
         }
 
-    override suspend fun setDayTheme(date: LocalDate, theme: String?) =
+    /** The fake only stores the link; creating a theme habit is the real repository's job. */
+    override suspend fun setDayTheme(date: LocalDate, themeName: String?) =
         writeLock.withLock {
             val current = store.value
             val day = current.days[date] ?: defaultDay(date)
-            val cleaned = theme?.trim()?.take(Day.THEME_MAX_LENGTH)?.ifEmpty { null }
-            store.value = current.copy(days = current.days + (date to day.copy(theme = cleaned)))
+            val named = themeName?.trim()?.ifEmpty { null }
+            val habitId = named?.let { name -> current.habits.firstOrNull { it.name == name }?.id }
+            store.value = current.copy(days = current.days + (date to day.copy(themeHabitId = habitId)))
         }
+
+    override suspend fun setDayNote(date: LocalDate, note: String?) =
+        writeLock.withLock {
+            val current = store.value
+            val day = current.days[date] ?: defaultDay(date)
+            val cleaned = note?.trim()?.take(Day.NOTE_MAX_LENGTH)?.ifEmpty { null }
+            store.value = current.copy(days = current.days + (date to day.copy(dayNote = cleaned)))
+        }
+
+    override fun observeDayStatuses(): Flow<Map<LocalDate, DayStatus>> =
+        store.map { current -> current.days.mapValues { (_, day) -> day.status } }
 
     override fun observeHabits(): Flow<List<Habit>> = store.map { it.habits }
 
@@ -128,14 +142,14 @@ class InMemoryHabitRepository(
             .map { habit -> HabitEntry(habit, progress[date to habit.id] ?: 0) }
 
     /**
-     * Carries `Day.passed` forward. Recorded values are not the only thing that
+     * Carries `Day.status` forward. Recorded values are not the only thing that
      * changes the outcome: edited points, a new goal or an archived habit do too.
      */
     private fun Store.withRecalculatedDays(): Store =
         copy(
             days =
                 days.mapValues { (date, day) ->
-                    day.copy(passed = DayEvaluator.evaluate(day, entriesFor(date)).passed)
+                    day.copy(status = DayEvaluator.evaluate(day, entriesFor(date)).status)
                 },
         )
 
@@ -167,7 +181,13 @@ class InMemoryHabitRepository(
         val pastDays =
             (1..4).associate { back ->
                 val date = today.minusDays(back.toLong())
-                date to Day(date, goalType = DEFAULT_GOAL_TYPE, goalThreshold = DEFAULT_GOAL_THRESHOLD, passed = true)
+                date to
+                    Day(
+                        date = date,
+                        goalType = DEFAULT_GOAL_TYPE,
+                        goalThreshold = DEFAULT_GOAL_THRESHOLD,
+                        status = DayStatus.PASSED,
+                    )
             }
         return Store(
             habits = habits,

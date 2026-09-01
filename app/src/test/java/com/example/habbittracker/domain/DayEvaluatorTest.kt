@@ -1,6 +1,7 @@
 package com.example.habbittracker.domain
 
 import com.example.habbittracker.domain.model.Day
+import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
@@ -82,6 +83,25 @@ class DayEvaluatorTest {
 
         assertFalse(result.passed)
         assertTrue(result.isNeutral)
+    }
+
+    @Test
+    fun `a day with habits that misses its goal is failed`() {
+        val day = Day(date, goalType = GoalType.POINTS, goalThreshold = 5)
+        val entries = listOf(HabitEntry(check(1, points = 2), progress = 1))
+
+        val result = DayEvaluator.evaluate(day, entries)
+
+        assertEquals(DayStatus.FAILED, result.status)
+        assertFalse(result.passed)
+    }
+
+    @Test
+    fun `a reached goal is passed`() {
+        val day = Day(date, goalType = GoalType.POINTS, goalThreshold = 2)
+        val entries = listOf(HabitEntry(check(1, points = 2), progress = 1))
+
+        assertEquals(DayStatus.PASSED, DayEvaluator.evaluate(day, entries).status)
     }
 
     @Test

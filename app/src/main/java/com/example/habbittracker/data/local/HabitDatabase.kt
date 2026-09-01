@@ -12,7 +12,13 @@ import androidx.room.TypeConverters
  * than a crash that shows up in testing.
  */
 @Database(
-    entities = [HabitEntity::class, DayEntity::class, DayHabitEntity::class],
+    entities = [
+        HabitEntity::class,
+        DayEntity::class,
+        DayHabitEntity::class,
+        GoalEntity::class,
+        PauseEntity::class,
+    ],
     version = HabitDatabase.SCHEMA_VERSION,
     exportSchema = true,
 )
@@ -24,8 +30,12 @@ abstract class HabitDatabase : RoomDatabase() {
 
     abstract fun dayHabitDao(): DayHabitDao
 
+    abstract fun goalDao(): GoalDao
+
+    abstract fun pauseDao(): PauseDao
+
     companion object {
-        const val SCHEMA_VERSION = 1
+        const val SCHEMA_VERSION = 2
         const val NAME = "habits.db"
     }
 }

@@ -18,6 +18,9 @@ interface DayHabitDao {
     @Query("SELECT * FROM day_habits")
     suspend fun getAll(): List<DayHabitEntity>
 
+    @Query("SELECT * FROM day_habits WHERE date = :date AND habit_id = :habitId")
+    suspend fun get(date: LocalDate, habitId: Long): DayHabitEntity?
+
     @Upsert
     suspend fun upsert(entry: DayHabitEntity)
 }

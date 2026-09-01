@@ -3,8 +3,12 @@ package com.example.habbittracker.data.local
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import com.example.habbittracker.domain.model.DayStatus
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
+
+/** Just the status of a day, which is all streaks and statistics need (F4). */
+data class DayStatusRow(val date: LocalDate, val status: DayStatus)
 
 @Dao
 interface DayDao {
@@ -17,13 +21,16 @@ interface DayDao {
     @Query("SELECT * FROM days")
     suspend fun getAll(): List<DayEntity>
 
-    /** Only the passed days, which is all the streak calculation needs (F4). */
-    @Query("SELECT date FROM days WHERE passed = 1")
-    fun observePassedDates(): Flow<List<LocalDate>>
+    @Query("SELECT date, status FROM days")
+    fun observeStatuses(): Flow<List<DayStatusRow>>
 
     @Upsert
     suspend fun upsert(day: DayEntity)
 
     @Upsert
     suspend fun upsertAll(days: List<DayEntity>)
+
+    /** Clears the theme link of every day that pointed at a habit that is now gone. */
+    @Query("UPDATE days SET theme_habit_id = NULL WHERE theme_habit_id = :habitId")
+    suspend fun clearThemeHabit(habitId: Long)
 }

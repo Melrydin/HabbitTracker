@@ -6,6 +6,7 @@ import androidx.room.Room
 import com.example.habbittracker.data.HabitRepository
 import com.example.habbittracker.data.RoomHabitRepository
 import com.example.habbittracker.data.local.HabitDatabase
+import com.example.habbittracker.data.local.MIGRATION_1_2
 
 /**
  * A simple service locator. Everything is built lazily, so a screen that never
@@ -15,6 +16,7 @@ class AppContainer(private val context: Context) {
     private val database: HabitDatabase by lazy {
         Room
             .databaseBuilder(context, HabitDatabase::class.java, HabitDatabase.NAME)
+            .addMigrations(MIGRATION_1_2)
             .build()
     }
 

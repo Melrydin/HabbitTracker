@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.habbittracker.data.HabitRepository
 import com.example.habbittracker.domain.DayEvaluator
 import com.example.habbittracker.domain.model.Day
+import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -34,6 +35,7 @@ class TodayViewModel(
      * stored value flows back. `null` means: take the value from the repository.
      */
     private val themeDraft = MutableStateFlow<String?>(null)
+    private val noteDraft = MutableStateFlow<String?>(null)
 
     private val eventChannel = Channel<TodayEvent>(Channel.BUFFERED)
     val events = eventChannel.receiveAsFlow()
@@ -43,10 +45,11 @@ class TodayViewModel(
     val uiState: StateFlow<TodayUiState> =
         date
             .flatMapLatest { day -> repository.observeDay(day) }
-            .combine(themeDraft) { snapshot, draft ->
+            .combine(themeDraft.combine(noteDraft, ::Pair)) { snapshot, (draft, noteDraft) ->
                 TodayUiState(
                     date = snapshot.day.date,
-                    theme = draft ?: snapshot.day.theme.orEmpty(),
+                    theme = draft ?: snapshot.themeName.orEmpty(),
+                    dayNote = noteDraft ?: snapshot.day.dayNote.orEmpty(),
                     goal = DayEvaluator.evaluate(snapshot.day, snapshot.entries),
                     habits = snapshot.entries.map(::HabitItem),
                     currentStreak = snapshot.currentStreak,
@@ -71,9 +74,15 @@ class TodayViewModel(
     fun onDecrement(item: HabitItem) = setProgress(item, item.entry.progress - item.step)
 
     fun onThemeChange(text: String) {
-        val limited = text.take(Day.THEME_MAX_LENGTH)
+        val limited = text.take(Habit.NAME_MAX_LENGTH)
         themeDraft.value = limited
         viewModelScope.launch { repository.setDayTheme(date.value, limited) }
+    }
+
+    fun onDayNoteChange(text: String) {
+        val limited = text.take(Day.NOTE_MAX_LENGTH)
+        noteDraft.value = limited
+        viewModelScope.launch { repository.setDayNote(date.value, limited) }
     }
 
     private fun setProgress(item: HabitItem, progress: Int) {

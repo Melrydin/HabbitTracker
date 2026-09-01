@@ -15,23 +15,36 @@ enum class GoalType {
 }
 
 /**
- * A calendar day with its theme and daily goal (F2).
+ * The computed outcome of a day (F2).
  *
- * [passed] is recomputed and stored on every change so that history and streaks
+ * [NEUTRAL] is the important one: a day nothing was asked of is neither a success
+ * nor a failure, and it does not break a streak.
+ */
+enum class DayStatus {
+    NEUTRAL,
+    PASSED,
+    FAILED,
+}
+
+/**
+ * A calendar day with its theme habit, note and daily goal (F2).
+ *
+ * [status] is recomputed and stored on every change so that history and streaks
  * stay queryable without recalculating them.
  */
 data class Day(
     val date: LocalDate,
-    val theme: String? = null,
+    val themeHabitId: Long? = null,
+    val dayNote: String? = null,
     val goalType: GoalType = GoalType.POINTS,
     val goalThreshold: Int = 0,
-    val passed: Boolean = false,
+    val status: DayStatus = DayStatus.NEUTRAL,
 ) {
     init {
-        require((theme?.length ?: 0) <= THEME_MAX_LENGTH) { "theme must be at most $THEME_MAX_LENGTH characters" }
+        require((dayNote?.length ?: 0) <= NOTE_MAX_LENGTH) { "dayNote must be at most $NOTE_MAX_LENGTH characters" }
     }
 
     companion object {
-        const val THEME_MAX_LENGTH = 40
+        const val NOTE_MAX_LENGTH = 1_000
     }
 }
