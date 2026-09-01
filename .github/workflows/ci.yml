@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   verify:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
@@ -31,7 +31,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # Needed for cspell; a self-hosted runner does not necessarily ship Node.
+      # The runner image ships a Node, but pinning it keeps the cspell run reproducible.
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -42,7 +42,9 @@ jobs:
 
       # The whole codebase is English, so an English spell checker is meaningful here.
       - name: Check spelling
-        run: npx --yes cspell@10 lint --no-progress "**/*.{kt,kts,xml,yml,yaml,md,toml}"
+        run: >
+          npx --yes cspell@10 lint -c .github/cspell.json --no-progress
+          "**/*.{kt,kts,xml,yml,yaml,md,toml}"
 
       - name: Android Lint
         run: ./gradlew :app:lintDebug

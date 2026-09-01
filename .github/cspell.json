@@ -1,0 +1,30 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [
+    "**/build/**",
+    "**/.gradle/**",
+    "**/.idea/**",
+    "**/.kotlin/**",
+    "**/gradle/wrapper/**",
+    "**/gradle-daemon-jvm.properties",
+    "**/gradle.properties",
+    "**/local.properties",
+    "**/gradlew",
+    "**/gradlew.bat",
+    "**/schemas/**",
+    "**/*.webp",
+    "**/*.png",
+    "**/res/mipmap*/**",
+    "**/cspell.json",
+    "**/docs/habit_tracker_featureliste.md"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "project",
+      "path": "./cspell-project.txt",
+      "addWords": true
+    }
+  ],
+  "dictionaries": ["project"]
+}

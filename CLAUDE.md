@@ -56,7 +56,7 @@ Check and fix the code style:
 Spell check:
 
 ```bash
-npx cspell lint --no-progress "**/*.{kt,kts,xml,yml,md,toml}"
+npx cspell lint -c .github/cspell.json --no-progress "**/*.{kt,kts,xml,yml,yaml,md,toml}"
 ```
 
 Everything at once, exactly what CI runs:
@@ -197,7 +197,7 @@ A solo project, so trunk based development:
   below).
 * The CI pipeline runs on every push and keeps `main` healthy: `.github/workflows/ci.yml`
   checks code style (ktlint), spelling (cspell), Android Lint, the build and the unit tests on
-  a **self-hosted runner**. On a red run the reports are attached to the job as an artifact.
+  `ubuntu-latest`. On a red run the reports are attached to the job as an artifact.
 * Should the project gain further contributors, a feature branch and pull request workflow can
   be reintroduced.
 
@@ -315,9 +315,15 @@ The casing follows what each platform requires:
 
 ## Spell checking
 
-`cspell.json` configures the checker; `cspell-project.txt` holds the project vocabulary. Add a
-word there only when it is a real term — a toolchain identifier, a library name, a proper noun.
-Never add a word to silence an actual typo.
+`.github/cspell.json` configures the checker and `.github/cspell-project.txt` holds the project
+vocabulary; both live next to the workflow that runs them. cspell does not look inside
+`.github/` on its own, so every invocation passes `-c .github/cspell.json`.
+
+Add a word to the vocabulary only when it is a real term — a toolchain identifier, a library
+name, a proper noun. Never add a word to silence an actual typo.
+
+`.editorconfig` stays in the project root on purpose: ktlint and the IDEs only pick it up from
+there.
 
 ## State
 
