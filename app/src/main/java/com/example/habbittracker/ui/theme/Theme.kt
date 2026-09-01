@@ -17,8 +17,8 @@ import androidx.compose.ui.platform.LocalContext
 
 /**
  * Status colors outside the Material roles: "passed" is a marker rather than a
- * surface tone, so it deliberately gets its own role. The tone matches the accent;
- * [onPassedContainer] keeps the text on the pill readable.
+ * surface tone, so it deliberately gets its own role instead of riding on the
+ * accent. [onPassedContainer] keeps the text on the pill readable.
  */
 @Immutable
 data class StatusColors(
@@ -96,7 +96,7 @@ private val DarkColorScheme =
         secondaryContainer = Color(0xFF424653),
         onSecondaryContainer = Color(0xFFDFE1EA),
         tertiary = PassedDark,
-        onTertiary = OnAccentDark,
+        onTertiary = Color(0xFF0B3B22),
         tertiaryContainer = PassedContainerDark,
         onTertiaryContainer = OnPassedContainerDark,
         background = BackgroundDark,

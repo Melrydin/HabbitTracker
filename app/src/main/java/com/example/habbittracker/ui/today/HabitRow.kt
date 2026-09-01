@@ -109,8 +109,7 @@ fun HabitRow(
             Icon(
                 imageVector = HabitIcons[habit.icon],
                 contentDescription = null,
-                // Green now means "done" and nothing else, open stays neutral.
-                tint = if (item.fulfilled) status.passed else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (item.fulfilled) status.passed else MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp),
             )
 
@@ -137,7 +136,7 @@ fun HabitRow(
                     Spacer(Modifier.height(10.dp))
                     ProgressTrack(
                         fraction = item.entry.progress.toFloat() / habit.target,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = if (item.fulfilled) status.passed else MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                         height = 4.dp,
                     )

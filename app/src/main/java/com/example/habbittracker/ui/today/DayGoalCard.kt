@@ -21,10 +21,12 @@ import com.example.habbittracker.domain.DayGoalProgress
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.ui.components.ProgressTrack
 import com.example.habbittracker.ui.components.StatusPill
+import com.example.habbittracker.ui.theme.HabitTheme
 
 /** The daily goal with its progress bar and status marker (F2). */
 @Composable
 fun DayGoalCard(goal: DayGoalProgress, modifier: Modifier = Modifier) {
+    val status = HabitTheme.status
     val label = goalLabel(goal)
 
     Surface(
@@ -52,7 +54,7 @@ fun DayGoalCard(goal: DayGoalProgress, modifier: Modifier = Modifier) {
             Spacer(Modifier.height(14.dp))
             ProgressTrack(
                 fraction = goal.fraction,
-                color = MaterialTheme.colorScheme.primary,
+                color = if (goal.passed) status.passed else MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 modifier = Modifier.semantics { contentDescription = label },
             )

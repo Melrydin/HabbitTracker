@@ -3,32 +3,31 @@ package com.example.habbittracker.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /*
- * Color concept: a neutral base plus exactly **one** accent, and that accent is
- * green. The "passed" status marker reuses the same tone to keep the look calm.
+ * Color concept: a neutral base, one accent and one status tone. The accent is
+ * Indigo, the "passed" marker a restrained green that never covers an area.
  *
- * The accent can be swapped here in a single place without touching any other file.
+ * Both can be swapped here in a single place without touching any other file.
  */
 
-// Accent
-val AccentLight = Color(0xFF2E7D4F)
-val AccentContainerLight = Color(0xFFE6F4EC)
-val OnAccentContainerLight = Color(0xFF0F4429)
+// Accent, Material Indigo
+val AccentLight = Color(0xFF3F51B5)
+val AccentContainerLight = Color(0xFFE3E5F6)
+val OnAccentContainerLight = Color(0xFF1B2260)
 
-val AccentDark = Color(0xFF7FD4A0)
-val AccentContainerDark = Color(0xFF22523A)
-val OnAccentContainerDark = Color(0xFFB5EDCA)
-val OnAccentDark = Color(0xFF0B3B22)
+val AccentDark = Color(0xFF9FA8DA)
+val AccentContainerDark = Color(0xFF2E3676)
+val OnAccentContainerDark = Color(0xFFDDE1F9)
+val OnAccentDark = Color(0xFF141A4D)
 
-// The "passed" status marker. Now that the app is green throughout it shares the
-// accent tone: it is told apart by shape (pill, check mark) and by the contrast to
-// the neutral "open" state, not by a second shade of green.
-val PassedLight = AccentLight
-val PassedContainerLight = AccentContainerLight
-val OnPassedContainerLight = OnAccentContainerLight
+// The "passed" status marker: a restrained green, used as a marker only and never
+// to fill an area. Kept apart from the accent so that "done" reads at a glance.
+val PassedLight = Color(0xFF2E7D4F)
+val PassedContainerLight = Color(0xFFE6F4EC)
+val OnPassedContainerLight = Color(0xFF0F4429)
 
-val PassedDark = AccentDark
-val PassedContainerDark = AccentContainerDark
-val OnPassedContainerDark = OnAccentContainerDark
+val PassedDark = Color(0xFF7FD4A0)
+val PassedContainerDark = Color(0xFF22523A)
+val OnPassedContainerDark = Color(0xFFB5EDCA)
 
 // The "open" status is deliberately grey rather than red, so nothing is judged
 val OpenLight = Color(0xFF9DA0A9)
