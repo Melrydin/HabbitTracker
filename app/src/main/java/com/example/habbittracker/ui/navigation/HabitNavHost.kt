@@ -172,6 +172,7 @@ fun HabitNavHost(
                             initializer {
                                 SettingsViewModel(
                                     repository = container.settingsRepository,
+                                    habits = container.habitRepository,
                                     backupManager = container.backupManager,
                                 )
                             }

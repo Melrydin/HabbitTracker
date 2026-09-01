@@ -55,6 +55,7 @@ fun SettingsRoute(
         onThemeModeChange = viewModel::onThemeModeChange,
         onGoalTypeChange = viewModel::onGoalTypeChange,
         onThresholdChange = viewModel::onThresholdChange,
+        onFreezeChange = viewModel::onFreezeChange,
         onOpenReminders = onOpenReminders,
         onOpenPauses = onOpenPauses,
         onExport = { exportLauncher.launch(viewModel.suggestedFileName()) },

@@ -13,6 +13,7 @@ import com.example.habbittracker.domain.DayEvaluator
 import com.example.habbittracker.domain.DayHabits
 import com.example.habbittracker.domain.Pauses
 import com.example.habbittracker.domain.StreakCalculator
+import com.example.habbittracker.domain.StreakProtection
 import com.example.habbittracker.domain.model.AppSettings
 import com.example.habbittracker.domain.model.Day
 import com.example.habbittracker.domain.model.DayStatus
@@ -48,9 +49,10 @@ class RoomHabitRepository(
             dayDao.observe(date),
             habitDao.observeAll(),
             dayHabitDao.observeForDate(date),
-            dayDao.observeStatuses(),
+            history,
             combine(settings, pauseDao.observeAll()) { current, pauses -> current to pauses },
-        ) { day, habits, recorded, statuses, settingsAndPauses ->
+        ) { day, habits, recorded, dayHistory, settingsAndPauses ->
+            val (statuses, frozen) = dayHistory
             val (current, pauseRows) = settingsAndPauses
             val pauses = pauseRows.map { it.toDomain() }
             DaySnapshot(
@@ -63,14 +65,25 @@ class RoomHabitRepository(
                     ),
                 currentStreak =
                     StreakCalculator.currentStreak(
-                        statuses = statuses.associate { it.date to it.status },
+                        statuses = statuses,
                         today = date,
+                        frozen = frozen,
                     ),
             )
         }
 
     override fun observeDayStatuses(): Flow<Map<LocalDate, DayStatus>> =
         dayDao.observeStatuses().map { rows -> rows.associate { it.date to it.status } }
+
+    override fun observeFrozenDays(): Flow<Set<LocalDate>> = dayDao.observeFrozen().map { it.toSet() }
+
+    override suspend fun refreshDays() = recalculateAll()
+
+    /** What a day is judged against once it is stored: its status and its grace day (F4). */
+    private val history: Flow<Pair<Map<LocalDate, DayStatus>, Set<LocalDate>>> =
+        combine(dayDao.observeStatuses(), dayDao.observeFrozen()) { rows, frozen ->
+            rows.associate { it.date to it.status } to frozen.toSet()
+        }
 
     override fun observePauses(): Flow<List<Pause>> =
         pauseDao.observeAll().map { pauses -> pauses.map { it.toDomain() } }
@@ -252,6 +265,7 @@ class RoomHabitRepository(
             )
         val status = DayEvaluator.evaluate(day, entries, Pauses.isPaused(pauses, date)).status
         dayDao.upsert(day.copy(status = status).toEntity())
+        spendGraceDays(current.freezePerMonth)
     }
 
     /**
@@ -276,6 +290,28 @@ class RoomHabitRepository(
                 day.copy(status = status).toEntity()
             }
         dayDao.upsertAll(updated)
+        spendGraceDays(current.freezePerMonth)
+    }
+
+    /**
+     * Hands out the monthly grace days over the whole history (F4).
+     *
+     * One changed day can free a slot another day of the same month then takes, so
+     * the budget is handed out in one forward pass instead of per day. Deciding
+     * greedily keeps the outcome the same whatever triggered the pass: the earliest
+     * missed day of a month is the one that gets protected.
+     */
+    private suspend fun spendGraceDays(budget: Int) {
+        val days = dayDao.getAll().map { it.toDomain() }.sortedBy { it.date }
+        val statuses = days.associate { it.date to it.status }
+        val frozen = mutableSetOf<LocalDate>()
+        val changed =
+            days.mapNotNull { day ->
+                val spends = StreakProtection.shouldFreeze(day.date, day.status, statuses, frozen, budget)
+                if (spends) frozen += day.date
+                if (spends == day.freezeUsed) null else day.copy(freezeUsed = spends).toEntity()
+            }
+        if (changed.isNotEmpty()) dayDao.upsertAll(changed)
     }
 
     private fun defaultDay(date: LocalDate, current: AppSettings) =

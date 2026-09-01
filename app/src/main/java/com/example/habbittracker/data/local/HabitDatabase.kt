@@ -38,7 +38,7 @@ abstract class HabitDatabase : RoomDatabase() {
     abstract fun reminderDao(): ReminderDao
 
     companion object {
-        const val SCHEMA_VERSION = 5
+        const val SCHEMA_VERSION = 6
         const val NAME = "habits.db"
     }
 }

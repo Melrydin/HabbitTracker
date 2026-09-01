@@ -78,7 +78,7 @@ class MigrationTest {
     private fun openMigrated(): HabitDatabase =
         Room
             .databaseBuilder(context, HabitDatabase::class.java, name)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
             .allowMainThreadQueries()
             .build()
 
@@ -162,6 +162,19 @@ class MigrationTest {
 
             // Days that existed before the flag never chose a goal of their own.
             assertFalse(day.goalOverridden)
+        }
+
+    @Test
+    fun `an upgraded day has not spent a grace day`() =
+        runBlocking {
+            createSchemaOne()
+
+            val db = openMigrated()
+            val day = db.dayDao().get(LocalDate.of(2026, 8, 30))!!.toDomain()
+            db.close()
+
+            // The budget only starts counting once the app hands one out.
+            assertFalse(day.freezeUsed)
         }
 
     @Test

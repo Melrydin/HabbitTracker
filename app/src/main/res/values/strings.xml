@@ -118,6 +118,7 @@
     <string name="history_legend_passed">Passed</string>
     <string name="history_legend_failed">Missed</string>
     <string name="history_legend_neutral">Nothing asked</string>
+    <string name="history_legend_frozen">Grace day</string>
 
     <plurals name="history_streak_days">
         <item quantity="one">%d day</item>
@@ -187,6 +188,16 @@
     <string name="settings_goal_threshold_points">%d points finish the day</string>
     <string name="settings_threshold_decrease">Lower the points needed</string>
     <string name="settings_threshold_increase">Raise the points needed</string>
+    <string name="settings_freeze_label">Streak protection</string>
+    <string name="settings_freeze_hint">A missed day can spend a grace day: the run survives, the day stays missed. Unused days do not carry over into the next month.</string>
+    <string name="settings_freeze_title">Grace days a month</string>
+    <string name="settings_freeze_off">Off, every missed day breaks the run</string>
+    <plurals name="settings_freeze_count">
+        <item quantity="one">%d missed day a month is forgiven</item>
+        <item quantity="other">%d missed days a month are forgiven</item>
+    </plurals>
+    <string name="settings_freeze_decrease">Fewer grace days</string>
+    <string name="settings_freeze_increase">More grace days</string>
     <string name="settings_backup_label">Backup</string>
     <string name="settings_backup_export">Export a backup</string>
     <string name="settings_backup_export_hint">Writes a ZIP with all habits, days and settings.</string>

@@ -174,16 +174,19 @@ class ZipBackupRepositoryTest {
             seed()
             settings.setThemeMode(ThemeMode.DARK)
             settings.setDefaultGoal(GoalType.MIN_COUNT, threshold = 3)
+            settings.setFreezePerMonth(4)
             val archive = exported()
 
             settings.setThemeMode(ThemeMode.LIGHT)
             settings.setDefaultGoal(GoalType.POINTS, threshold = 9)
+            settings.setFreezePerMonth(0)
             backup.import(ByteArrayInputStream(archive))
 
             val restored = settings.settings.first()
             assertEquals(ThemeMode.DARK, restored.themeMode)
             assertEquals(GoalType.MIN_COUNT, restored.defaultGoalType)
             assertEquals(3, restored.defaultGoalThreshold)
+            assertEquals(4, restored.freezePerMonth)
         }
 
     /** Builds a one-entry archive, for the cases where the contents are the point. */

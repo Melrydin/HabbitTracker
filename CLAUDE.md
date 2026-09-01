@@ -80,6 +80,8 @@ app/src/main/java/com/example/habbittracker/
 │   ├── DayEvaluator      daily goal evaluation (F2)
 │   ├── DayHabits         which habits belong to a day (F1, F3)
 │   ├── StreakCalculator      current and longest day streak (F4)
+│   ├── StreakProtection      grace days that keep a run alive (F4)
+│   ├── Pauses                breaks and holidays (F4)
 │   ├── HabitStreakCalculator a habit's own streak, daily or weekly (F4)
 │   ├── Statistics            weekday rates, period comparison, habit rate (F4)
 │   ├── ReminderSchedule      when a reminder is next due (F5)
@@ -204,6 +206,10 @@ written just to be counted later.
 * A **break** ([Pauses]) makes a day neutral whatever was recorded: during a holiday nothing
   is asked, so nothing can be missed. A break for one habit only takes that habit out of the
   day, which lowers the goal instead of failing it.
+* A **grace day** ([StreakProtection]) lets a missed day spend from a monthly budget
+  (`AppSettings.freezePerMonth`, one by default, zero switches it off) instead of breaking the
+  run. The day stays `FAILED` and still counts against the completion rate — only the streak
+  forgives it, which is the difference between a safety net and a lie about what happened.
 
 ## Business rules
 
@@ -228,6 +234,10 @@ Three behaviors that are not obvious from the code and are pinned down by tests:
   yesterday. Otherwise the streak would read 0 every morning.
 * An **archived habit stays visible** on days that already have a value recorded. Archiving
   therefore cannot retroactively ruin a day that had passed.
+* A grace day is only spent where there is a **run to protect**: the nearest earlier day that
+  counts for anything must have passed. Otherwise the budget would drain on days with nothing
+  behind them. Within a month the earliest missed day takes it, and the budget does not carry
+  over — a month gets what it gets.
 
 `Day.status` is recomputed and stored after every change — not only after tracking a value,
 but also after edited points or an archived habit.
@@ -430,12 +440,12 @@ editing half; the statistics half waits for V2 together with the rule it depends
 Open:
 
 * **Phase 2 (V2)** is under way. Done: reminders (F5), widget, tile and notification action
-  (F9), the habit streak and statistics half of F4 including the habit detail. Still open from
-  F4: streak protection with freeze days and the pause mode. Then weekly habits (F8),
-  abstinence habits (F11), categories and tags (F12), CSV export.
+  (F9), and F4 in full: the habit streak, the statistics half including the habit detail,
+  breaks and holidays, and the grace days. Still open: weekly habits (F8), abstinence habits
+  (F11), categories and tags (F12), CSV export.
 * The widget is **not configurable yet**. F9 asks for a choice between all habits of the day
   and a selection; it currently always shows all of them.
-* The `goals` and `pauses` tables exist but stay empty until F10 and F4 need them.
+* The `goals` table exists but stays empty until F10 needs it.
 * `Habit.colorTag` exists in the data model but deliberately not in the editor — a per-habit
   color picker contradicts the one-color rule above.
 * The project name is spelled **Habbit** with two b's, in the app name, the package

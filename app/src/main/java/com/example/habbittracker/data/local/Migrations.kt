@@ -129,3 +129,11 @@ val MIGRATION_4_5 =
             db.execSQL("CREATE INDEX IF NOT EXISTS `index_reminders_habit_id` ON `reminders` (`habit_id`)")
         }
     }
+
+/** Schema 5 to 6: a day records whether it spent a grace day (F4). */
+val MIGRATION_5_6 =
+    object : Migration(5, 6) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE days ADD COLUMN freeze_used INTEGER NOT NULL DEFAULT 0")
+        }
+    }

@@ -37,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,6 +61,7 @@ fun SettingsScreen(
     onThemeModeChange: (ThemeMode) -> Unit,
     onGoalTypeChange: (GoalType) -> Unit,
     onThresholdChange: (Int) -> Unit,
+    onFreezeChange: (Int) -> Unit,
     onOpenReminders: () -> Unit,
     onOpenPauses: () -> Unit,
     onExport: () -> Unit,
@@ -126,6 +128,24 @@ fun SettingsScreen(
                 }
             }
 
+            LabeledSection(
+                label = stringResource(R.string.settings_freeze_label),
+                hint = stringResource(R.string.settings_freeze_hint),
+            ) {
+                SettingRow(
+                    title = stringResource(R.string.settings_freeze_title),
+                    subtitle = freezeSubtitle(settings.freezePerMonth),
+                ) {
+                    ValueStepper(
+                        value = settings.freezePerMonth,
+                        onValueChange = onFreezeChange,
+                        decreaseLabel = stringResource(R.string.settings_freeze_decrease),
+                        increaseLabel = stringResource(R.string.settings_freeze_increase),
+                        range = 0..AppSettings.FREEZE_MAX,
+                    )
+                }
+            }
+
             LabeledSection(label = stringResource(R.string.reminders_manage)) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     SettingRow(
@@ -185,6 +205,15 @@ fun SettingsScreen(
     }
 }
 
+/** Zero reads as a switched-off feature, not as a count of nothing. */
+@Composable
+private fun freezeSubtitle(value: Int): String =
+    if (value == 0) {
+        stringResource(R.string.settings_freeze_off)
+    } else {
+        pluralStringResource(R.plurals.settings_freeze_count, value, value)
+    }
+
 @Preview(name = "Settings", showBackground = true)
 @Composable
 private fun SettingsPreview() {
@@ -195,6 +224,7 @@ private fun SettingsPreview() {
             onThemeModeChange = {},
             onGoalTypeChange = {},
             onThresholdChange = {},
+            onFreezeChange = {},
             onOpenReminders = {},
             onOpenPauses = {},
             onExport = {},

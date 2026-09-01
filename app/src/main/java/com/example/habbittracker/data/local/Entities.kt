@@ -84,6 +84,7 @@ data class DayEntity(
     @ColumnInfo(name = "goal_type") val goalType: GoalType,
     @ColumnInfo(name = "goal_threshold") val goalThreshold: Int,
     @ColumnInfo(name = "goal_overridden", defaultValue = "0") val goalOverridden: Boolean,
+    @ColumnInfo(name = "freeze_used", defaultValue = "0") val freezeUsed: Boolean,
     val status: DayStatus,
 )
 
@@ -260,6 +261,7 @@ fun DayEntity.toDomain() =
         goalType = goalType,
         goalThreshold = goalThreshold,
         goalOverridden = goalOverridden,
+        freezeUsed = freezeUsed,
         status = status,
     )
 
@@ -271,5 +273,6 @@ fun Day.toEntity() =
         goalType = goalType,
         goalThreshold = goalThreshold,
         goalOverridden = goalOverridden,
+        freezeUsed = freezeUsed,
         status = status,
     )

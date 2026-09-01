@@ -58,6 +58,15 @@ interface HabitRepository {
     /** Status of every stored day, for streaks, heatmap and completion rate (F4). */
     fun observeDayStatuses(): Flow<Map<LocalDate, DayStatus>>
 
+    /** The days that spent a grace day: marked in the history, skipped by streaks (F4). */
+    fun observeFrozenDays(): Flow<Set<LocalDate>>
+
+    /**
+     * Judges every stored day again. Needed for a setting that changes how days
+     * already behind are judged rather than only the ones still to come (F4).
+     */
+    suspend fun refreshDays()
+
     /**
      * For one habit, every stored day it applied to and whether it was fulfilled
      * there (F4). Days the habit did not belong to are absent rather than false, so

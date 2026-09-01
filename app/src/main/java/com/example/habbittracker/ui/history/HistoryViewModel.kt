@@ -25,6 +25,7 @@ data class HistoryUiState(
     val month: YearMonth,
     val today: LocalDate,
     val statuses: Map<LocalDate, DayStatus> = emptyMap(),
+    val frozen: Set<LocalDate> = emptySet(),
     val currentStreak: Int = 0,
     val longestStreak: Int = 0,
     val monthRate: CompletionRate = CompletionRate(passed = 0, failed = 0),
@@ -44,14 +45,22 @@ class HistoryViewModel(
     private val month = MutableStateFlow(YearMonth.now(clock))
 
     val uiState: StateFlow<HistoryUiState> =
-        combine(month, repository.observeDayStatuses()) { shown, statuses ->
+        combine(
+            month,
+            repository.observeDayStatuses(),
+            repository.observeFrozenDays(),
+        ) { shown, statuses, frozen ->
             val today = LocalDate.now(clock)
             HistoryUiState(
                 month = shown,
                 today = today,
                 statuses = statuses,
-                currentStreak = StreakCalculator.currentStreak(statuses, today),
-                longestStreak = StreakCalculator.longestStreak(statuses),
+                frozen = frozen,
+                // Only the streaks forgive a grace day. Rate and weekday statistics
+                // stay on what actually happened, otherwise a missed day would
+                // quietly disappear from the numbers as well.
+                currentStreak = StreakCalculator.currentStreak(statuses, today, frozen),
+                longestStreak = StreakCalculator.longestStreak(statuses, frozen),
                 monthRate = completionRate(statuses, shown.atDay(1), shown.atEndOfMonth()),
                 bestWeekday = Statistics.bestWeekday(statuses),
                 weakestWeekday = Statistics.weakestWeekday(statuses),

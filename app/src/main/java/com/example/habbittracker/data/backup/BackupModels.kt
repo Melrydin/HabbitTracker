@@ -57,6 +57,7 @@ data class BackupDay(
     val goalType: String,
     val goalThreshold: Int,
     val goalOverridden: Boolean = false,
+    val freezeUsed: Boolean = false,
     val status: String,
 )
 
@@ -83,6 +84,7 @@ data class BackupSettings(
     val themeMode: String,
     val defaultGoalType: String,
     val defaultGoalThreshold: Int = 6,
+    val freezePerMonth: Int = 1,
 )
 
 /** Names of the entries inside the ZIP, fixed by the feature list. */

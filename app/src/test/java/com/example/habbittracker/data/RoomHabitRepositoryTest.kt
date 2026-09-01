@@ -413,6 +413,49 @@ class RoomHabitRepositoryTest {
         }
 
     @Test
+    fun `a missed day spends a grace day and the run survives it`() =
+        runBlocking {
+            val id = addHabit("Exercise", points = 6)
+            repository.setProgress(date.minusDays(3), id, 1)
+            // A stored day that earns nothing is a missed day.
+            repository.setProgress(date.minusDays(2), id, 0)
+            repository.setProgress(date.minusDays(1), id, 1)
+
+            val frozen = repository.observeFrozenDays().first()
+            assertEquals(setOf(date.minusDays(2)), frozen)
+            // Both passed days still count: the missed one in between was forgiven.
+            assertEquals(2, repository.observeDay(date).first().currentStreak)
+        }
+
+    @Test
+    fun `the second missed day of a month is on its own`() =
+        runBlocking {
+            val id = addHabit("Exercise", points = 6)
+            repository.setProgress(date.minusDays(6), id, 1)
+            repository.setProgress(date.minusDays(5), id, 0)
+            repository.setProgress(date.minusDays(4), id, 1)
+            repository.setProgress(date.minusDays(3), id, 0)
+
+            // One grace day a month, and the earliest missed day takes it.
+            assertEquals(setOf(date.minusDays(5)), repository.observeFrozenDays().first())
+            assertEquals(0, repository.observeDay(date).first().currentStreak)
+        }
+
+    @Test
+    fun `switching the protection off judges the past days again`() =
+        runBlocking {
+            val id = addHabit("Exercise", points = 6)
+            repository.setProgress(date.minusDays(2), id, 1)
+            repository.setProgress(date.minusDays(1), id, 0)
+
+            settings.setFreezePerMonth(0)
+            repository.refreshDays()
+
+            assertTrue(repository.observeFrozenDays().first().isEmpty())
+            assertEquals(0, repository.observeDay(date).first().currentStreak)
+        }
+
+    @Test
     fun `the habit history says which days it applied to and how they went`() =
         runBlocking {
             val id = addHabit("Exercise")

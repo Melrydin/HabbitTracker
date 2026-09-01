@@ -3,6 +3,7 @@ package com.example.habbittracker.ui.settings
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.habbittracker.data.HabitRepository
 import com.example.habbittracker.data.SettingsRepository
 import com.example.habbittracker.data.backup.BackupManager
 import com.example.habbittracker.data.backup.BackupOutcome
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 
 class SettingsViewModel(
     private val repository: SettingsRepository,
+    private val habits: HabitRepository,
     private val backupManager: BackupManager,
 ) : ViewModel() {
     val settings: StateFlow<AppSettings> =
@@ -42,6 +44,14 @@ class SettingsViewModel(
 
     fun onThresholdChange(threshold: Int) {
         viewModelScope.launch { repository.setDefaultGoal(settings.value.defaultGoalType, threshold) }
+    }
+
+    /** The budget also decides how days already behind are judged, so they are judged again. */
+    fun onFreezeChange(value: Int) {
+        viewModelScope.launch {
+            repository.setFreezePerMonth(value)
+            habits.refreshDays()
+        }
     }
 
     fun onExport(target: Uri) {

@@ -44,6 +44,8 @@ data class Day(
      * "chosen by hand" have to be told apart.
      */
     val goalOverridden: Boolean = false,
+    /** Set when this missed day spent a grace day to keep a run alive (F4). */
+    val freezeUsed: Boolean = false,
     val status: DayStatus = DayStatus.NEUTRAL,
 ) {
     init {

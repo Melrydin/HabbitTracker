@@ -99,6 +99,7 @@ fun DayEntity.toBackup() =
         goalType = goalType.name,
         goalThreshold = goalThreshold,
         goalOverridden = goalOverridden,
+        freezeUsed = freezeUsed,
         status = status.name,
     )
 
@@ -110,6 +111,7 @@ fun BackupDay.toEntity() =
         goalType = goalType.toEnumOr(GoalType.POINTS),
         goalThreshold = goalThreshold,
         goalOverridden = goalOverridden,
+        freezeUsed = freezeUsed,
         status = status.toEnumOr(DayStatus.NEUTRAL),
     )
 
@@ -154,6 +156,7 @@ fun AppSettings.toBackup() =
         themeMode = themeMode.name,
         defaultGoalType = defaultGoalType.name,
         defaultGoalThreshold = defaultGoalThreshold,
+        freezePerMonth = freezePerMonth,
     )
 
 fun BackupSettings.toDomain() =
@@ -161,4 +164,5 @@ fun BackupSettings.toDomain() =
         themeMode = themeMode.toEnumOr(ThemeMode.SYSTEM),
         defaultGoalType = defaultGoalType.toEnumOr(GoalType.POINTS),
         defaultGoalThreshold = defaultGoalThreshold,
+        freezePerMonth = freezePerMonth,
     )

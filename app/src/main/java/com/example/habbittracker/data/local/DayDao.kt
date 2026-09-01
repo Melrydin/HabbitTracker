@@ -24,6 +24,9 @@ interface DayDao {
     @Query("SELECT date, status FROM days")
     fun observeStatuses(): Flow<List<DayStatusRow>>
 
+    @Query("SELECT date FROM days WHERE freeze_used = 1")
+    fun observeFrozen(): Flow<List<LocalDate>>
+
     @Upsert
     suspend fun upsert(day: DayEntity)
 

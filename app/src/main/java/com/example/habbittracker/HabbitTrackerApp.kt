@@ -19,6 +19,7 @@ import com.example.habbittracker.data.local.MIGRATION_1_2
 import com.example.habbittracker.data.local.MIGRATION_2_3
 import com.example.habbittracker.data.local.MIGRATION_3_4
 import com.example.habbittracker.data.local.MIGRATION_4_5
+import com.example.habbittracker.data.local.MIGRATION_5_6
 import com.example.habbittracker.data.reminder.ReminderScheduler
 
 private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -31,7 +32,7 @@ class AppContainer(private val context: Context) {
     private val database: HabitDatabase by lazy {
         Room
             .databaseBuilder(context, HabitDatabase::class.java, HabitDatabase.NAME)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
             .build()
     }
 

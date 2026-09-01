@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,13 +35,16 @@ import java.util.Locale
  *
  * Passed is the only colored state. A missed day is neutral grey rather than red,
  * so the grid shows what happened without judging it, and a day nothing was asked
- * of stays an empty outline.
+ * of stays an empty outline. A missed day that spent a grace day keeps that grey
+ * and carries a marker dot, because the day was still missed — only the streak
+ * survived it.
  */
 @Composable
 fun MonthHeatmap(
     month: YearMonth,
     statuses: Map<LocalDate, DayStatus>,
     today: LocalDate,
+    frozen: Set<LocalDate>,
     onDayClick: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -63,6 +69,7 @@ fun MonthHeatmap(
                     DayCell(
                         date = date,
                         status = date?.let { statuses[it] } ?: DayStatus.NEUTRAL,
+                        isFrozen = date in frozen,
                         isToday = date == today,
                         isFuture = date != null && date > today,
                         onClick = { date?.let(onDayClick) },
@@ -78,6 +85,7 @@ fun MonthHeatmap(
 private fun DayCell(
     date: LocalDate?,
     status: DayStatus,
+    isFrozen: Boolean,
     isToday: Boolean,
     isFuture: Boolean,
     onClick: () -> Unit,
@@ -115,6 +123,16 @@ private fun DayCell(
                 color = content,
             )
         }
+        if (isFrozen) {
+            Box(
+                modifier =
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 2.dp)
+                        .size(DOT_SIZE)
+                        .background(marker.passed, CircleShape),
+            )
+        }
     }
 }
 
@@ -131,4 +149,5 @@ private fun weeksOf(month: YearMonth): List<List<LocalDate?>> {
 }
 
 private const val DAYS_PER_WEEK = 7
+private val DOT_SIZE = 4.dp
 private val CELL_SHAPE = RoundedCornerShape(8.dp)

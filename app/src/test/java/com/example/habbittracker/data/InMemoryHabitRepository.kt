@@ -5,6 +5,8 @@ import com.example.habbittracker.domain.DayEvaluator
 import com.example.habbittracker.domain.DayHabits
 import com.example.habbittracker.domain.Pauses
 import com.example.habbittracker.domain.StreakCalculator
+import com.example.habbittracker.domain.StreakProtection
+import com.example.habbittracker.domain.model.AppSettings
 import com.example.habbittracker.domain.model.Day
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
@@ -29,6 +31,7 @@ import java.time.LocalDate
  */
 class InMemoryHabitRepository(
     today: LocalDate = LocalDate.now(),
+    private val freezePerMonth: Int = AppSettings.DEFAULT_FREEZE_PER_MONTH,
 ) : HabitRepository {
     private data class Store(
         val habits: List<Habit>,
@@ -50,6 +53,7 @@ class InMemoryHabitRepository(
                     StreakCalculator.currentStreak(
                         statuses = current.days.mapValues { (_, day) -> day.status },
                         today = date,
+                        frozen = current.frozenDays(),
                     ),
             )
         }
@@ -115,6 +119,13 @@ class InMemoryHabitRepository(
 
     override fun observeDayStatuses(): Flow<Map<LocalDate, DayStatus>> =
         store.map { current -> current.days.mapValues { (_, day) -> day.status } }
+
+    override fun observeFrozenDays(): Flow<Set<LocalDate>> = store.map { it.frozenDays() }
+
+    override suspend fun refreshDays() =
+        writeLock.withLock {
+            store.value = store.value.withRecalculatedDays()
+        }
 
     override fun observeHabitHistory(habitId: Long): Flow<Map<LocalDate, Boolean>> =
         store.map { current ->
@@ -224,7 +235,23 @@ class InMemoryHabitRepository(
                                 .status,
                     )
                 },
-        )
+        ).withGraceDays()
+
+    /** Hands the monthly budget to the earliest missed days, as the Room repository does (F4). */
+    private fun Store.withGraceDays(): Store {
+        val statuses = days.mapValues { (_, day) -> day.status }
+        val frozen = mutableSetOf<LocalDate>()
+        val judged =
+            days.keys.sorted().associateWith { date ->
+                val day = days.getValue(date)
+                val spends = StreakProtection.shouldFreeze(date, day.status, statuses, frozen, freezePerMonth)
+                if (spends) frozen += date
+                day.copy(freezeUsed = spends)
+            }
+        return copy(days = judged)
+    }
+
+    private fun Store.frozenDays(): Set<LocalDate> = days.filterValues { it.freezeUsed }.keys
 
     private fun defaultDay(date: LocalDate) =
         Day(

@@ -28,6 +28,7 @@ class DataStoreSettingsRepository(
                 themeMode = preferences[THEME_MODE].toEnumOr(AppSettings().themeMode),
                 defaultGoalType = preferences[GOAL_TYPE].toEnumOr(AppSettings().defaultGoalType),
                 defaultGoalThreshold = preferences[GOAL_THRESHOLD] ?: AppSettings.DEFAULT_GOAL_THRESHOLD,
+                freezePerMonth = preferences[FREEZE_PER_MONTH] ?: AppSettings.DEFAULT_FREEZE_PER_MONTH,
             )
         }
 
@@ -46,10 +47,16 @@ class DataStoreSettingsRepository(
         }
     }
 
+    override suspend fun setFreezePerMonth(value: Int) {
+        dataStore.edit { it[FREEZE_PER_MONTH] = value.coerceIn(0, AppSettings.FREEZE_MAX) }
+    }
+
     override suspend fun replace(settings: AppSettings) {
         dataStore.edit {
             it[THEME_MODE] = settings.themeMode.name
             it[GOAL_TYPE] = settings.defaultGoalType.name
+            it[FREEZE_PER_MONTH] = settings.freezePerMonth.coerceIn(0, AppSettings.FREEZE_MAX)
+            it[FREEZE_PER_MONTH] = settings.freezePerMonth.coerceIn(0, AppSettings.FREEZE_MAX)
             it[GOAL_THRESHOLD] =
                 settings.defaultGoalThreshold.coerceIn(
                     AppSettings.GOAL_THRESHOLD_MIN,
@@ -62,5 +69,6 @@ class DataStoreSettingsRepository(
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val GOAL_TYPE = stringPreferencesKey("default_goal_type")
         val GOAL_THRESHOLD = intPreferencesKey("default_goal_threshold")
+        val FREEZE_PER_MONTH = intPreferencesKey("freeze_per_month")
     }
 }

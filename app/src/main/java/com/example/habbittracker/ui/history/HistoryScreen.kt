@@ -1,6 +1,8 @@
 package com.example.habbittracker.ui.history
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -97,6 +100,7 @@ fun HistoryScreen(
                         month = state.month,
                         statuses = state.statuses,
                         today = state.today,
+                        frozen = state.frozen,
                         onDayClick = onOpenDay,
                     )
                     Spacer(Modifier.height(16.dp))
@@ -274,18 +278,28 @@ private fun Legend(modifier: Modifier = Modifier) {
         LegendItem(status.passedContainer, stringResource(R.string.history_legend_passed))
         LegendItem(MaterialTheme.colorScheme.surfaceContainerHigh, stringResource(R.string.history_legend_failed))
         LegendItem(Color.Transparent, stringResource(R.string.history_legend_neutral))
+        LegendItem(
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            label = stringResource(R.string.history_legend_frozen),
+            dotted = true,
+        )
     }
 }
 
 @Composable
-private fun LegendItem(color: Color, label: String, modifier: Modifier = Modifier) {
+private fun LegendItem(color: Color, label: String, modifier: Modifier = Modifier, dotted: Boolean = false) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Surface(
             modifier = Modifier.size(12.dp),
             shape = RoundedCornerShape(4.dp),
             color = color,
-            content = {},
-        )
+        ) {
+            if (dotted) {
+                Box(contentAlignment = Alignment.Center) {
+                    Box(Modifier.size(4.dp).background(HabitTheme.status.passed, CircleShape))
+                }
+            }
+        }
         Spacer(Modifier.size(6.dp))
         Text(
             text = label,
@@ -314,6 +328,7 @@ private fun HistoryPreview() {
                                     else -> DayStatus.PASSED
                                 }
                         },
+                    frozen = setOf(month.atDay(7)),
                     currentStreak = 4,
                     longestStreak = 11,
                     monthRate = CompletionRate(passed = 22, failed = 4),

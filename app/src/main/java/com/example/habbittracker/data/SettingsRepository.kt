@@ -17,6 +17,9 @@ interface SettingsRepository {
     /** The rule today and the days ahead are judged by, plus the points bar. */
     suspend fun setDefaultGoal(type: GoalType, threshold: Int)
 
+    /** Grace days per month; zero switches the streak protection off (F4). */
+    suspend fun setFreezePerMonth(value: Int)
+
     /** Overwrites everything at once, used when a backup is restored (F6). */
     suspend fun replace(settings: AppSettings)
 }
