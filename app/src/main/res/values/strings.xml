@@ -28,11 +28,15 @@
     </plurals>
 
     <!-- Habit row -->
-    <string name="habit_progress_with_unit">%1$d / %2$d %3$s</string>
-    <string name="habit_progress_plain">%1$d / %2$d</string>
     <string name="habit_required">Required</string>
     <string name="habit_decrease">Decrease %s</string>
     <string name="habit_increase">Increase %s</string>
+    <string name="habit_enter_value">Enter a value for %s</string>
+    <string name="habit_entry_title">%s</string>
+    <string name="habit_entry_label">Value</string>
+    <string name="habit_entry_target">Target %1$d %2$s</string>
+    <string name="habit_entry_target_plain">Target %d</string>
+    <string name="habit_entry_confirm">Set</string>
 
     <plurals name="habit_points">
         <item quantity="one">%d point</item>

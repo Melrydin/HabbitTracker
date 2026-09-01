@@ -74,6 +74,9 @@ class TodayViewModel(
 
     fun onDecrement(item: HabitItem) = setProgress(item, item.entry.progress - STEP)
 
+    /** A value typed in directly; the repository clamps it to what the habit allows. */
+    fun onSetProgress(item: HabitItem, progress: Int) = setProgress(item, progress)
+
     fun onThemeChange(text: String) {
         val limited = text.take(Habit.NAME_MAX_LENGTH)
         themeDraft.value = limited

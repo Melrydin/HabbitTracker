@@ -2,6 +2,7 @@ package com.example.habbittracker.ui.today
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,8 +25,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
@@ -57,9 +63,11 @@ fun HabitRow(
     onToggle: (HabitItem) -> Unit,
     onIncrement: (HabitItem) -> Unit,
     onDecrement: (HabitItem) -> Unit,
+    onSetProgress: (HabitItem, Int) -> Unit,
     onEdit: (HabitItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var entering by remember { mutableStateOf(false) }
     val habit = item.entry.habit
     val status = HabitTheme.status
     val haptics = LocalHapticFeedback.current
@@ -148,12 +156,25 @@ fun HabitRow(
             } else {
                 Stepper(
                     habitName = habit.name,
-                    canDecrease = item.entry.progress > 0,
+                    progress = item.entry.progress,
                     onDecrement = { onDecrement(item) },
                     onIncrement = { onIncrement(item) },
+                    onEnterValue = { entering = true },
                 )
             }
         }
+    }
+
+    if (entering) {
+        ProgressEntryDialog(
+            habit = habit,
+            progress = item.entry.progress,
+            onConfirm = {
+                entering = false
+                onSetProgress(item, it)
+            },
+            onDismiss = { entering = false },
+        )
     }
 }
 
@@ -187,9 +208,10 @@ private fun CheckMarker(checked: Boolean, modifier: Modifier = Modifier) {
 @Composable
 private fun Stepper(
     habitName: String,
-    canDecrease: Boolean,
+    progress: Int,
     onDecrement: () -> Unit,
     onIncrement: () -> Unit,
+    onEnterValue: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val haptics = LocalHapticFeedback.current
@@ -199,7 +221,7 @@ private fun Stepper(
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                 onDecrement()
             },
-            enabled = canDecrease,
+            enabled = progress > 0,
             colors =
                 IconButtonDefaults.iconButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -210,6 +232,19 @@ private fun Stepper(
                 contentDescription = stringResource(R.string.habit_decrease, habitName),
             )
         }
+        // The count doubles as the way into typing one in, for the days a few
+        // taps would not carry it far enough (F3).
+        Text(
+            text = progress.toString(),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier =
+                Modifier
+                    .clip(MaterialTheme.shapes.extraSmall)
+                    .clickable(onClickLabel = stringResource(R.string.habit_enter_value, habitName)) {
+                        onEnterValue()
+                    }.padding(horizontal = 8.dp, vertical = 4.dp),
+        )
         IconButton(
             onClick = {
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -236,11 +271,12 @@ private fun Stepper(
 private fun habitSubtitle(item: HabitItem, goalType: GoalType): String {
     val habit = item.entry.habit
     if (habit.type != HabitType.CHECK) {
+        // The count itself sits in the stepper, so the line states the target.
         val unit = habit.unit
         return if (unit.isNullOrBlank()) {
-            stringResource(R.string.habit_progress_plain, item.entry.progress, habit.target)
+            stringResource(R.string.habit_entry_target_plain, habit.target)
         } else {
-            stringResource(R.string.habit_progress_with_unit, item.entry.progress, habit.target, unit)
+            stringResource(R.string.habit_entry_target, habit.target, unit)
         }
     }
     return when {
