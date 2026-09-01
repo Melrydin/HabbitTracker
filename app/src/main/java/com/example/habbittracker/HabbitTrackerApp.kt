@@ -14,6 +14,7 @@ import com.example.habbittracker.data.backup.ZipBackupRepository
 import com.example.habbittracker.data.local.DataStoreSettingsRepository
 import com.example.habbittracker.data.local.HabitDatabase
 import com.example.habbittracker.data.local.MIGRATION_1_2
+import com.example.habbittracker.data.local.MIGRATION_2_3
 
 private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -25,7 +26,7 @@ class AppContainer(private val context: Context) {
     private val database: HabitDatabase by lazy {
         Room
             .databaseBuilder(context, HabitDatabase::class.java, HabitDatabase.NAME)
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .build()
     }
 

@@ -47,7 +47,7 @@ import com.example.habbittracker.ui.theme.HabitTheme
 
 /**
  * A row of the daily list (F3). CHECK toggles when the whole row is tapped;
- * COUNTER and AMOUNT get a stepper and open the editor on tap instead.
+ * A counter gets a stepper and opens the editor on tap instead.
  * A long press always leads to the editor (F1).
  */
 @Composable

@@ -88,3 +88,17 @@ private fun SupportSQLiteDatabase.createGoalsAndPauses() {
     )
     execSQL("CREATE INDEX IF NOT EXISTS `index_pauses_habit_id` ON `pauses` (`habit_id`)")
 }
+
+/**
+ * Schema 2 to 3: the AMOUNT habit type was merged into COUNTER.
+ *
+ * The tables are unchanged, only their contents: a row still naming AMOUNT would
+ * fail to read once the enum no longer has that constant, which would take the
+ * whole habit list down.
+ */
+val MIGRATION_2_3 =
+    object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("UPDATE habits SET type = 'COUNTER' WHERE type = 'AMOUNT'")
+        }
+    }

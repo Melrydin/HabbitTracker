@@ -64,7 +64,7 @@ class HabitFormStateTest {
 
     @Test
     fun `an empty target blocks saving`() {
-        val form = HabitFormState().withName("Read").withType(HabitType.AMOUNT).withTarget("")
+        val form = HabitFormState().withName("Read").withType(HabitType.COUNTER).withTarget("")
 
         assertEquals(HabitFormError.TARGET_REQUIRED, form.targetError)
         assertFalse(form.canSave)
@@ -72,7 +72,7 @@ class HabitFormStateTest {
 
     @Test
     fun `a target of zero is too small`() {
-        val form = HabitFormState().withName("Read").withType(HabitType.AMOUNT).withTarget("0")
+        val form = HabitFormState().withName("Read").withType(HabitType.COUNTER).withTarget("0")
 
         assertEquals(HabitFormError.TARGET_TOO_SMALL, form.targetError)
     }
@@ -146,7 +146,7 @@ class HabitFormStateTest {
             Habit(
                 id = 7,
                 name = "Read",
-                type = HabitType.AMOUNT,
+                type = HabitType.COUNTER,
                 target = 30,
                 unit = "min",
                 points = 2,

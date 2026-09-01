@@ -91,17 +91,21 @@ class TodayViewModel(
         viewModelScope.launch { repository.setProgress(date.value, item.id, progress) }
     }
 
-    /** Counters step by one, amounts step coarser so that 30 min is not 30 taps. */
+    /**
+     * Larger targets step coarser, so a 30 minute habit is not 30 taps. The cut-off
+     * is a judgement call: below it a single step still feels like one unit.
+     */
     private val HabitItem.step: Int
         get() =
-            when (entry.habit.type) {
-                HabitType.CHECK -> 1
-                HabitType.COUNTER -> 1
-                HabitType.AMOUNT -> AMOUNT_STEP
+            when {
+                entry.habit.type == HabitType.CHECK -> 1
+                entry.habit.target > COARSE_STEP_FROM -> COARSE_STEP
+                else -> 1
             }
 
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L
-        const val AMOUNT_STEP = 5
+        const val COARSE_STEP = 5
+        const val COARSE_STEP_FROM = 12
     }
 }

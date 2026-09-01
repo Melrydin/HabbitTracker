@@ -271,7 +271,7 @@ private fun HabitListPreview() {
                         ),
                     archived =
                         listOf(
-                            Habit(3, "Vocabulary", HabitType.AMOUNT, 20, "min", icon = "menu_book", archived = true),
+                            Habit(3, "Vocabulary", HabitType.COUNTER, 20, "min", icon = "menu_book", archived = true),
                         ),
                     loaded = true,
                 ),

@@ -7,11 +7,8 @@ enum class HabitType {
     /** Yes/no. `target` is always 1. */
     CHECK,
 
-    /** A count, for example 8 glasses. May exceed the target. */
+    /** A count or amount, for example 8 glasses or 30 minutes. May exceed the target. */
     COUNTER,
-
-    /** An amount or duration, for example 30 min. May exceed the target. */
-    AMOUNT,
 }
 
 /** Place in the two-level habit hierarchy (F8). */

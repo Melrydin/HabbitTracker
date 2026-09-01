@@ -219,6 +219,29 @@ class ZipBackupRepositoryTest {
         }
 
     @Test
+    fun `an older backup naming the removed amount type restores as a counter`() =
+        runBlocking {
+            val withHabit = ByteArrayOutputStream()
+            ZipOutputStream(withHabit).use { zip ->
+                zip.putNextEntry(ZipEntry(BackupEntries.MANIFEST))
+                zip.write("""{"appVersion":"0.9","schemaVersion":2,"exportedAt":"2026-08-01"}""".toByteArray())
+                zip.closeEntry()
+                zip.putNextEntry(ZipEntry(BackupEntries.HABITS))
+                zip.write(
+                    """[{"id":1,"name":"Read","type":"AMOUNT","target":30,"unit":"min","icon":"menu_book"}]"""
+                        .toByteArray(),
+                )
+                zip.closeEntry()
+            }
+
+            backup.import(ByteArrayInputStream(withHabit.toByteArray()))
+
+            val restored = habits.observeHabits().first().single()
+            assertEquals(HabitType.COUNTER, restored.type)
+            assertEquals(30, restored.target)
+        }
+
+    @Test
     fun `a damaged archive leaves the existing data alone`() =
         runBlocking {
             val id = seed()

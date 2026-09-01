@@ -10,5 +10,4 @@ fun HabitType.labelRes(): Int =
     when (this) {
         HabitType.CHECK -> R.string.habit_type_check
         HabitType.COUNTER -> R.string.habit_type_counter
-        HabitType.AMOUNT -> R.string.habit_type_amount
     }

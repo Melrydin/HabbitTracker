@@ -27,6 +27,12 @@ import java.time.LocalDate
 private inline fun <reified T : Enum<T>> String?.toEnum(fallback: T): T =
     enumValues<T>().firstOrNull { it.name == this } ?: fallback
 
+/** Amount habits were merged into counters; older backups still name them. */
+private fun String?.toHabitType(): HabitType =
+    if (this == LEGACY_AMOUNT) HabitType.COUNTER else toEnum(HabitType.CHECK)
+
+private const val LEGACY_AMOUNT = "AMOUNT"
+
 private fun String?.toDate(): LocalDate? = this?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
 
 fun HabitEntity.toBackup() =
@@ -62,7 +68,7 @@ fun BackupHabit.toEntity() =
     HabitEntity(
         id = id,
         name = name,
-        type = type.toEnum(HabitType.CHECK),
+        type = type.toHabitType(),
         target = target,
         unit = unit,
         points = points,

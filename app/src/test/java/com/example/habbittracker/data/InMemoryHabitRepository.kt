@@ -60,7 +60,7 @@ class InMemoryHabitRepository(
                     // CHECK only knows 0 or 1, counters are allowed to exceed their target.
                     HabitType.CHECK -> progress.coerceIn(0, 1)
 
-                    HabitType.COUNTER, HabitType.AMOUNT -> progress.coerceIn(0, PROGRESS_MAX)
+                    HabitType.COUNTER -> progress.coerceIn(0, PROGRESS_MAX)
                 }
             val updated = current.copy(progress = current.progress + ((date to habitId) to clamped))
             store.value = updated.withRecalculatedDays()
@@ -173,7 +173,7 @@ class InMemoryHabitRepository(
                     icon = "water_drop",
                 ),
                 Habit(2, "Exercise", HabitType.CHECK, target = 1, points = 3, required = true, icon = "directions_run"),
-                Habit(3, "Read", HabitType.AMOUNT, target = 30, unit = "min", points = 2, icon = "menu_book"),
+                Habit(3, "Read", HabitType.COUNTER, target = 30, unit = "min", points = 2, icon = "menu_book"),
                 Habit(4, "Meditation", HabitType.CHECK, target = 1, points = 1, icon = "self_improvement"),
                 Habit(5, "Journal", HabitType.CHECK, target = 1, points = 1, icon = "edit_note"),
             )

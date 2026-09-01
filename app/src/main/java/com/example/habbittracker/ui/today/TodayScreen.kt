@@ -417,7 +417,7 @@ private fun previewState(passed: Boolean = false) =
                         ),
                     progress = if (passed) 1 else 0,
                 ),
-                HabitEntry(Habit(3, "Read", HabitType.AMOUNT, 30, "min", points = 2, icon = "menu_book"), 30),
+                HabitEntry(Habit(3, "Read", HabitType.COUNTER, 30, "min", points = 2, icon = "menu_book"), 30),
                 HabitEntry(Habit(4, "Meditation", HabitType.CHECK, 1, points = 1, icon = "self_improvement"), 0),
             ).map(::HabitItem),
         currentStreak = 4,

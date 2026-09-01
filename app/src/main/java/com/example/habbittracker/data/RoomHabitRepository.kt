@@ -165,7 +165,7 @@ class RoomHabitRepository(
     private fun Habit.clamp(progress: Int): Int =
         when (type) {
             HabitType.CHECK -> progress.coerceIn(0, 1)
-            HabitType.COUNTER, HabitType.AMOUNT -> progress.coerceIn(0, PROGRESS_MAX)
+            HabitType.COUNTER -> progress.coerceIn(0, PROGRESS_MAX)
         }
 
     private suspend fun recalculate(date: LocalDate) {

@@ -7,6 +7,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.HabitKind
+import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.domain.model.StreakRule
 import kotlinx.coroutines.runBlocking
@@ -76,7 +77,7 @@ class MigrationTest {
     private fun openMigrated(): HabitDatabase =
         Room
             .databaseBuilder(context, HabitDatabase::class.java, name)
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .allowMainThreadQueries()
             .build()
 
@@ -125,6 +126,28 @@ class MigrationTest {
 
             assertEquals(1, recorded.size)
             assertEquals(1, recorded.single().progress)
+        }
+
+    @Test
+    fun `an amount habit becomes a counter`() =
+        runBlocking {
+            createSchemaOne()
+            // Schema 1 knew a third habit type that no longer exists.
+            SQLiteDatabase.openOrCreateDatabase(context.getDatabasePath(name), null).use { db ->
+                db.execSQL(
+                    "INSERT INTO habits (id, name, type, target, unit, points, required, icon, " +
+                        "color_tag, archived) " +
+                        "VALUES (2, 'Read', 'AMOUNT', 30, 'min', 2, 0, 'menu_book', NULL, 0)",
+                )
+            }
+
+            val db = openMigrated()
+            val habit = db.habitDao().getById(2)!!.toDomain()
+            db.close()
+
+            assertEquals(HabitType.COUNTER, habit.type)
+            assertEquals(30, habit.target)
+            assertEquals("min", habit.unit)
         }
 
     @Test

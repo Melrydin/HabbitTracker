@@ -130,8 +130,7 @@
     <string name="settings_threshold_increase">Raise the threshold</string>
 
     <string name="habit_type_check">Yes/No</string>
-    <string name="habit_type_counter">Count</string>
-    <string name="habit_type_amount">Amount</string>
+    <string name="habit_type_counter">Count / amount</string>
     <string name="habit_summary_target">Target %1$d %2$s</string>
     <string name="habit_summary_target_plain">Target %d</string>
     <string name="habit_edit_action">Edit</string>

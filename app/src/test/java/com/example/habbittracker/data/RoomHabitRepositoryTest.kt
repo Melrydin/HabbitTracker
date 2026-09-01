@@ -116,12 +116,12 @@ class RoomHabitRepositoryTest {
         runBlocking {
             val id =
                 repository.upsertHabit(
-                    Habit(NEW_HABIT_ID, "Read", HabitType.AMOUNT, target = 30, unit = "min", icon = "menu_book"),
+                    Habit(NEW_HABIT_ID, "Read", HabitType.COUNTER, target = 30, unit = "min", icon = "menu_book"),
                 )
             repository.setProgress(date, id, 30)
 
             val stored = repository.getHabit(id)!!
-            assertEquals(HabitType.AMOUNT, stored.type)
+            assertEquals(HabitType.COUNTER, stored.type)
             assertEquals("min", stored.unit)
             assertEquals(
                 date,
