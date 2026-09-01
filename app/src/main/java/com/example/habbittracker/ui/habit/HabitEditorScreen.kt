@@ -82,7 +82,9 @@ fun HabitEditorScreen(
     onPerWeekTargetChange: (Int) -> Unit,
     onPointsChange: (Int) -> Unit,
     onRequiredChange: (Boolean) -> Unit,
+    onGivesThemeChange: (Boolean) -> Unit,
     onIconChange: (String) -> Unit,
+    rhythm: RhythmCallbacks,
     onSave: () -> Unit,
     onToggleArchived: () -> Unit,
     onDelete: () -> Unit,
@@ -143,6 +145,10 @@ fun HabitEditorScreen(
                     onUnitChange = onUnitChange,
                 )
             }
+
+            RhythmSection(form = form, weeks = state.weeks, callbacks = rhythm)
+
+            ThemeRow(givesTheme = form.givesTheme, onGivesThemeChange = onGivesThemeChange)
 
             PointsRow(points = form.points, onPointsChange = onPointsChange)
 
@@ -448,6 +454,18 @@ private fun RequiredRow(
     }
 }
 
+/** A habit that names the day it appears on (F8). */
+@Composable
+private fun ThemeRow(givesTheme: Boolean, onGivesThemeChange: (Boolean) -> Unit, modifier: Modifier = Modifier) {
+    SettingRow(
+        modifier = modifier,
+        title = stringResource(R.string.habit_editor_theme_label),
+        subtitle = stringResource(R.string.habit_editor_theme_hint),
+    ) {
+        Switch(checked = givesTheme, onCheckedChange = onGivesThemeChange)
+    }
+}
+
 @Composable
 private fun DangerZone(
     archived: Boolean,
@@ -507,6 +525,16 @@ private fun DangerZone(
     }
 }
 
+private fun previewRhythm() =
+    RhythmCallbacks(
+        onKindChange = {},
+        onWeekChange = {},
+        onWeekSpanChange = {},
+        onRecurrenceChange = {},
+        onParentChange = {},
+        onToggleDow = {},
+    )
+
 // --- Previews ---------------------------------------------------------------
 
 @Preview(name = "Editor, new", showBackground = true)
@@ -534,7 +562,9 @@ private fun HabitEditorNewPreview() {
             onPerWeekTargetChange = {},
             onPointsChange = {},
             onRequiredChange = {},
+            onGivesThemeChange = {},
             onIconChange = {},
+            rhythm = previewRhythm(),
             onSave = {},
             onToggleArchived = {},
             onDelete = {},
@@ -568,7 +598,9 @@ private fun HabitEditorEditPreview() {
             onPerWeekTargetChange = {},
             onPointsChange = {},
             onRequiredChange = {},
+            onGivesThemeChange = {},
             onIconChange = {},
+            rhythm = previewRhythm(),
             onSave = {},
             onToggleArchived = {},
             onDelete = {},

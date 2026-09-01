@@ -140,3 +140,10 @@ data class Habit(
         const val DEFAULT_ICON = "task_alt"
     }
 }
+
+/** Whether a weekday belongs to the span of a week habit (F8). */
+fun WeekSpan.covers(dayOfWeek: Int): Boolean =
+    when (this) {
+        WeekSpan.WORKWEEK -> dayOfWeek in DayOfWeek.MONDAY.value..DayOfWeek.FRIDAY.value
+        WeekSpan.FULL -> dayOfWeek in DayOfWeek.MONDAY.value..DayOfWeek.SUNDAY.value
+    }

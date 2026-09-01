@@ -26,6 +26,7 @@ import com.example.habbittracker.ui.habit.HabitEditorScreen
 import com.example.habbittracker.ui.habit.HabitEditorViewModel
 import com.example.habbittracker.ui.habit.HabitListScreen
 import com.example.habbittracker.ui.habit.HabitListViewModel
+import com.example.habbittracker.ui.habit.RhythmCallbacks
 import com.example.habbittracker.ui.history.HistoryScreen
 import com.example.habbittracker.ui.history.HistoryViewModel
 import com.example.habbittracker.ui.pause.PauseScreen
@@ -239,7 +240,17 @@ fun HabitNavHost(
                 onPerWeekTargetChange = viewModel::onPerWeekTargetChange,
                 onPointsChange = viewModel::onPointsChange,
                 onRequiredChange = viewModel::onRequiredChange,
+                onGivesThemeChange = viewModel::onGivesThemeChange,
                 onIconChange = viewModel::onIconChange,
+                rhythm =
+                    RhythmCallbacks(
+                        onKindChange = viewModel::onKindChange,
+                        onWeekChange = viewModel::onWeekChange,
+                        onWeekSpanChange = viewModel::onWeekSpanChange,
+                        onRecurrenceChange = viewModel::onRecurrenceChange,
+                        onParentChange = viewModel::onParentChange,
+                        onToggleDow = viewModel::onToggleDow,
+                    ),
                 onSave = viewModel::onSave,
                 onToggleArchived = viewModel::onToggleArchived,
                 onDelete = viewModel::onDelete,

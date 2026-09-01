@@ -8,8 +8,11 @@ import com.example.habbittracker.domain.CompletionRate
 import com.example.habbittracker.domain.HabitStreakCalculator
 import com.example.habbittracker.domain.Statistics
 import com.example.habbittracker.domain.model.Habit
+import com.example.habbittracker.domain.model.HabitKind
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.Recurrence
 import com.example.habbittracker.domain.model.StreakRule
+import com.example.habbittracker.domain.model.WeekSpan
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +20,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.Clock
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
 /** What the habit has done lately (F4), shown next to the form for existing habits. */
 data class HabitStats(val currentStreak: Int, val rate: CompletionRate)
@@ -26,6 +31,8 @@ data class HabitEditorUiState(
     val form: HabitFormState = HabitFormState(),
     val stats: HabitStats? = null,
     val loading: Boolean = false,
+    /** The week habits a sub habit can hang off (F8). */
+    val weeks: List<Habit> = emptyList(),
 )
 
 /**
@@ -49,6 +56,7 @@ class HabitEditorViewModel(
     val events = eventChannel.receiveAsFlow()
 
     init {
+        observeWeeks()
         if (habitId != NEW_HABIT_ID) {
             viewModelScope.launch {
                 val habit = repository.getHabit(habitId)
@@ -77,6 +85,20 @@ class HabitEditorViewModel(
     fun onPerWeekTargetChange(value: Int) = updateForm { it.withPerWeekTarget(value) }
 
     fun onPointsChange(value: Int) = updateForm { it.withPoints(value) }
+
+    fun onKindChange(value: HabitKind) = updateForm { it.withKind(value, thisMonday()) }
+
+    fun onWeekChange(value: LocalDate) = updateForm { it.withWeek(value) }
+
+    fun onWeekSpanChange(value: WeekSpan) = updateForm { it.withWeekSpan(value) }
+
+    fun onRecurrenceChange(value: Recurrence) = updateForm { it.withRecurrence(value) }
+
+    fun onParentChange(value: Long) = updateForm { it.withParent(value) }
+
+    fun onToggleDow(value: Int) = updateForm { it.toggleDow(value) }
+
+    fun onGivesThemeChange(value: Boolean) = updateForm { it.withGivesTheme(value) }
 
     fun onRequiredChange(value: Boolean) = updateForm { it.copy(required = value) }
 
@@ -107,6 +129,21 @@ class HabitEditorViewModel(
         viewModelScope.launch {
             repository.deleteHabit(form.id)
             eventChannel.send(HabitEditorFinished)
+        }
+    }
+
+    private fun thisMonday(): LocalDate =
+        LocalDate.now(clock).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+
+    /** A sub habit can only be attached to a week habit that is still active. */
+    private fun observeWeeks() {
+        viewModelScope.launch {
+            repository.observeHabits().collect { habits ->
+                _uiState.value =
+                    _uiState.value.copy(
+                        weeks = habits.filter { it.kind == HabitKind.WEEKLY && !it.archived && it.id != habitId },
+                    )
+            }
         }
     }
 

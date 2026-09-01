@@ -73,6 +73,23 @@
     <string name="habit_editor_unit_placeholder">e.g. glasses</string>
     <string name="habit_editor_note_label">Note</string>
     <string name="habit_editor_note_placeholder">What this habit is about, optional</string>
+    <string name="habit_editor_kind_label">Rhythm</string>
+    <string name="habit_editor_kind_hint">A habit runs every day, or it belongs to one calendar week.</string>
+    <string name="habit_editor_kind_simple">Every day</string>
+    <string name="habit_editor_kind_weekly">One week</string>
+    <string name="habit_editor_kind_sub">Part of a week</string>
+    <string name="habit_editor_week_label">Week</string>
+    <string name="habit_editor_week_previous">Week before</string>
+    <string name="habit_editor_week_next">Week after</string>
+    <string name="habit_editor_span_workweek">Mon to Fri</string>
+    <string name="habit_editor_span_full">Mon to Sun</string>
+    <string name="habit_editor_recurrence_every_day">Every day of the week</string>
+    <string name="habit_editor_recurrence_by_subs">Only through its parts</string>
+    <string name="habit_editor_parent_label">Belongs to</string>
+    <string name="habit_editor_parent_missing">Create a week habit first, then this one can join it.</string>
+    <string name="habit_editor_dows_label">On these days</string>
+    <string name="habit_editor_theme_label">Gives the day its theme</string>
+    <string name="habit_editor_theme_hint">On a day it appears on, this habit names the day.</string>
     <string name="habit_editor_streak_label">Streak rule</string>
     <string name="habit_editor_streak_daily">Every day</string>
     <string name="habit_editor_streak_weekly">Times a week</string>
@@ -218,6 +235,7 @@
     <string name="habit_type_check">Yes/No</string>
     <string name="habit_type_counter">Count / amount</string>
     <string name="habit_summary_target">Target %1$d %2$s</string>
+    <string name="habit_summary_week">Week of %1$s</string>
     <string name="habit_summary_target_plain">Target %d</string>
     <string name="habit_edit_action">Edit</string>
 </resources>

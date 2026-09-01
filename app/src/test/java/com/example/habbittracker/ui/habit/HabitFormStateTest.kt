@@ -2,14 +2,19 @@ package com.example.habbittracker.ui.habit
 
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
 import com.example.habbittracker.domain.model.Habit
+import com.example.habbittracker.domain.model.HabitKind
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.WeekSpan
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalDate
 
 class HabitFormStateTest {
+    private val monday = LocalDate.of(2026, 8, 31)
+
     @Test
     fun `an empty name blocks saving`() {
         val form = HabitFormState()
@@ -138,6 +143,82 @@ class HabitFormStateTest {
         val habit = HabitFormState().withName("Exercise").withUnit("min").toHabit()
 
         assertNull(habit.unit)
+    }
+
+    // --- Rhythm, F8 ---
+
+    @Test
+    fun `a new week habit starts in the week it was created in`() {
+        val form = HabitFormState().withName("Reading week").withKind(HabitKind.WEEKLY, monday)
+
+        assertEquals(monday, form.weekStart)
+        assertTrue(form.canSave)
+    }
+
+    @Test
+    fun `a week is always addressed by its monday`() {
+        val form = HabitFormState().withKind(HabitKind.WEEKLY, monday).withWeek(monday.plusDays(4))
+
+        assertEquals(monday, form.weekStart)
+    }
+
+    @Test
+    fun `a sub habit needs a week to hang off and days to appear on`() {
+        val form = HabitFormState().withName("Cook").withKind(HabitKind.SUB, monday)
+
+        assertEquals(HabitFormError.PARENT_REQUIRED, form.parentError)
+        assertEquals(HabitFormError.WEEKDAYS_REQUIRED, form.weekdaysError)
+        assertFalse(form.canSave)
+
+        val complete = form.withParent(7).toggleDow(2)
+        assertTrue(complete.canSave)
+    }
+
+    @Test
+    fun `narrowing the span drops the weekend days that were picked`() {
+        val form =
+            HabitFormState()
+                .withKind(HabitKind.SUB, monday)
+                .toggleDow(5)
+                .toggleDow(6)
+                .withWeekSpan(WeekSpan.WORKWEEK)
+
+        assertEquals(setOf(5), form.assignedDows)
+    }
+
+    @Test
+    fun `switching back to a daily habit drops the week it lived in`() {
+        val form =
+            HabitFormState()
+                .withName("Reading week")
+                .withKind(HabitKind.WEEKLY, monday)
+                .withKind(HabitKind.SIMPLE, monday)
+
+        assertNull(form.weekStart)
+        assertNull(form.toHabit().weekSpan)
+        assertNull(form.toHabit().recurrence)
+    }
+
+    @Test
+    fun `a sub habit keeps only what a sub habit has`() {
+        val habit =
+            HabitFormState()
+                .withName("Cook")
+                .withKind(HabitKind.SUB, monday)
+                .withParent(7)
+                .toggleDow(3)
+                .toHabit()
+
+        assertEquals(7L, habit.parentId)
+        assertEquals(setOf(3), habit.assignedDows)
+        assertNull(habit.weekStart)
+    }
+
+    @Test
+    fun `a habit can offer the day its theme`() {
+        val habit = HabitFormState().withName("Reading").withGivesTheme(true).toHabit()
+
+        assertTrue(habit.givesTheme)
     }
 
     @Test

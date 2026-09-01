@@ -78,7 +78,8 @@ app/src/main/java/com/example/habbittracker/
 ├── domain/           business rules, plain Kotlin, no Android imports
 │   ├── model/        Habit, Day, HabitEntry, Goal, Pause
 │   ├── DayEvaluator      daily goal evaluation (F2)
-│   ├── DayHabits         which habits belong to a day (F1, F3)
+│   ├── DayHabits         which habits belong to a day (F1, F3, F8)
+│   ├── DayTheme          which habit gives a day its theme (F2, F8)
 │   ├── StreakCalculator      current and longest day streak (F4)
 │   ├── StreakProtection      grace days that keep a run alive (F4)
 │   ├── Pauses                breaks and holidays (F4)
@@ -219,6 +220,30 @@ written just to be counted later.
   (`AppSettings.freezePerMonth`, one by default, zero switches it off) instead of breaking the
   run. The day stays `FAILED` and still counts against the completion rate — only the streak
   forgives it, which is the difference between a safety net and a lie about what happened.
+
+## Week habits
+
+A habit is either a plain daily one, bound to a single calendar week, or a part of
+such a week (F8). Which habits a day holds is decided by [DayHabits] alone, from the
+date and the habit definitions — nothing is written ahead of time.
+
+* A **week habit** is bound to one week by its `weekStart`, always a Monday, and shows
+  up only inside it. A following week means a new habit; there is deliberately no
+  repetition, because a week habit describes one concrete week.
+* Its `weekSpan` decides whether the week ends on Friday or Sunday, its `recurrence`
+  whether it appears itself on every day of that week or only through its sub habits.
+* A **sub habit** appears on the weekdays it was assigned, inside its parent's week.
+  A day it is assigned to but the parent's span does not hold produces nothing.
+* A recorded value **holds a habit on its day** whatever the definition says now.
+  Moving a week must not rewrite a day that had already passed, the same reason
+  archiving cannot.
+* Deleting a week habit deletes its sub habits, through the foreign key on
+  `parent_id`.
+
+The **day theme** is always a habit ([DayTheme]). A habit with `givesTheme` offers one
+on every day it appears on: exactly one offer takes it, several leave the day without a
+theme until the user picks, and a theme typed by hand always wins because it is the
+explicit choice.
 
 ## Business rules
 
@@ -450,8 +475,8 @@ Open:
 
 * **Phase 2 (V2)** is under way. Done: reminders (F5), widget, tile and notification action
   (F9), and F4 in full: the habit streak, the statistics half including the habit detail,
-  breaks and holidays, and the grace days. Still open: weekly habits (F8), abstinence habits
-  (F11), categories and tags (F12), CSV export.
+  breaks and holidays, and the grace days, plus week habits and the theme coupling (F8).
+  Still open: abstinence habits (F11), categories and tags (F12), CSV export.
 * The widget is **not configurable yet**. F9 asks for a choice between all habits of the day
   and a selection; it currently always shows all of them.
 * The `goals` table exists but stays empty until F10 needs it.

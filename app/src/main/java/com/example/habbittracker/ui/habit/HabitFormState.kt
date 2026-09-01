@@ -2,9 +2,16 @@ package com.example.habbittracker.ui.habit
 
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
 import com.example.habbittracker.domain.model.Habit
+import com.example.habbittracker.domain.model.HabitKind
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.Recurrence
 import com.example.habbittracker.domain.model.StreakRule
+import com.example.habbittracker.domain.model.WeekSpan
+import com.example.habbittracker.domain.model.covers
 import com.example.habbittracker.ui.icons.HabitIcons
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
 /** Reasons why the form cannot be saved yet. */
 enum class HabitFormError {
@@ -12,6 +19,8 @@ enum class HabitFormError {
     TARGET_REQUIRED,
     TARGET_TOO_SMALL,
     TARGET_TOO_LARGE,
+    PARENT_REQUIRED,
+    WEEKDAYS_REQUIRED,
 }
 
 /**
@@ -34,6 +43,14 @@ data class HabitFormState(
     val streakRule: StreakRule = StreakRule.DAILY,
     val perWeekTarget: Int = DEFAULT_PER_WEEK,
     val archived: Boolean = false,
+    // F8, where the habit sits in the week
+    val kind: HabitKind = HabitKind.SIMPLE,
+    val weekStart: LocalDate? = null,
+    val weekSpan: WeekSpan = WeekSpan.FULL,
+    val recurrence: Recurrence = Recurrence.EVERY_DAY,
+    val parentId: Long? = null,
+    val assignedDows: Set<Int> = emptySet(),
+    val givesTheme: Boolean = false,
 ) {
     val isNew: Boolean get() = id == NEW_HABIT_ID
 
@@ -56,7 +73,22 @@ data class HabitFormState(
             }
         }
 
-    val canSave: Boolean get() = nameError == null && targetError == null
+    /** A sub habit without a week to hang off would never turn up anywhere (F8). */
+    val parentError: HabitFormError?
+        get() = if (kind == HabitKind.SUB && parentId == null) HabitFormError.PARENT_REQUIRED else null
+
+    val weekdaysError: HabitFormError?
+        get() = if (kind == HabitKind.SUB && assignedDows.isEmpty()) HabitFormError.WEEKDAYS_REQUIRED else null
+
+    val canSave: Boolean
+        get() =
+            nameError == null && targetError == null && parentError == null && weekdaysError == null &&
+                (kind != HabitKind.WEEKLY || weekStart != null)
+
+    /** Only a week habit is bound to a week; only a sub habit hangs off one. */
+    val showsWeek: Boolean get() = kind == HabitKind.WEEKLY
+
+    val showsParent: Boolean get() = kind == HabitKind.SUB
 
     // --- Edits ---
 
@@ -77,6 +109,36 @@ data class HabitFormState(
     val showsPerWeekTarget: Boolean get() = streakRule == StreakRule.WEEKLY_COUNT
 
     fun withPoints(value: Int) = copy(points = value.coerceIn(POINTS_MIN, POINTS_MAX))
+
+    /**
+     * Switching the kind drops what the other kinds carry, so a habit cannot keep a
+     * week it no longer lives in. [thisMonday] seeds a new week habit with the
+     * current week, which is the one the user almost always means.
+     */
+    fun withKind(value: HabitKind, thisMonday: LocalDate): HabitFormState =
+        when (value) {
+            HabitKind.SIMPLE -> copy(kind = value, weekStart = null, parentId = null, assignedDows = emptySet())
+            HabitKind.WEEKLY -> copy(kind = value, weekStart = weekStart ?: thisMonday, parentId = null)
+            HabitKind.SUB -> copy(kind = value, weekStart = null)
+        }
+
+    /** A week is always addressed by its Monday, whichever day of it was picked. */
+    fun withWeek(value: LocalDate) = copy(weekStart = value.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)))
+
+    fun withWeekSpan(value: WeekSpan) =
+        copy(
+            weekSpan = value,
+            assignedDows = assignedDows.filter(value::covers).toSet(),
+        )
+
+    fun withRecurrence(value: Recurrence) = copy(recurrence = value)
+
+    fun withParent(value: Long) = copy(parentId = value)
+
+    fun toggleDow(value: Int) =
+        copy(assignedDows = if (value in assignedDows) assignedDows - value else assignedDows + value)
+
+    fun withGivesTheme(value: Boolean) = copy(givesTheme = value)
 
     /** Switching to CHECK makes target and unit meaningless. */
     fun withType(value: HabitType): HabitFormState =
@@ -104,6 +166,13 @@ data class HabitFormState(
             streakRule = streakRule,
             perWeekTarget = if (streakRule == StreakRule.WEEKLY_COUNT) perWeekTarget else null,
             archived = archived,
+            kind = kind,
+            parentId = parentId.takeIf { kind == HabitKind.SUB },
+            weekStart = weekStart.takeIf { kind == HabitKind.WEEKLY },
+            weekSpan = weekSpan.takeIf { kind == HabitKind.WEEKLY },
+            recurrence = recurrence.takeIf { kind == HabitKind.WEEKLY },
+            assignedDows = if (kind == HabitKind.SUB) assignedDows else emptySet(),
+            givesTheme = givesTheme,
         )
     }
 
@@ -130,6 +199,13 @@ data class HabitFormState(
                 streakRule = habit.streakRule,
                 perWeekTarget = habit.perWeekTarget ?: DEFAULT_PER_WEEK,
                 archived = habit.archived,
+                kind = habit.kind,
+                weekStart = habit.weekStart,
+                weekSpan = habit.weekSpan ?: WeekSpan.FULL,
+                recurrence = habit.recurrence ?: Recurrence.EVERY_DAY,
+                parentId = habit.parentId,
+                assignedDows = habit.assignedDows,
+                givesTheme = habit.givesTheme,
             )
     }
 }

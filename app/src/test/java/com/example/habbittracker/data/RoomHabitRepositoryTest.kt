@@ -10,8 +10,11 @@ import com.example.habbittracker.data.local.HabitDatabase
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
+import com.example.habbittracker.domain.model.HabitKind
 import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.domain.model.Pause
+import com.example.habbittracker.domain.model.Recurrence
+import com.example.habbittracker.domain.model.WeekSpan
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -27,8 +30,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.time.Clock
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.time.temporal.TemporalAdjusters
 
 /**
  * Exercises the real Room implementation on the JVM, so the DAOs, type converters
@@ -83,6 +88,19 @@ class RoomHabitRepositoryTest {
     ): Long =
         repository.upsertHabit(
             Habit(NEW_HABIT_ID, name, type, target, points = points, required = required, icon = "task_alt"),
+        )
+
+    private fun weekHabit(name: String, monday: LocalDate) =
+        Habit(
+            NEW_HABIT_ID,
+            name,
+            HabitType.CHECK,
+            target = 1,
+            icon = "task_alt",
+            kind = HabitKind.WEEKLY,
+            weekStart = monday,
+            weekSpan = WeekSpan.FULL,
+            recurrence = Recurrence.EVERY_DAY,
         )
 
     private fun themeGiver(name: String) =
@@ -413,6 +431,41 @@ class RoomHabitRepositoryTest {
             val day = repository.observeDay(date).first().day
             assertFalse(day.goalOverridden)
             assertEquals(GoalType.POINTS, day.goalType)
+        }
+
+    @Test
+    fun `a week habit only shows up inside its own week`() =
+        runBlocking {
+            val monday = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+            val id = repository.upsertHabit(weekHabit("Reading week", monday))
+
+            assertTrue(habitIdsOn(monday).contains(id))
+            assertTrue(habitIdsOn(monday.plusDays(6)).contains(id))
+            assertFalse(habitIdsOn(monday.plusWeeks(1)).contains(id))
+        }
+
+    @Test
+    fun `deleting a week habit takes its sub habits with it`() =
+        runBlocking {
+            val monday = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+            val parent = repository.upsertHabit(weekHabit("Reading week", monday))
+            val sub =
+                repository.upsertHabit(
+                    Habit(
+                        NEW_HABIT_ID,
+                        "Chapter",
+                        HabitType.CHECK,
+                        target = 1,
+                        icon = "task_alt",
+                        kind = HabitKind.SUB,
+                        parentId = parent,
+                        assignedDows = setOf(1),
+                    ),
+                )
+
+            repository.deleteHabit(parent)
+
+            assertNull(repository.getHabit(sub))
         }
 
     @Test

@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -36,11 +37,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.model.Habit
+import com.example.habbittracker.domain.model.HabitKind
 import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.ui.components.BackTopAppBar
 import com.example.habbittracker.ui.components.EmptyState
 import com.example.habbittracker.ui.icons.HabitIcons
 import com.example.habbittracker.ui.theme.HabbitTrackerTheme
+import java.time.DayOfWeek
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 
 /**
  * Overview of every habit (F1). The archive lives here too, so that archiving stays
@@ -176,11 +182,12 @@ private fun HabitSummaryRow(
     }
 }
 
-/** Second line: type, target, points and required, exactly as set in the editor. */
+/** Second line: rhythm, type, target, points and required, exactly as set in the editor. */
 @Composable
 private fun habitSummary(habit: Habit): String {
     val parts =
         buildList {
+            rhythmOf(habit)?.let(::add)
             add(stringResource(habit.type.labelRes()))
             if (habit.type != HabitType.CHECK) {
                 val unit = habit.unit
@@ -196,6 +203,31 @@ private fun habitSummary(habit: Habit): String {
             if (habit.required) add(stringResource(R.string.habit_required))
         }
     return parts.joinToString(stringResource(R.string.today_subtitle_separator))
+}
+
+/**
+ * Which week a habit lives in (F8). A habit that runs every day says nothing here,
+ * because that is the normal case and would only add noise to every row.
+ */
+@Composable
+private fun rhythmOf(habit: Habit): String? {
+    val locale = Locale.getDefault()
+    val formatter = remember(locale) { DateTimeFormatter.ofPattern("d MMM", locale) }
+    return when (habit.kind) {
+        HabitKind.SIMPLE -> {
+            null
+        }
+
+        HabitKind.WEEKLY -> {
+            habit.weekStart?.let { stringResource(R.string.habit_summary_week, formatter.format(it)) }
+        }
+
+        HabitKind.SUB -> {
+            habit.assignedDows
+                .sorted()
+                .joinToString(" ") { DayOfWeek.of(it).getDisplayName(TextStyle.SHORT, locale) }
+        }
+    }
 }
 
 @Preview(name = "Habits", showBackground = true)
