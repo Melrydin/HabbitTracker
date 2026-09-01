@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -69,6 +70,7 @@ fun HabitEditorScreen(
     onTypeChange: (HabitType) -> Unit,
     onTargetChange: (String) -> Unit,
     onUnitChange: (String) -> Unit,
+    onNoteChange: (String) -> Unit,
     onPointsChange: (Int) -> Unit,
     onRequiredChange: (Boolean) -> Unit,
     onIconChange: (String) -> Unit,
@@ -149,6 +151,8 @@ fun HabitEditorScreen(
 
             RequiredRow(required = form.required, onRequiredChange = onRequiredChange)
 
+            NoteField(note = form.note, onNoteChange = onNoteChange)
+
             if (!form.isNew) {
                 DangerZone(
                     archived = form.archived,
@@ -220,6 +224,26 @@ private fun NameField(
                 style = MaterialTheme.typography.labelMedium,
             )
         },
+    )
+}
+
+/** A free description of the habit (F1). Multi-line, because a note is prose. */
+@Composable
+private fun NoteField(
+    note: String,
+    onNoteChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedTextField(
+        value = note,
+        onValueChange = onNoteChange,
+        modifier = modifier.fillMaxWidth(),
+        label = { Text(stringResource(R.string.habit_editor_note_label)) },
+        placeholder = { Text(stringResource(R.string.habit_editor_note_placeholder)) },
+        minLines = 3,
+        maxLines = 6,
+        shape = MaterialTheme.shapes.medium,
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
     )
 }
 
@@ -553,6 +577,7 @@ private fun HabitEditorNewPreview() {
             onTypeChange = {},
             onTargetChange = {},
             onUnitChange = {},
+            onNoteChange = {},
             onPointsChange = {},
             onRequiredChange = {},
             onIconChange = {},
@@ -584,6 +609,7 @@ private fun HabitEditorEditPreview() {
             onTypeChange = {},
             onTargetChange = {},
             onUnitChange = {},
+            onNoteChange = {},
             onPointsChange = {},
             onRequiredChange = {},
             onIconChange = {},

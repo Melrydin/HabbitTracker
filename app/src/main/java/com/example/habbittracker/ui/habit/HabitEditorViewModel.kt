@@ -57,6 +57,8 @@ class HabitEditorViewModel(
 
     fun onUnitChange(value: String) = updateForm { it.withUnit(value) }
 
+    fun onNoteChange(value: String) = updateForm { it.withNote(value) }
+
     fun onPointsChange(value: Int) = updateForm { it.withPoints(value) }
 
     fun onRequiredChange(value: Boolean) = updateForm { it.copy(required = value) }

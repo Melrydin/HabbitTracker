@@ -29,6 +29,7 @@ data class HabitFormState(
     val points: Int = 1,
     val required: Boolean = false,
     val icon: String = HabitIcons.FALLBACK,
+    val note: String = "",
     val archived: Boolean = false,
 ) {
     val isNew: Boolean get() = id == NEW_HABIT_ID
@@ -63,6 +64,8 @@ data class HabitFormState(
 
     fun withUnit(value: String) = copy(unit = value.take(UNIT_MAX_LENGTH))
 
+    fun withNote(value: String) = copy(note = value.take(Habit.NOTE_MAX_LENGTH))
+
     fun withPoints(value: Int) = copy(points = value.coerceIn(POINTS_MIN, POINTS_MAX))
 
     /** Switching to CHECK makes target and unit meaningless. */
@@ -87,6 +90,7 @@ data class HabitFormState(
             points = points,
             required = required,
             icon = icon,
+            note = note.trim().ifBlank { null },
             archived = archived,
         )
     }
@@ -108,6 +112,7 @@ data class HabitFormState(
                 points = habit.points,
                 required = habit.required,
                 icon = habit.icon,
+                note = habit.note.orEmpty(),
                 archived = habit.archived,
             )
     }

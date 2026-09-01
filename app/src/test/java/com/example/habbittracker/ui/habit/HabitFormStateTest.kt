@@ -113,6 +113,27 @@ class HabitFormStateTest {
     }
 
     @Test
+    fun `a blank note is stored as null rather than an empty string`() {
+        val habit = HabitFormState().withName("Exercise").withNote("   ").toHabit()
+
+        assertNull(habit.note)
+    }
+
+    @Test
+    fun `a note is trimmed and kept`() {
+        val habit = HabitFormState().withName("Exercise").withNote("  Twenty minutes  ").toHabit()
+
+        assertEquals("Twenty minutes", habit.note)
+    }
+
+    @Test
+    fun `the note is truncated to the allowed length`() {
+        val form = HabitFormState().withNote("x".repeat(Habit.NOTE_MAX_LENGTH + 50))
+
+        assertEquals(Habit.NOTE_MAX_LENGTH, form.note.length)
+    }
+
+    @Test
     fun `yes no stores no unit`() {
         val habit = HabitFormState().withName("Exercise").withUnit("min").toHabit()
 

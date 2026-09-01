@@ -2,16 +2,19 @@ package com.example.habbittracker.ui.today
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.CalendarMonth
@@ -38,6 +41,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -81,6 +85,7 @@ fun TodayRoute(
         state = state,
         snackbarHostState = snackbarHostState,
         onThemeChange = viewModel::onThemeChange,
+        onDayNoteChange = viewModel::onDayNoteChange,
         onToggleCheck = viewModel::onToggleCheck,
         onIncrement = viewModel::onIncrement,
         onDecrement = viewModel::onDecrement,
@@ -98,6 +103,7 @@ fun TodayScreen(
     state: TodayUiState,
     snackbarHostState: SnackbarHostState,
     onThemeChange: (String) -> Unit,
+    onDayNoteChange: (String) -> Unit,
     onToggleCheck: (HabitItem) -> Unit,
     onIncrement: (HabitItem) -> Unit,
     onDecrement: (HabitItem) -> Unit,
@@ -128,7 +134,7 @@ fun TodayScreen(
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
             contentPadding =
-                androidx.compose.foundation.layout.PaddingValues(
+                PaddingValues(
                     start = 20.dp,
                     end = 20.dp,
                     top = innerPadding.calculateTopPadding() + 12.dp,
@@ -178,6 +184,65 @@ fun TodayScreen(
                     )
                 }
             }
+
+            item(key = "day_note") {
+                DayNoteField(
+                    note = state.dayNote,
+                    onNoteChange = onDayNoteChange,
+                    modifier = Modifier.padding(top = 20.dp),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * A free note on the day (F2). It sits below the habits because a look back is
+ * written at the end of the day, and the header stays calm that way.
+ */
+@Composable
+private fun DayNoteField(
+    note: String,
+    onNoteChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.today_note_label),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
+        )
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceContainer,
+        ) {
+            BasicTextField(
+                value = note,
+                onValueChange = onNoteChange,
+                textStyle =
+                    MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
+                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 96.dp)
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                decorationBox = { innerTextField ->
+                    if (note.isEmpty()) {
+                        Text(
+                            text = stringResource(R.string.today_note_placeholder),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    innerTextField()
+                },
+            )
         }
     }
 }
@@ -263,9 +328,7 @@ private fun ThemeField(
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             singleLine = true,
             keyboardOptions =
-                androidx.compose.foundation.text.KeyboardOptions(
-                    imeAction = ImeAction.Done,
-                ),
+                KeyboardOptions(imeAction = ImeAction.Done),
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -365,6 +428,7 @@ private fun TodayScreenPreview() {
             state = previewState(),
             snackbarHostState = remember { SnackbarHostState() },
             onThemeChange = {},
+            onDayNoteChange = {},
             onToggleCheck = {},
             onIncrement = {},
             onDecrement = {},
@@ -385,6 +449,7 @@ private fun TodayScreenDarkPreview() {
             state = previewState(passed = true),
             snackbarHostState = remember { SnackbarHostState() },
             onThemeChange = {},
+            onDayNoteChange = {},
             onToggleCheck = {},
             onIncrement = {},
             onDecrement = {},
@@ -405,6 +470,7 @@ private fun TodayScreenEmptyPreview() {
             state = TodayUiState(date = LocalDate.of(2026, 8, 31), loaded = true),
             snackbarHostState = remember { SnackbarHostState() },
             onThemeChange = {},
+            onDayNoteChange = {},
             onToggleCheck = {},
             onIncrement = {},
             onDecrement = {},
