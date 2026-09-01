@@ -2,6 +2,7 @@ package com.example.habbittracker.data.local
 
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
@@ -27,4 +28,11 @@ interface HabitDao {
 
     @Delete
     suspend fun delete(habit: HabitEntity)
+
+    /** Restore only. Parents must be inserted before their sub habits. */
+    @Insert
+    suspend fun insertAll(habits: List<HabitEntity>)
+
+    @Query("DELETE FROM habits")
+    suspend fun deleteAll()
 }

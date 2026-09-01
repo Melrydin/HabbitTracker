@@ -23,4 +23,10 @@ interface DayHabitDao {
 
     @Upsert
     suspend fun upsert(entry: DayHabitEntity)
+
+    @Upsert
+    suspend fun upsertAll(entries: List<DayHabitEntity>)
+
+    @Query("DELETE FROM day_habits")
+    suspend fun deleteAll()
 }

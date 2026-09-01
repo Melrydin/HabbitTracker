@@ -9,6 +9,8 @@ import androidx.room.Room
 import com.example.habbittracker.data.HabitRepository
 import com.example.habbittracker.data.RoomHabitRepository
 import com.example.habbittracker.data.SettingsRepository
+import com.example.habbittracker.data.backup.BackupManager
+import com.example.habbittracker.data.backup.ZipBackupRepository
 import com.example.habbittracker.data.local.DataStoreSettingsRepository
 import com.example.habbittracker.data.local.HabitDatabase
 import com.example.habbittracker.data.local.MIGRATION_1_2
@@ -29,6 +31,23 @@ class AppContainer(private val context: Context) {
 
     val settingsRepository: SettingsRepository by lazy {
         DataStoreSettingsRepository(context.settingsDataStore)
+    }
+
+    val backupManager: BackupManager by lazy {
+        BackupManager(
+            context = context,
+            repository =
+                ZipBackupRepository(
+                    database = database,
+                    habitDao = database.habitDao(),
+                    dayDao = database.dayDao(),
+                    dayHabitDao = database.dayHabitDao(),
+                    goalDao = database.goalDao(),
+                    pauseDao = database.pauseDao(),
+                    settingsRepository = settingsRepository,
+                    appVersion = BuildConfig.VERSION_NAME,
+                ),
+        )
     }
 
     val habitRepository: HabitRepository by lazy {

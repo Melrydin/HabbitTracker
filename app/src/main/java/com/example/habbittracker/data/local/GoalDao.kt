@@ -2,6 +2,7 @@ package com.example.habbittracker.data.local
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -15,4 +16,10 @@ interface GoalDao {
 
     @Query("SELECT * FROM goals")
     suspend fun getAll(): List<GoalEntity>
+
+    @Upsert
+    suspend fun upsertAll(goals: List<GoalEntity>)
+
+    @Query("DELETE FROM goals")
+    suspend fun deleteAll()
 }

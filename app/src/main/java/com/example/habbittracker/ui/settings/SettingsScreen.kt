@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,11 +23,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -43,15 +51,21 @@ import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 @Composable
 fun SettingsScreen(
     settings: AppSettings,
+    snackbarHostState: SnackbarHostState,
     onThemeModeChange: (ThemeMode) -> Unit,
     onGoalTypeChange: (GoalType) -> Unit,
     onThresholdChange: (Int) -> Unit,
+    onExport: () -> Unit,
+    onImport: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var confirmImport by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -98,7 +112,76 @@ fun SettingsScreen(
                 ThresholdRow(settings = settings, onThresholdChange = onThresholdChange)
             }
 
+            SettingsSection(label = stringResource(R.string.settings_backup_label)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    ActionRow(
+                        title = stringResource(R.string.settings_backup_export),
+                        subtitle = stringResource(R.string.settings_backup_export_hint),
+                        onClick = onExport,
+                    )
+                    ActionRow(
+                        title = stringResource(R.string.settings_backup_import),
+                        subtitle = stringResource(R.string.settings_backup_import_hint),
+                        onClick = { confirmImport = true },
+                    )
+                }
+            }
+
             Spacer(Modifier.height(24.dp))
+        }
+    }
+
+    if (confirmImport) {
+        AlertDialog(
+            onDismissRequest = { confirmImport = false },
+            title = { Text(stringResource(R.string.settings_backup_import_title)) },
+            text = { Text(stringResource(R.string.settings_backup_import_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmImport = false
+                        onImport()
+                    },
+                ) {
+                    Text(stringResource(R.string.settings_backup_import_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmImport = false }) {
+                    Text(stringResource(R.string.habit_editor_cancel))
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        )
+    }
+}
+
+/** A row that starts something when tapped, used for the two backup actions. */
+@Composable
+private fun ActionRow(
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        onClick = onClick,
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -268,9 +351,12 @@ private fun SettingsPreview() {
     HabbitTrackerTheme {
         SettingsScreen(
             settings = AppSettings(),
+            snackbarHostState = remember { SnackbarHostState() },
             onThemeModeChange = {},
             onGoalTypeChange = {},
             onThresholdChange = {},
+            onExport = {},
+            onImport = {},
             onBack = {},
         )
     }

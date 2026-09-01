@@ -45,6 +45,18 @@ class DataStoreSettingsRepository(
         }
     }
 
+    override suspend fun replace(settings: AppSettings) {
+        dataStore.edit {
+            it[THEME_MODE] = settings.themeMode.name
+            it[GOAL_TYPE] = settings.defaultGoalType.name
+            it[GOAL_THRESHOLD] =
+                settings.defaultGoalThreshold.coerceIn(
+                    AppSettings.GOAL_THRESHOLD_MIN,
+                    AppSettings.GOAL_THRESHOLD_MAX,
+                )
+        }
+    }
+
     private fun <T : Enum<T>> String?.toEnum(values: List<T>, fallback: T): T =
         values.firstOrNull { it.name == this } ?: fallback
 

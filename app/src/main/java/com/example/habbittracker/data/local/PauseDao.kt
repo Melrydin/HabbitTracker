@@ -15,4 +15,7 @@ interface PauseDao {
 
     @Query("SELECT * FROM pauses")
     suspend fun getAll(): List<PauseEntity>
+
+    @Query("DELETE FROM pauses")
+    suspend fun deleteAll()
 }

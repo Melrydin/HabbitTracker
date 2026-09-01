@@ -30,6 +30,9 @@ interface DayDao {
     @Upsert
     suspend fun upsertAll(days: List<DayEntity>)
 
+    @Query("DELETE FROM days")
+    suspend fun deleteAll()
+
     /** Clears the theme link of every day that pointed at a habit that is now gone. */
     @Query("UPDATE days SET theme_habit_id = NULL WHERE theme_habit_id = :habitId")
     suspend fun clearThemeHabit(habitId: Long)

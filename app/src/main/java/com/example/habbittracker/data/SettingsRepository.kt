@@ -16,4 +16,7 @@ interface SettingsRepository {
 
     /** The rule and threshold new days start with; existing days keep their own. */
     suspend fun setDefaultGoal(type: GoalType, threshold: Int)
+
+    /** Overwrites everything at once, used when a backup is restored (F6). */
+    suspend fun replace(settings: AppSettings)
 }

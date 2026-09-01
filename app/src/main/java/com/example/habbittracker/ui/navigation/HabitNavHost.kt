@@ -28,7 +28,7 @@ import com.example.habbittracker.ui.habit.HabitListScreen
 import com.example.habbittracker.ui.habit.HabitListViewModel
 import com.example.habbittracker.ui.history.HistoryScreen
 import com.example.habbittracker.ui.history.HistoryViewModel
-import com.example.habbittracker.ui.settings.SettingsScreen
+import com.example.habbittracker.ui.settings.SettingsRoute
 import com.example.habbittracker.ui.settings.SettingsViewModel
 import com.example.habbittracker.ui.today.TodayRoute
 import com.example.habbittracker.ui.today.TodayViewModel
@@ -122,17 +122,15 @@ fun HabitNavHost(
                 viewModel(
                     factory =
                         viewModelFactory {
-                            initializer { SettingsViewModel(container.settingsRepository) }
+                            initializer {
+                                SettingsViewModel(
+                                    repository = container.settingsRepository,
+                                    backupManager = container.backupManager,
+                                )
+                            }
                         },
                 )
-            val settings by viewModel.settings.collectAsStateWithLifecycle()
-            SettingsScreen(
-                settings = settings,
-                onThemeModeChange = viewModel::onThemeModeChange,
-                onGoalTypeChange = viewModel::onGoalTypeChange,
-                onThresholdChange = viewModel::onThresholdChange,
-                onBack = { navController.popBackStack() },
-            )
+            SettingsRoute(viewModel = viewModel, onBack = { navController.popBackStack() })
         }
 
         composable(Routes.HABITS) {
