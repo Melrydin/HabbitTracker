@@ -3,6 +3,7 @@ package com.example.habbittracker.ui.habit
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.StreakRule
 import com.example.habbittracker.ui.icons.HabitIcons
 
 /** Reasons why the form cannot be saved yet. */
@@ -30,6 +31,8 @@ data class HabitFormState(
     val required: Boolean = false,
     val icon: String = HabitIcons.FALLBACK,
     val note: String = "",
+    val streakRule: StreakRule = StreakRule.DAILY,
+    val perWeekTarget: Int = DEFAULT_PER_WEEK,
     val archived: Boolean = false,
 ) {
     val isNew: Boolean get() = id == NEW_HABIT_ID
@@ -66,6 +69,13 @@ data class HabitFormState(
 
     fun withNote(value: String) = copy(note = value.take(Habit.NOTE_MAX_LENGTH))
 
+    fun withStreakRule(value: StreakRule) = copy(streakRule = value)
+
+    fun withPerWeekTarget(value: Int) = copy(perWeekTarget = value.coerceIn(1, DAYS_IN_WEEK))
+
+    /** Only the weekly rule needs a count; the daily one asks for every active day. */
+    val showsPerWeekTarget: Boolean get() = streakRule == StreakRule.WEEKLY_COUNT
+
     fun withPoints(value: Int) = copy(points = value.coerceIn(POINTS_MIN, POINTS_MAX))
 
     /** Switching to CHECK makes target and unit meaningless. */
@@ -91,6 +101,8 @@ data class HabitFormState(
             required = required,
             icon = icon,
             note = note.trim().ifBlank { null },
+            streakRule = streakRule,
+            perWeekTarget = if (streakRule == StreakRule.WEEKLY_COUNT) perWeekTarget else null,
             archived = archived,
         )
     }
@@ -100,6 +112,8 @@ data class HabitFormState(
         const val POINTS_MIN = 1
         const val POINTS_MAX = 99
         const val UNIT_MAX_LENGTH = 12
+        const val DAYS_IN_WEEK = 7
+        private const val DEFAULT_PER_WEEK = 3
         private const val TARGET_MAX_DIGITS = 4
 
         fun from(habit: Habit) =
@@ -113,6 +127,8 @@ data class HabitFormState(
                 required = habit.required,
                 icon = habit.icon,
                 note = habit.note.orEmpty(),
+                streakRule = habit.streakRule,
+                perWeekTarget = habit.perWeekTarget ?: DEFAULT_PER_WEEK,
                 archived = habit.archived,
             )
     }

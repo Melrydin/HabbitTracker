@@ -65,6 +65,30 @@ class RoomHabitRepository(
     override fun observeDayStatuses(): Flow<Map<LocalDate, DayStatus>> =
         dayDao.observeStatuses().map { rows -> rows.associate { it.date to it.status } }
 
+    override fun observeHabitHistory(habitId: Long): Flow<Map<LocalDate, Boolean>> =
+        combine(dayDao.observeStatuses(), habitDao.observeAll(), dayHabitDao.observeAll()) {
+            days,
+            habits,
+            recorded,
+            ->
+            val habit = habits.firstOrNull { it.id == habitId }?.toDomain()
+            val domainHabits = habits.map { it.toDomain() }
+            val recordedByDate = recorded.groupBy { it.date }
+            if (habit == null) {
+                emptyMap()
+            } else {
+                days
+                    .associate { it.date to recordedByDate[it.date].orEmpty() }
+                    .mapValues { (_, rows) -> rows.associate { it.habitId to it.progress } }
+                    .filterValues { progress ->
+                        DayHabits.entriesFor(domainHabits, progress).any {
+                            it.habit.id ==
+                                habitId
+                        }
+                    }.mapValues { (_, progress) -> (progress[habitId] ?: 0) >= habit.target }
+            }
+        }
+
     override suspend fun setProgress(date: LocalDate, habitId: Long, progress: Int) {
         database.withTransaction {
             val habit = habitDao.getById(habitId)?.toDomain() ?: return@withTransaction

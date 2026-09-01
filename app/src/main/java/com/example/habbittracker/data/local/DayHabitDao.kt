@@ -14,6 +14,9 @@ interface DayHabitDao {
     @Query("SELECT * FROM day_habits WHERE date = :date")
     suspend fun getForDate(date: LocalDate): List<DayHabitEntity>
 
+    @Query("SELECT * FROM day_habits")
+    fun observeAll(): Flow<List<DayHabitEntity>>
+
     /** Every recorded value, used when a change forces a recalculation of all days. */
     @Query("SELECT * FROM day_habits")
     suspend fun getAll(): List<DayHabitEntity>

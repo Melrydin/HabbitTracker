@@ -36,14 +36,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.CompletionRate
+import com.example.habbittracker.domain.RateComparison
+import com.example.habbittracker.domain.WeekdayRate
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.ui.components.BackTopAppBar
+import com.example.habbittracker.ui.components.LabeledSection
 import com.example.habbittracker.ui.components.MonthHeatmap
+import com.example.habbittracker.ui.components.SettingRow
 import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 import com.example.habbittracker.ui.theme.HabitTheme
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Locale
 
 /** Heatmap, streaks and completion rate over the stored days (F4). */
@@ -101,9 +106,62 @@ fun HistoryScreen(
 
             CompletionRateCard(rate = state.monthRate)
 
+            PatternsSection(state = state)
+
             Spacer(Modifier.height(24.dp))
         }
     }
+}
+
+/** Weekday tendencies and how the current period compares (F4). */
+@Composable
+private fun PatternsSection(state: HistoryUiState, modifier: Modifier = Modifier) {
+    LabeledSection(label = stringResource(R.string.history_stats_label), modifier = modifier) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            state.bestWeekday?.let {
+                SettingRow(
+                    title = weekdayValue(it),
+                    subtitle = stringResource(R.string.history_best_weekday),
+                )
+            }
+            state.weakestWeekday?.let {
+                SettingRow(
+                    title = weekdayValue(it),
+                    subtitle = stringResource(R.string.history_weakest_weekday),
+                )
+            }
+            state.weekComparison?.let {
+                SettingRow(
+                    title = comparisonValue(it),
+                    subtitle = stringResource(R.string.history_this_week),
+                )
+            }
+            state.monthComparison?.let {
+                SettingRow(
+                    title = comparisonValue(it),
+                    subtitle = stringResource(R.string.history_this_month),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun weekdayValue(rate: WeekdayRate): String {
+    val name = rate.day.getDisplayName(TextStyle.FULL, Locale.getDefault())
+    return stringResource(R.string.history_weekday_value, name, rate.rate.percent)
+}
+
+@Composable
+private fun comparisonValue(comparison: RateComparison): String {
+    val difference = comparison.differenceInPercent
+    val trend =
+        when {
+            difference > 0 -> stringResource(R.string.history_more, difference)
+            difference < 0 -> stringResource(R.string.history_less, -difference)
+            else -> stringResource(R.string.history_same)
+        }
+    return stringResource(R.string.history_against_previous, comparison.current.percent, trend)
 }
 
 @Composable

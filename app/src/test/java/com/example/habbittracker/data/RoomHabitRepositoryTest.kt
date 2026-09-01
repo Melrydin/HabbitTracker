@@ -410,6 +410,26 @@ class RoomHabitRepositoryTest {
         }
 
     @Test
+    fun `the habit history says which days it applied to and how they went`() =
+        runBlocking {
+            val id = addHabit("Exercise")
+            repository.setProgress(date.minusDays(1), id, 1)
+            // Touching the day creates its row without fulfilling the habit.
+            repository.setDayNote(date, "note")
+
+            val history = repository.observeHabitHistory(id).first()
+
+            assertEquals(true, history[date.minusDays(1)])
+            assertEquals(false, history[date])
+        }
+
+    @Test
+    fun `the history of an unknown habit is empty`() =
+        runBlocking {
+            assertTrue(repository.observeHabitHistory(999).first().isEmpty())
+        }
+
+    @Test
     fun `the theme is stored and an empty theme clears it`() =
         runBlocking {
             repository.setDayTheme(date, "  Calm focus  ")

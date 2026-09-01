@@ -57,6 +57,13 @@ interface HabitRepository {
     /** Status of every stored day, for streaks, heatmap and completion rate (F4). */
     fun observeDayStatuses(): Flow<Map<LocalDate, DayStatus>>
 
+    /**
+     * For one habit, every stored day it applied to and whether it was fulfilled
+     * there (F4). Days the habit did not belong to are absent rather than false, so
+     * a streak can skip them instead of counting them against the run.
+     */
+    fun observeHabitHistory(habitId: Long): Flow<Map<LocalDate, Boolean>>
+
     // --- Habit management (F1) ---
 
     /** Every habit including archived ones. Callers that want only active ones filter themselves. */

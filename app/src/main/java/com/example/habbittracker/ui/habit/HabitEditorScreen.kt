@@ -46,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
@@ -55,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.StreakRule
 import com.example.habbittracker.ui.components.BackTopAppBar
 import com.example.habbittracker.ui.components.LabeledSection
 import com.example.habbittracker.ui.components.SegmentedChoice
@@ -76,6 +78,8 @@ fun HabitEditorScreen(
     onTargetChange: (String) -> Unit,
     onUnitChange: (String) -> Unit,
     onNoteChange: (String) -> Unit,
+    onStreakRuleChange: (StreakRule) -> Unit,
+    onPerWeekTargetChange: (Int) -> Unit,
     onPointsChange: (Int) -> Unit,
     onRequiredChange: (Boolean) -> Unit,
     onIconChange: (String) -> Unit,
@@ -116,6 +120,8 @@ fun HabitEditorScreen(
                     .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
+            state.stats?.let { StatsSection(stats = it) }
+
             NameField(form = form, onNameChange = onNameChange)
 
             LabeledSection(label = stringResource(R.string.habit_editor_icon_label)) {
@@ -141,6 +147,29 @@ fun HabitEditorScreen(
             PointsRow(points = form.points, onPointsChange = onPointsChange)
 
             RequiredRow(required = form.required, onRequiredChange = onRequiredChange)
+
+            LabeledSection(label = stringResource(R.string.habit_editor_streak_label)) {
+                SegmentedChoice(
+                    options = StreakRule.entries,
+                    selected = form.streakRule,
+                    onSelect = onStreakRuleChange,
+                ) { stringResource(it.labelRes()) }
+                if (form.showsPerWeekTarget) {
+                    Spacer(Modifier.height(12.dp))
+                    SettingRow(
+                        title = stringResource(R.string.habit_editor_per_week_label),
+                        subtitle = stringResource(R.string.habit_editor_per_week_hint),
+                    ) {
+                        ValueStepper(
+                            value = form.perWeekTarget,
+                            onValueChange = onPerWeekTargetChange,
+                            decreaseLabel = stringResource(R.string.habit_editor_per_week_decrease),
+                            increaseLabel = stringResource(R.string.habit_editor_per_week_increase),
+                            range = 1..HabitFormState.DAYS_IN_WEEK,
+                        )
+                    }
+                }
+            }
 
             NoteField(note = form.note, onNoteChange = onNoteChange)
 
@@ -216,6 +245,30 @@ private fun NameField(
             )
         },
     )
+}
+
+/** Streak and rate for this habit (F4), the statistics half of the habit detail. */
+@Composable
+private fun StatsSection(stats: HabitStats, modifier: Modifier = Modifier) {
+    LabeledSection(label = stringResource(R.string.habit_editor_stats_label), modifier = modifier) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            SettingRow(
+                title =
+                    pluralStringResource(
+                        R.plurals.history_streak_days,
+                        stats.currentStreak,
+                        stats.currentStreak,
+                    ),
+                subtitle = stringResource(R.string.habit_editor_stats_streak),
+                modifier = Modifier.weight(1f),
+            )
+            SettingRow(
+                title = stringResource(R.string.history_rate_percent, stats.rate.percent),
+                subtitle = stringResource(R.string.habit_editor_stats_rate),
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
 }
 
 /** A free description of the habit (F1). Multi-line, because a note is prose. */
@@ -477,6 +530,8 @@ private fun HabitEditorNewPreview() {
             onTargetChange = {},
             onUnitChange = {},
             onNoteChange = {},
+            onStreakRuleChange = {},
+            onPerWeekTargetChange = {},
             onPointsChange = {},
             onRequiredChange = {},
             onIconChange = {},
@@ -509,6 +564,8 @@ private fun HabitEditorEditPreview() {
             onTargetChange = {},
             onUnitChange = {},
             onNoteChange = {},
+            onStreakRuleChange = {},
+            onPerWeekTargetChange = {},
             onPointsChange = {},
             onRequiredChange = {},
             onIconChange = {},

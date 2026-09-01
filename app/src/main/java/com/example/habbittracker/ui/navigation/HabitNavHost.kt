@@ -212,6 +212,8 @@ fun HabitNavHost(
                 onTargetChange = viewModel::onTargetChange,
                 onUnitChange = viewModel::onUnitChange,
                 onNoteChange = viewModel::onNoteChange,
+                onStreakRuleChange = viewModel::onStreakRuleChange,
+                onPerWeekTargetChange = viewModel::onPerWeekTargetChange,
                 onPointsChange = viewModel::onPointsChange,
                 onRequiredChange = viewModel::onRequiredChange,
                 onIconChange = viewModel::onIconChange,

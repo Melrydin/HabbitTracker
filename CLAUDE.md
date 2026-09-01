@@ -79,8 +79,11 @@ app/src/main/java/com/example/habbittracker/
 │   ├── model/        Habit, Day, HabitEntry, Goal, Pause
 │   ├── DayEvaluator      daily goal evaluation (F2)
 │   ├── DayHabits         which habits belong to a day (F1, F3)
-│   ├── StreakCalculator  current and longest streak (F4)
-│   └── CompletionRate    share of passed among judged days (F4)
+│   ├── StreakCalculator      current and longest day streak (F4)
+│   ├── HabitStreakCalculator a habit's own streak, daily or weekly (F4)
+│   ├── Statistics            weekday rates, period comparison, habit rate (F4)
+│   ├── ReminderSchedule      when a reminder is next due (F5)
+│   └── CompletionRate        share of passed among judged days (F4)
 ├── data/             HabitRepository, SettingsRepository
 │   ├── local/        entities, DAOs, type converters, HabitDatabase, DataStore
 │   ├── backup/       ZIP export and restore (F6)
@@ -183,6 +186,20 @@ Three ways to tick a habit off without opening a screen (F9): the home screen wi
   than the app's accent, which is not available there.
 * `Tile.setSubtitle` only exists from Android 10 on and is guarded; below that the label
   carries the state on its own.
+
+## Statistics
+
+Everything under F4 is derived from stored day statuses and recorded values; nothing is
+written just to be counted later.
+
+* The **day streak** ([StreakCalculator]) and a **habit's own streak**
+  ([HabitStreakCalculator]) are separate. The habit one follows `streakRule`: every active day,
+  or a number of days per week.
+* A habit's history maps only the days the habit **applied to**. A day it did not belong to is
+  absent rather than false, so a streak skips it instead of counting it against the run.
+* The day or week in progress never breaks a run. A streak that read zero every morning would
+  tell the user nothing.
+* Weeks run Monday to Sunday, matching the week habits of F8.
 
 ## Business rules
 
@@ -409,8 +426,9 @@ editing half; the statistics half waits for V2 together with the rule it depends
 Open:
 
 * **Phase 2 (V2)** is under way. Done: reminders (F5), widget, tile and notification action
-  (F9). Still open: weekly habits (F8), the statistics build-out including the habit detail
-  (F4), abstinence habits (F11), categories and tags (F12), CSV export.
+  (F9), the habit streak and statistics half of F4 including the habit detail. Still open from
+  F4: streak protection with freeze days and the pause mode. Then weekly habits (F8),
+  abstinence habits (F11), categories and tags (F12), CSV export.
 * The widget is **not configurable yet**. F9 asks for a choice between all habits of the day
   and a selection; it currently always shows all of them.
 * The `goals` and `pauses` tables exist but stay empty until F10 and F4 need them.

@@ -113,6 +113,18 @@ class InMemoryHabitRepository(
     override fun observeDayStatuses(): Flow<Map<LocalDate, DayStatus>> =
         store.map { current -> current.days.mapValues { (_, day) -> day.status } }
 
+    override fun observeHabitHistory(habitId: Long): Flow<Map<LocalDate, Boolean>> =
+        store.map { current ->
+            val habit = current.habits.firstOrNull { it.id == habitId }
+            if (habit == null) {
+                emptyMap()
+            } else {
+                current.days.keys
+                    .filter { date -> current.entriesFor(date).any { it.habit.id == habitId } }
+                    .associateWith { date -> (current.progress[date to habitId] ?: 0) >= habit.target }
+            }
+        }
+
     override fun observeHabits(): Flow<List<Habit>> = store.map { it.habits }
 
     override suspend fun getHabit(id: Long): Habit? = store.value.habits.firstOrNull { it.id == id }
