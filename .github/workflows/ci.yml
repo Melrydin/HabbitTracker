@@ -19,21 +19,26 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      # The daemon toolchain in gradle/gradle-daemon-jvm.properties requires JDK 25.
-      - name: Set up JDK
-        uses: actions/setup-java@v4
+      # Two JDKs on purpose: the Gradle daemon runs on 25 as declared in
+      # gradle/gradle-daemon-jvm.properties, while Kotlin compiles against the 17
+      # toolchain pinned in app/build.gradle.kts. Installing both keeps Gradle from
+      # downloading a toolchain on every run.
+      - name: Set up JDKs
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: '25'
+          java-version: |
+            17
+            25
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@v5
 
       # The runner image ships a Node, but pinning it keeps the cspell run reproducible.
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '22'
 
@@ -58,7 +63,7 @@ jobs:
       # On a red run the reports are the first thing anyone wants to see.
       - name: Upload reports
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: reports
           path: |
