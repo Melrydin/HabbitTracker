@@ -21,7 +21,7 @@ checker skips it.
 | Language | Kotlin |
 | UI | Jetpack Compose, Material 3 |
 | Architecture | MVVM, repository, StateFlow |
-| Persistence | Room (SQLite), local only |
+| Persistence | Room (SQLite) for data, DataStore for settings, local only |
 | Navigation | `navigation-compose`, string routes |
 | minSdk / targetSdk | 26 / 37 |
 | Permissions | none (later only `POST_NOTIFICATIONS` for F5) |
@@ -81,15 +81,18 @@ app/src/main/java/com/example/habbittracker/
 │   ├── DayHabits         which habits belong to a day (F1, F3)
 │   ├── StreakCalculator  current and longest streak (F4)
 │   └── CompletionRate    share of passed among judged days (F4)
-├── data/             HabitRepository (interface) + RoomHabitRepository
-│   └── local/        entities, DAOs, type converters, HabitDatabase
+├── data/             HabitRepository, SettingsRepository
+│   ├── local/        entities, DAOs, type converters, HabitDatabase, DataStore
+│   └── backup/       ZIP export and restore (F6)
 ├── ui/
 │   ├── theme/        colors, typography, shapes
 │   ├── components/   building blocks shared across screens (ProgressTrack, StatusPill)
 │   ├── icons/        HabitIcons: name from Habit.icon → ImageVector
 │   ├── navigation/   HabitNavHost, Routes
 │   ├── today/        today screen (F2, F3)
-│   └── habit/        habit editor and habit list (F1)
+│   ├── habit/        habit editor and habit list (F1)
+│   ├── history/      heatmap, streaks, completion rate (F4)
+│   └── settings/     theme, default goal, backup (F6, F7)
 ├── HabbitTrackerApp  Application + AppContainer (service locator)
 └── MainActivity
 ```
@@ -128,6 +131,23 @@ built-in Kotlin support rejects. `android.disallowKotlinSourceSets=false` in
 `gradle.properties` is the documented escape hatch and is required for Room to build; AGP 9.3
 ships no built-in KSP to fall back on. `android.sync.suppressAgpWarnings` silences the
 resulting experimental-option warning — and, be aware, every other one of that kind too.
+
+## Backup
+
+`data/backup/` writes a ZIP of six JSON files (F6). Its models are deliberately **separate
+from both the domain models and the Room entities**: a backup written today has to stay
+readable after either of those is refactored, so the file format can stand still while the
+code moves.
+
+* Reading is lenient downwards only. Missing fields take their defaults, so an older backup
+  restores without a migration step, and an unknown enum value falls back instead of failing
+  the whole restore. A **newer** schema is refused rather than guessed at.
+* Restoring replaces rather than merges (V1) and runs in one transaction, so a damaged file
+  leaves the existing data untouched.
+* Habits are inserted parents first: a sub habit references its weekly parent and the foreign
+  key is checked per row.
+* `ZipBackupRepository` only reads and writes streams; `BackupManager` does the URI handling,
+  which keeps the format testable without Android.
 
 ## Business rules
 
@@ -340,11 +360,14 @@ archive and delete.
 
 Open:
 
-* **Phase 1 is not finished.** Still open from the roadmap: the history screen with heatmap
-  and completion rate (F4), the settings screen (F7), the ZIP backup and restore (F6), and the
-  note fields for habit and day in the UI. The data and rules behind all of them already
-  exist.
-* History and settings are still empty callbacks in `HabitNavHost`.
+**Phase 1 of the roadmap is complete**: F1, F2, F3, F4 basics, F6 and F7 basics all have data,
+rules and UI, and the schema already carries every V2 and V3 field.
+
+Open:
+
+* **Phase 2 (V2)** has not started: reminders (F5), widgets (F9), weekly habits (F8), the
+  statistics build-out (F4), abstinence habits (F11), categories and tags (F12), CSV export.
+* The `goals` and `pauses` tables exist but stay empty until F10 and F4 need them.
 * `Habit.colorTag` exists in the data model but deliberately not in the editor — a per-habit
   color picker contradicts the one-color rule above.
 * The project name is spelled **Habbit** with two b's, in the app name, the package
