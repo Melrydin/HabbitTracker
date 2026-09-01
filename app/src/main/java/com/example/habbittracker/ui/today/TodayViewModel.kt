@@ -26,9 +26,10 @@ import java.time.LocalDate
 class TodayViewModel(
     private val repository: HabitRepository,
     private val clock: Clock = Clock.systemDefaultZone(),
+    shownDate: LocalDate? = null,
 ) : ViewModel() {
     // TODO: reset when the date rolls over midnight, once the screen becomes visible again.
-    private val date = MutableStateFlow(LocalDate.now(clock))
+    private val date = MutableStateFlow(shownDate ?: LocalDate.now(clock))
 
     /**
      * While typing, the local draft wins so that the cursor does not jump when the
@@ -53,6 +54,7 @@ class TodayViewModel(
                     goal = DayEvaluator.evaluate(snapshot.day, snapshot.entries),
                     habits = snapshot.entries.map(::HabitItem),
                     currentStreak = snapshot.currentStreak,
+                    isToday = snapshot.day.date == LocalDate.now(clock),
                     loaded = true,
                 )
             }.onEach { state ->

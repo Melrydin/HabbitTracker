@@ -78,6 +78,25 @@
     <string name="habit_editor_delete_title">Delete habit?</string>
     <string name="habit_editor_delete_message">%s and every recorded value will be removed. Archiving keeps the history.</string>
 
+    <!-- History -->
+    <string name="history_title">History</string>
+    <string name="history_current_streak">Current streak</string>
+    <string name="history_longest_streak">Longest streak</string>
+    <string name="history_completion_rate">Completion rate</string>
+    <string name="history_rate_percent">%d%%</string>
+    <string name="history_rate_detail">%1$d of %2$d judged days</string>
+    <string name="history_rate_none">No judged days this month</string>
+    <string name="history_previous_month">Previous month</string>
+    <string name="history_next_month">Next month</string>
+    <string name="history_legend_passed">Passed</string>
+    <string name="history_legend_failed">Missed</string>
+    <string name="history_legend_neutral">Nothing asked</string>
+
+    <plurals name="history_streak_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_theme_label">Theme</string>

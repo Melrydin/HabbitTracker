@@ -145,6 +145,7 @@ fun TodayScreen(
             item(key = "header") {
                 TodayHeader(
                     date = state.date,
+                    isToday = state.isToday,
                     currentStreak = state.currentStreak,
                     onOpenHabits = onOpenHabits,
                     onOpenHistory = onOpenHistory,
@@ -250,6 +251,7 @@ private fun DayNoteField(
 @Composable
 private fun TodayHeader(
     date: LocalDate,
+    isToday: Boolean,
     currentStreak: Int,
     onOpenHabits: () -> Unit,
     onOpenHistory: () -> Unit,
@@ -257,7 +259,8 @@ private fun TodayHeader(
     modifier: Modifier = Modifier,
 ) {
     val locale = Locale.getDefault()
-    val formatter = remember(locale) { DateTimeFormatter.ofPattern("EEEE, d. MMMM", locale) }
+    val formatter = remember(locale) { DateTimeFormatter.ofPattern("EEEE, d MMMM", locale) }
+    val titleFormatter = remember(locale) { DateTimeFormatter.ofPattern("d MMMM", locale) }
     val separator = stringResource(R.string.today_subtitle_separator)
     val subtitle =
         buildString {
@@ -271,7 +274,8 @@ private fun TodayHeader(
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = stringResource(R.string.today_title),
+                // A backfilled day names its date; only the running day is "Today".
+                text = if (isToday) stringResource(R.string.today_title) else date.format(titleFormatter),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
             )

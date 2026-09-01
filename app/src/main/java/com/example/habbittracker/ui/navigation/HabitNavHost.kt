@@ -26,15 +26,25 @@ import com.example.habbittracker.ui.habit.HabitEditorScreen
 import com.example.habbittracker.ui.habit.HabitEditorViewModel
 import com.example.habbittracker.ui.habit.HabitListScreen
 import com.example.habbittracker.ui.habit.HabitListViewModel
+import com.example.habbittracker.ui.history.HistoryScreen
+import com.example.habbittracker.ui.history.HistoryViewModel
 import com.example.habbittracker.ui.settings.SettingsScreen
 import com.example.habbittracker.ui.settings.SettingsViewModel
 import com.example.habbittracker.ui.today.TodayRoute
 import com.example.habbittracker.ui.today.TodayViewModel
+import java.time.LocalDate
 
 object Routes {
-    const val TODAY = "today"
     const val HABITS = "habits"
     const val SETTINGS = "settings"
+    const val HISTORY = "history"
+
+    const val DATE_ARG = "date"
+
+    /** Without a date the screen shows the running day. */
+    const val TODAY = "today?$DATE_ARG={$DATE_ARG}"
+
+    fun today(date: LocalDate? = null) = "today?$DATE_ARG=${date?.toString().orEmpty()}"
 
     const val HABIT_ID_ARG = "habitId"
     const val HABIT_EDITOR = "habit_editor?$HABIT_ID_ARG={$HABIT_ID_ARG}"
@@ -51,15 +61,31 @@ fun HabitNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Routes.TODAY,
+        startDestination = Routes.today(),
         modifier = modifier,
     ) {
-        composable(Routes.TODAY) {
+        composable(
+            route = Routes.TODAY,
+            arguments =
+                listOf(
+                    navArgument(Routes.DATE_ARG) {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    },
+                ),
+        ) { backStackEntry ->
+            val shownDate =
+                backStackEntry.arguments
+                    ?.getString(Routes.DATE_ARG)
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let(LocalDate::parse)
             val viewModel: TodayViewModel =
                 viewModel(
                     factory =
                         viewModelFactory {
-                            initializer { TodayViewModel(container.habitRepository) }
+                            initializer {
+                                TodayViewModel(container.habitRepository, shownDate = shownDate)
+                            }
                         },
                 )
             TodayRoute(
@@ -67,9 +93,27 @@ fun HabitNavHost(
                 onAddHabit = { navController.navigate(Routes.habitEditor()) },
                 onEditHabit = { habitId -> navController.navigate(Routes.habitEditor(habitId)) },
                 onOpenHabits = { navController.navigate(Routes.HABITS) },
-                // TODO: hook up the history screen once it exists.
-                onOpenHistory = {},
+                onOpenHistory = { navController.navigate(Routes.HISTORY) },
                 onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+            )
+        }
+
+        composable(Routes.HISTORY) {
+            val viewModel: HistoryViewModel =
+                viewModel(
+                    factory =
+                        viewModelFactory {
+                            initializer { HistoryViewModel(container.habitRepository) }
+                        },
+                )
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            HistoryScreen(
+                state = state,
+                onPreviousMonth = viewModel::onPreviousMonth,
+                onNextMonth = viewModel::onNextMonth,
+                // Opening a past day is how values get backfilled (F3).
+                onOpenDay = { date -> navController.navigate(Routes.today(date)) },
+                onBack = { navController.popBackStack() },
             )
         }
 

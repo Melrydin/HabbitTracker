@@ -22,6 +22,7 @@ data class TodayUiState(
         DayGoalProgress(GoalType.POINTS, current = 0, threshold = 0, status = DayStatus.NEUTRAL),
     val habits: List<HabitItem> = emptyList(),
     val currentStreak: Int = 0,
+    val isToday: Boolean = true,
     val loaded: Boolean = false,
 )
 
