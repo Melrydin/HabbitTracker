@@ -363,18 +363,20 @@ there.
 
 ## State
 
-Done: today screen (F2, F3, F4 basics) and habit management (F1) including create, edit,
-archive and delete.
+**Phase 1 of the roadmap is complete.** F1, F2, F3, F4 basics, F6 and F7 basics all have
+data, rules and UI, and the schema already carries every V2 and V3 field so those features
+land without another migration.
 
-Open:
-
-**Phase 1 of the roadmap is complete**: F1, F2, F3, F4 basics, F6 and F7 basics all have data,
-rules and UI, and the schema already carries every V2 and V3 field.
+One item of the MVP list was moved rather than built. The core screen list names a habit
+detail with "editing, statistics, streak", but F4 puts the per-habit rate and the flexible
+habit streak under V2, and the streak rule they need is a V2 field. The editor covers the
+editing half; the statistics half waits for V2 together with the rule it depends on.
 
 Open:
 
 * **Phase 2 (V2)** has not started: reminders (F5), widgets (F9), weekly habits (F8), the
-  statistics build-out (F4), abstinence habits (F11), categories and tags (F12), CSV export.
+  statistics build-out including the habit detail (F4), abstinence habits (F11), categories
+  and tags (F12), CSV export.
 * The `goals` and `pauses` tables exist but stay empty until F10 and F4 need them.
 * `Habit.colorTag` exists in the data model but deliberately not in the editor — a per-habit
   color picker contradicts the one-color rule above.
