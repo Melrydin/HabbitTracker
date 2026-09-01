@@ -29,6 +29,12 @@ checker skips it.
 AGP 9 brings its own Kotlin support; there is no separate `kotlin-android` plugin here.
 Dependencies go through the version catalog in `gradle/libs.versions.toml`.
 
+**Two JDKs are in play.** The Gradle daemon runs on 25, declared in
+`gradle/gradle-daemon-jvm.properties`, while Kotlin compiles against the 17 toolchain pinned
+in `app/build.gradle.kts`. Kotlin 2.2 cannot use JDK 25 as a compile target and would
+silently fall back, so the toolchain makes the target explicit instead of letting it follow
+whatever JVM happens to run the build. CI installs both versions for the same reason.
+
 ## Commands
 
 Build:
@@ -119,7 +125,9 @@ rules in `domain/`, so they cannot drift apart on the parts that matter.
 
 KSP registers its generated sources through the `kotlin.sourceSets` DSL, which AGP 9's
 built-in Kotlin support rejects. `android.disallowKotlinSourceSets=false` in
-`gradle.properties` is the documented escape hatch and is required for Room to build.
+`gradle.properties` is the documented escape hatch and is required for Room to build; AGP 9.3
+ships no built-in KSP to fall back on. `android.sync.suppressAgpWarnings` silences the
+resulting experimental-option warning — and, be aware, every other one of that kind too.
 
 ## Business rules
 

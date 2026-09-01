@@ -28,8 +28,13 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlin {
+        // Pins the JDK that compiles Kotlin. Without it the compiler follows the
+        // Gradle daemon, and Kotlin 2.2 has no support for JDK 25 yet.
+        jvmToolchain(17)
     }
     buildFeatures {
         compose = true
