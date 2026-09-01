@@ -1,9 +1,11 @@
 package com.example.habbittracker.domain
 
 import com.example.habbittracker.domain.model.Habit
+import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.domain.model.StreakRule
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 
 /**
@@ -22,10 +24,34 @@ object HabitStreakCalculator {
      * streak that reads zero every morning would tell the user nothing.
      */
     fun currentStreak(habit: Habit, fulfillment: Map<LocalDate, Boolean>, today: LocalDate): Int =
-        when (habit.streakRule) {
-            StreakRule.DAILY -> dailyStreak(fulfillment, today)
-            StreakRule.WEEKLY_COUNT -> weeklyStreak(habit, fulfillment, today)
+        when {
+            habit.polarity == Polarity.BAD -> daysSinceSlip(fulfillment, today)
+            habit.streakRule == StreakRule.WEEKLY_COUNT -> weeklyStreak(habit, fulfillment, today)
+            else -> dailyStreak(fulfillment, today)
         }
+
+    /**
+     * Days since the last slip, for a habit that is avoided (F11).
+     *
+     * Read off the calendar rather than counted over stored days: an abstinence
+     * habit is only ever written to when something goes wrong, so counting stored
+     * days would leave the number at zero on exactly the days it should reward.
+     * Without a slip on record the run starts at the earliest day known of the
+     * habit, which is the most that can honestly be claimed.
+     */
+    private fun daysSinceSlip(fulfillment: Map<LocalDate, Boolean>, today: LocalDate): Int {
+        val lastSlip =
+            fulfillment
+                .filterValues { !it }
+                .keys
+                .filterNot { it.isAfter(today) }
+                .maxOrNull()
+        val start = lastSlip ?: fulfillment.keys.minOrNull()?.minusDays(1) ?: return 0
+        return ChronoUnit.DAYS
+            .between(start, today)
+            .toInt()
+            .coerceAtLeast(0)
+    }
 
     private fun dailyStreak(fulfillment: Map<LocalDate, Boolean>, today: LocalDate): Int {
         val earliest = fulfillment.keys.minOrNull() ?: return 0

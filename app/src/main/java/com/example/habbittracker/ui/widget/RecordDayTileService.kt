@@ -38,7 +38,7 @@ class RecordDayTileService : TileService() {
                 .observeDay(today)
                 .first()
                 .entries
-                .filterNot { it.fulfilled }
+                .filter { it.open }
                 .forEach { repository.completeHabit(today, it.habit.id) }
             TodayWidget().updateAll(applicationContext)
             refresh()
@@ -57,7 +57,7 @@ class RecordDayTileService : TileService() {
                 .observeDay(LocalDate.now())
                 .first()
                 .entries
-                .count { !it.fulfilled }
+                .count { it.open }
         qsTile?.apply {
             state = if (open == 0) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
             label = getString(R.string.tile_label)

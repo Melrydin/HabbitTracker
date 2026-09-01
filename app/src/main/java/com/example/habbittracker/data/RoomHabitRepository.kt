@@ -21,6 +21,7 @@ import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.domain.model.Pause
+import com.example.habbittracker.domain.model.Polarity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -117,7 +118,7 @@ class RoomHabitRepository(
                     .associate { it.date to recordedByDate[it.date].orEmpty() }
                     .mapValues { (_, rows) -> rows.associate { it.habitId to it.progress } }
                     .filterKeys { date -> domainHabits.appliedOn(date, recordedByDate, habitId) }
-                    .mapValues { (_, progress) -> (progress[habitId] ?: 0) >= habit.target }
+                    .mapValues { (_, progress) -> habit.isFulfilledBy(progress[habitId] ?: 0) }
             }
         }
 
@@ -131,7 +132,8 @@ class RoomHabitRepository(
 
     override suspend fun completeHabit(date: LocalDate, habitId: Long) {
         val habit = habitDao.getById(habitId)?.toDomain() ?: return
-        setProgress(date, habitId, habit.target)
+        // A habit to avoid is done by having nothing on it: a clean day (F11).
+        setProgress(date, habitId, if (habit.polarity == Polarity.BAD) 0 else habit.target)
     }
 
     /**

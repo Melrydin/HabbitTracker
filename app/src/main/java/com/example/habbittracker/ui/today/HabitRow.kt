@@ -46,7 +46,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.model.GoalType
+import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.ui.components.ProgressTrack
 import com.example.habbittracker.ui.icons.HabitIcons
 import com.example.habbittracker.ui.theme.HabitTheme
@@ -263,6 +265,19 @@ private fun Stepper(
     }
 }
 
+/** What the counter aims at, or for a habit to avoid what it must not pass (F11). */
+@Composable
+private fun targetLine(habit: Habit): String {
+    val unit = habit.unit
+    val limit = habit.polarity == Polarity.BAD
+    return when {
+        unit.isNullOrBlank() && limit -> stringResource(R.string.habit_entry_limit_plain, habit.target)
+        unit.isNullOrBlank() -> stringResource(R.string.habit_entry_target_plain, habit.target)
+        limit -> stringResource(R.string.habit_entry_limit, habit.target, unit)
+        else -> stringResource(R.string.habit_entry_target, habit.target, unit)
+    }
+}
+
 /**
  * Second line: the current value for counters, and for CHECK whatever moves the day
  * forward (points or required), so the rule of the day stays readable.
@@ -271,13 +286,15 @@ private fun Stepper(
 private fun habitSubtitle(item: HabitItem, goalType: GoalType): String {
     val habit = item.entry.habit
     if (habit.type != HabitType.CHECK) {
-        // The count itself sits in the stepper, so the line states the target.
-        val unit = habit.unit
-        return if (unit.isNullOrBlank()) {
-            stringResource(R.string.habit_entry_target_plain, habit.target)
-        } else {
-            stringResource(R.string.habit_entry_target, habit.target, unit)
-        }
+        // The count itself sits in the stepper, so the line states what to reach —
+        // or, for a habit to avoid, what not to go beyond (F11).
+        return targetLine(habit)
+    }
+    // A habit to avoid has no target to state, so the line carries the outcome
+    // instead: it is the only thing that says what the mark on the right means.
+    if (habit.polarity == Polarity.BAD) {
+        val clean = if (item.entry.progress == 0) R.string.habit_entry_clean else R.string.habit_entry_slipped
+        return stringResource(clean)
     }
     return when {
         goalType == GoalType.ALL_REQUIRED && habit.required -> {

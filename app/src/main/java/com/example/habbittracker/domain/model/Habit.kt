@@ -132,6 +132,25 @@ data class Habit(
         }
     }
 
+    /**
+     * The most a habit to avoid may reach and still count as a clean day (F11).
+     *
+     * A plain abstinence allows nothing at all; a reduction allows its target,
+     * which is a ceiling there rather than something to reach.
+     */
+    val allowance: Int get() = if (type == HabitType.CHECK) 0 else target
+
+    /**
+     * What counts as done (F1, F11). A habit to build up asks for its target, one
+     * to avoid asks to stay within what it allows — so an untouched day is already
+     * a clean one, which is the whole point of tracking abstinence.
+     */
+    fun isFulfilledBy(progress: Int): Boolean =
+        when (polarity) {
+            Polarity.GOOD -> progress >= target
+            Polarity.BAD -> progress <= allowance
+        }
+
     companion object {
         const val NAME_MAX_LENGTH = 40
         const val NOTE_MAX_LENGTH = 500

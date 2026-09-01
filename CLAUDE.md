@@ -187,7 +187,8 @@ Three ways to tick a habit off without opening a screen (F9): the home screen wi
   the widget `incrementHabit`.
 * The tile finishes **everything the day still asks for** rather than one habit: it has
   nowhere to choose one.
-* A tap in the widget adds **one step**, it does not finish the habit. Five glasses of water
+* A tap in the widget adds **one step**, which for a habit to avoid means recording a
+  slip — the only quick action such a habit has. It does not finish the habit. Five glasses of water
   are filled glass by glass there just as they are in the app, so the widget shows the count
   next to the name.
 * The widget follows the host's palette, so a finished habit is marked with a check and a
@@ -244,6 +245,24 @@ The **day theme** is always a habit ([DayTheme]). A habit with `givesTheme` offe
 on every day it appears on: exactly one offer takes it, several leave the day without a
 theme until the user picks, and a theme typed by hand always wins because it is the
 explicit choice.
+
+## Abstinence habits
+
+A habit is either built up or avoided (`Habit.polarity`, F11). Everything follows from
+one rule in `Habit.isFulfilledBy`, so no screen has to know about the difference:
+
+* A habit to build up is done at its target. One to avoid is done while it stays within
+  what it allows — **nothing at all** for a plain abstinence, **at most the target** for
+  a reduction, where the number is a ceiling rather than something to reach.
+* An **untouched day is already clean**, which is the whole point: abstinence cannot be
+  tracked by asking for a positive action every day. A clean day earns its points like
+  any other fulfilled habit.
+* Recording a slip is what the tap does, so the mark toggles the recorded value rather
+  than the outcome. The tile skips those habits entirely (`HabitEntry.open`) — a day
+  cannot be "finished" for them, and sweeping the day would erase a slip the user logged.
+* The streak is the **abstinence run**: days since the last slip, read off the calendar
+  rather than counted over stored days. A day nothing was recorded on still counts,
+  otherwise the number would sit at zero on exactly the days it should reward.
 
 ## Business rules
 
@@ -475,8 +494,9 @@ Open:
 
 * **Phase 2 (V2)** is under way. Done: reminders (F5), widget, tile and notification action
   (F9), and F4 in full: the habit streak, the statistics half including the habit detail,
-  breaks and holidays, and the grace days, plus week habits and the theme coupling (F8).
-  Still open: abstinence habits (F11), categories and tags (F12), CSV export.
+  breaks and holidays, and the grace days, week habits and the theme coupling (F8), and
+  abstinence habits (F11).
+  Still open: categories and tags (F12), CSV export.
 * The widget is **not configurable yet**. F9 asks for a choice between all habits of the day
   and a selection; it currently always shows all of them.
 * The `goals` table exists but stays empty until F10 needs it.

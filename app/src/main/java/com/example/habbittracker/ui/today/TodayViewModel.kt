@@ -69,8 +69,12 @@ class TodayViewModel(
                 initialValue = TodayUiState(date = date.value),
             )
 
+    /**
+     * The mark means "done" for a habit to build up and "slipped" for one to avoid,
+     * so it toggles the recorded value rather than the outcome (F11).
+     */
     fun onToggleCheck(item: HabitItem) {
-        setProgress(item, if (item.fulfilled) 0 else item.entry.habit.target)
+        setProgress(item, if (item.entry.progress > 0) 0 else item.entry.habit.target)
     }
 
     fun onIncrement(item: HabitItem) = setProgress(item, item.entry.progress + STEP)

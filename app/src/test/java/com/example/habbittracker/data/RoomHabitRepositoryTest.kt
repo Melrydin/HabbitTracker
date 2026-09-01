@@ -13,6 +13,7 @@ import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitKind
 import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.domain.model.Pause
+import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.domain.model.Recurrence
 import com.example.habbittracker.domain.model.WeekSpan
 import kotlinx.coroutines.flow.first
@@ -89,6 +90,9 @@ class RoomHabitRepositoryTest {
         repository.upsertHabit(
             Habit(NEW_HABIT_ID, name, type, target, points = points, required = required, icon = "task_alt"),
         )
+
+    private fun avoidedHabit(name: String) =
+        Habit(NEW_HABIT_ID, name, HabitType.CHECK, target = 1, icon = "task_alt", polarity = Polarity.BAD)
 
     private fun weekHabit(name: String, monday: LocalDate) =
         Habit(
@@ -431,6 +435,69 @@ class RoomHabitRepositoryTest {
             val day = repository.observeDay(date).first().day
             assertFalse(day.goalOverridden)
             assertEquals(GoalType.POINTS, day.goalType)
+        }
+
+    @Test
+    fun `an untouched day is already clean for a habit that is avoided`() =
+        runBlocking {
+            val id = repository.upsertHabit(avoidedHabit("Smoking"))
+
+            val entry =
+                repository
+                    .observeDay(date)
+                    .first()
+                    .entries
+                    .first { it.habit.id == id }
+            assertTrue(entry.fulfilled)
+            // Nothing is open there: no tap can make a clean day cleaner.
+            assertFalse(entry.open)
+        }
+
+    @Test
+    fun `a recorded slip takes the day away from a habit that is avoided`() =
+        runBlocking {
+            val id = repository.upsertHabit(avoidedHabit("Smoking"))
+
+            repository.setProgress(date, id, 1)
+
+            assertFalse(
+                repository
+                    .observeDay(date)
+                    .first()
+                    .entries
+                    .first { it.habit.id == id }
+                    .fulfilled,
+            )
+        }
+
+    @Test
+    fun `completing a habit that is avoided clears the slip instead of booking one`() =
+        runBlocking {
+            val id = repository.upsertHabit(avoidedHabit("Smoking"))
+            repository.setProgress(date, id, 1)
+
+            repository.completeHabit(date, id)
+
+            assertTrue(
+                repository
+                    .observeDay(date)
+                    .first()
+                    .entries
+                    .first { it.habit.id == id }
+                    .fulfilled,
+            )
+        }
+
+    @Test
+    fun `the history of a habit that is avoided marks the days with a slip`() =
+        runBlocking {
+            val id = repository.upsertHabit(avoidedHabit("Smoking"))
+            repository.setProgress(date.minusDays(1), id, 1)
+            repository.setProgress(date, id, 0)
+
+            val history = repository.observeHabitHistory(id).first()
+            assertEquals(false, history[date.minusDays(1)])
+            assertEquals(true, history[date])
         }
 
     @Test

@@ -56,6 +56,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.domain.model.StreakRule
 import com.example.habbittracker.ui.components.BackTopAppBar
 import com.example.habbittracker.ui.components.LabeledSection
@@ -83,6 +84,7 @@ fun HabitEditorScreen(
     onPointsChange: (Int) -> Unit,
     onRequiredChange: (Boolean) -> Unit,
     onGivesThemeChange: (Boolean) -> Unit,
+    onPolarityChange: (Polarity) -> Unit,
     onIconChange: (String) -> Unit,
     rhythm: RhythmCallbacks,
     onSave: () -> Unit,
@@ -122,7 +124,7 @@ fun HabitEditorScreen(
                     .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            state.stats?.let { StatsSection(stats = it) }
+            state.stats?.let { StatsSection(stats = it, abstinence = form.polarity == Polarity.BAD) }
 
             NameField(form = form, onNameChange = onNameChange)
 
@@ -135,6 +137,17 @@ fun HabitEditorScreen(
                     options = HabitType.entries,
                     selected = form.type,
                     onSelect = onTypeChange,
+                ) { stringResource(it.labelRes()) }
+            }
+
+            LabeledSection(
+                label = stringResource(R.string.habit_editor_polarity_label),
+                hint = stringResource(R.string.habit_editor_polarity_hint),
+            ) {
+                SegmentedChoice(
+                    options = Polarity.entries,
+                    selected = form.polarity,
+                    onSelect = onPolarityChange,
                 ) { stringResource(it.labelRes()) }
             }
 
@@ -255,7 +268,7 @@ private fun NameField(
 
 /** Streak and rate for this habit (F4), the statistics half of the habit detail. */
 @Composable
-private fun StatsSection(stats: HabitStats, modifier: Modifier = Modifier) {
+private fun StatsSection(stats: HabitStats, abstinence: Boolean, modifier: Modifier = Modifier) {
     LabeledSection(label = stringResource(R.string.habit_editor_stats_label), modifier = modifier) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             SettingRow(
@@ -265,7 +278,16 @@ private fun StatsSection(stats: HabitStats, modifier: Modifier = Modifier) {
                         stats.currentStreak,
                         stats.currentStreak,
                     ),
-                subtitle = stringResource(R.string.habit_editor_stats_streak),
+                // For a habit to avoid the same number reads as days since the last
+                // slip, which is what an abstinence streak is (F11).
+                subtitle =
+                    stringResource(
+                        if (abstinence) {
+                            R.string.habit_editor_stats_abstinence
+                        } else {
+                            R.string.habit_editor_stats_streak
+                        },
+                    ),
                 modifier = Modifier.weight(1f),
             )
             SettingRow(
@@ -370,7 +392,16 @@ private fun TargetAndUnitFields(
             value = form.target,
             onValueChange = onTargetChange,
             modifier = Modifier.weight(1f),
-            label = { Text(stringResource(R.string.habit_editor_target_label)) },
+            label = {
+                // For a habit to avoid the number is a ceiling, so it is named as one.
+                val label =
+                    if (form.targetIsLimit) {
+                        R.string.habit_editor_limit_label
+                    } else {
+                        R.string.habit_editor_target_label
+                    }
+                Text(stringResource(label))
+            },
             singleLine = true,
             isError = form.targetError != null,
             shape = MaterialTheme.shapes.medium,
@@ -563,6 +594,7 @@ private fun HabitEditorNewPreview() {
             onPointsChange = {},
             onRequiredChange = {},
             onGivesThemeChange = {},
+            onPolarityChange = {},
             onIconChange = {},
             rhythm = previewRhythm(),
             onSave = {},
@@ -599,6 +631,7 @@ private fun HabitEditorEditPreview() {
             onPointsChange = {},
             onRequiredChange = {},
             onGivesThemeChange = {},
+            onPolarityChange = {},
             onIconChange = {},
             rhythm = previewRhythm(),
             onSave = {},

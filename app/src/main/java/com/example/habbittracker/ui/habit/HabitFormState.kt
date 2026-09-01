@@ -4,6 +4,7 @@ import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitKind
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.domain.model.Recurrence
 import com.example.habbittracker.domain.model.StreakRule
 import com.example.habbittracker.domain.model.WeekSpan
@@ -51,11 +52,16 @@ data class HabitFormState(
     val parentId: Long? = null,
     val assignedDows: Set<Int> = emptySet(),
     val givesTheme: Boolean = false,
+    // F11, whether the habit is built up or avoided
+    val polarity: Polarity = Polarity.GOOD,
 ) {
     val isNew: Boolean get() = id == NEW_HABIT_ID
 
     /** Per the feature list CHECK always has target 1, so the field is hidden there. */
     val showsTargetAndUnit: Boolean get() = type != HabitType.CHECK
+
+    /** For a habit to avoid the number is a ceiling, not something to reach (F11). */
+    val targetIsLimit: Boolean get() = polarity == Polarity.BAD
 
     private val parsedTarget: Int? get() = if (type == HabitType.CHECK) 1 else target.trim().toIntOrNull()
 
@@ -140,6 +146,8 @@ data class HabitFormState(
 
     fun withGivesTheme(value: Boolean) = copy(givesTheme = value)
 
+    fun withPolarity(value: Polarity) = copy(polarity = value)
+
     /** Switching to CHECK makes target and unit meaningless. */
     fun withType(value: HabitType): HabitFormState =
         when {
@@ -173,6 +181,7 @@ data class HabitFormState(
             recurrence = recurrence.takeIf { kind == HabitKind.WEEKLY },
             assignedDows = if (kind == HabitKind.SUB) assignedDows else emptySet(),
             givesTheme = givesTheme,
+            polarity = polarity,
         )
     }
 
@@ -206,6 +215,7 @@ data class HabitFormState(
                 parentId = habit.parentId,
                 assignedDows = habit.assignedDows,
                 givesTheme = habit.givesTheme,
+                polarity = habit.polarity,
             )
     }
 }

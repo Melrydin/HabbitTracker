@@ -2,6 +2,7 @@ package com.example.habbittracker.domain
 
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.domain.model.StreakRule
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -24,6 +25,9 @@ class HabitStreakCalculatorTest {
             streakRule = StreakRule.WEEKLY_COUNT,
             perWeekTarget = perWeek,
         )
+
+    private fun avoided() =
+        Habit(1, "Smoking", HabitType.CHECK, target = 1, icon = "task_alt", polarity = Polarity.BAD)
 
     private fun history(vararg entries: Pair<Long, Boolean>) =
         entries.associate { (back, done) -> today.minusDays(back) to done }
@@ -53,6 +57,42 @@ class HabitStreakCalculatorTest {
     @Test
     fun `without history the daily streak is zero`() {
         assertEquals(0, HabitStreakCalculator.currentStreak(daily(), emptyMap(), today))
+    }
+
+    // --- Abstinence, F11 ---
+
+    @Test
+    fun `an abstinence streak counts the days since the last slip`() {
+        val fulfillment = history(0L to true, 1L to true, 2L to false, 5L to true)
+
+        assertEquals(2, HabitStreakCalculator.currentStreak(avoided(), fulfillment, today))
+    }
+
+    @Test
+    fun `a slip today ends the abstinence run`() {
+        val fulfillment = history(0L to false, 1L to true, 2L to true)
+
+        assertEquals(0, HabitStreakCalculator.currentStreak(avoided(), fulfillment, today))
+    }
+
+    @Test
+    fun `days nothing was recorded on still count towards abstinence`() {
+        // Only the slip and today are on record; the gap between them counts.
+        val fulfillment = history(10L to false, 0L to true)
+
+        assertEquals(10, HabitStreakCalculator.currentStreak(avoided(), fulfillment, today))
+    }
+
+    @Test
+    fun `without a slip the run reaches back to the earliest day known`() {
+        val fulfillment = history(4L to true, 0L to true)
+
+        assertEquals(5, HabitStreakCalculator.currentStreak(avoided(), fulfillment, today))
+    }
+
+    @Test
+    fun `without history the abstinence streak is zero`() {
+        assertEquals(0, HabitStreakCalculator.currentStreak(avoided(), emptyMap(), today))
     }
 
     @Test

@@ -6,6 +6,7 @@ import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.Polarity
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -21,9 +22,41 @@ class DayEvaluatorTest {
     private fun counter(id: Long, target: Int, points: Int = 1) =
         Habit(id, "Habit $id", HabitType.COUNTER, target = target, unit = "x", points = points, icon = "task_alt")
 
+    private fun avoided(id: Long, points: Int = 1) = check(id, points = points).copy(polarity = Polarity.BAD)
+
     /** Only POINTS reads the threshold; the other rules derive theirs. */
     private fun day(goalType: GoalType, threshold: Int = 0) =
         Day(date, goalType = goalType, goalThreshold = threshold)
+
+    // --- Abstinence, F11 ---
+
+    @Test
+    fun `a clean day fulfils a habit that is avoided`() {
+        val entries = listOf(HabitEntry(avoided(1, points = 3), progress = 0))
+
+        val result = DayEvaluator.evaluate(day(GoalType.POINTS, threshold = 3), entries)
+
+        assertTrue(result.passed)
+        assertEquals(3, result.current)
+    }
+
+    @Test
+    fun `a recorded slip takes the points away again`() {
+        val entries = listOf(HabitEntry(avoided(1, points = 3), progress = 1))
+
+        val result = DayEvaluator.evaluate(day(GoalType.POINTS, threshold = 3), entries)
+
+        assertFalse(result.passed)
+        assertEquals(0, result.current)
+    }
+
+    @Test
+    fun `a reduction habit stays clean up to its limit`() {
+        val habit = counter(1, target = 2).copy(polarity = Polarity.BAD)
+
+        assertTrue(HabitEntry(habit, progress = 2).fulfilled)
+        assertFalse(HabitEntry(habit, progress = 3).fulfilled)
+    }
 
     @Test
     fun `a points goal passes once the sum reaches the threshold`() {

@@ -10,6 +10,7 @@ import com.example.habbittracker.domain.Statistics
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitKind
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.domain.model.Recurrence
 import com.example.habbittracker.domain.model.StreakRule
 import com.example.habbittracker.domain.model.WeekSpan
@@ -99,6 +100,8 @@ class HabitEditorViewModel(
     fun onToggleDow(value: Int) = updateForm { it.toggleDow(value) }
 
     fun onGivesThemeChange(value: Boolean) = updateForm { it.withGivesTheme(value) }
+
+    fun onPolarityChange(value: Polarity) = updateForm { it.withPolarity(value) }
 
     fun onRequiredChange(value: Boolean) = updateForm { it.copy(required = value) }
 

@@ -65,6 +65,16 @@
     <string name="habit_editor_name_counter">%1$d/%2$d</string>
     <string name="habit_editor_icon_label">Icon</string>
     <string name="habit_editor_type_label">Type</string>
+    <string name="habit_editor_polarity_label">Direction</string>
+    <string name="habit_editor_polarity_hint">A habit to avoid counts every day without a slip. Recording one ends the run and starts it again the next day.</string>
+    <string name="habit_editor_polarity_good">Build up</string>
+    <string name="habit_editor_polarity_bad">Avoid</string>
+    <string name="habit_editor_limit_label">At most per day</string>
+    <string name="habit_editor_stats_abstinence">Days without a slip</string>
+    <string name="habit_entry_limit">At most %1$d %2$s</string>
+    <string name="habit_entry_limit_plain">At most %d</string>
+    <string name="habit_entry_clean">Clean day</string>
+    <string name="habit_entry_slipped">Slip recorded</string>
     <string name="habit_editor_target_label">Target</string>
     <string name="habit_editor_target_error_required">Enter a number</string>
     <string name="habit_editor_target_error_min">At least 1</string>

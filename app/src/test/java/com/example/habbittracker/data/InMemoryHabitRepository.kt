@@ -14,6 +14,7 @@ import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
 import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.domain.model.Pause
+import com.example.habbittracker.domain.model.Polarity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -75,7 +76,7 @@ class InMemoryHabitRepository(
 
     override suspend fun completeHabit(date: LocalDate, habitId: Long) {
         val habit = store.value.habits.firstOrNull { it.id == habitId } ?: return
-        setProgress(date, habitId, habit.target)
+        setProgress(date, habitId, if (habit.polarity == Polarity.BAD) 0 else habit.target)
     }
 
     /** The fake only stores the link; creating a theme habit is the real repository's job. */
@@ -146,7 +147,7 @@ class InMemoryHabitRepository(
             } else {
                 current.days.keys
                     .filter { date -> current.entriesFor(date).any { it.habit.id == habitId } }
-                    .associateWith { date -> (current.progress[date to habitId] ?: 0) >= habit.target }
+                    .associateWith { date -> habit.isFulfilledBy(current.progress[date to habitId] ?: 0) }
             }
         }
 

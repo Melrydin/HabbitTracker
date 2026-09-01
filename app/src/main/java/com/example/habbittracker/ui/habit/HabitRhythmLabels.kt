@@ -3,6 +3,7 @@ package com.example.habbittracker.ui.habit
 import androidx.annotation.StringRes
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.model.HabitKind
+import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.domain.model.Recurrence
 import com.example.habbittracker.domain.model.WeekSpan
 
@@ -27,4 +28,12 @@ fun Recurrence.labelRes(): Int =
     when (this) {
         Recurrence.EVERY_DAY -> R.string.habit_editor_recurrence_every_day
         Recurrence.BY_SUBS -> R.string.habit_editor_recurrence_by_subs
+    }
+
+/** Label for the direction of a habit: built up or avoided (F11). */
+@StringRes
+fun Polarity.labelRes(): Int =
+    when (this) {
+        Polarity.GOOD -> R.string.habit_editor_polarity_good
+        Polarity.BAD -> R.string.habit_editor_polarity_bad
     }

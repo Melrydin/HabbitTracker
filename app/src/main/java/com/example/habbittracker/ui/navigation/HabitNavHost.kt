@@ -241,6 +241,7 @@ fun HabitNavHost(
                 onPointsChange = viewModel::onPointsChange,
                 onRequiredChange = viewModel::onRequiredChange,
                 onGivesThemeChange = viewModel::onGivesThemeChange,
+                onPolarityChange = viewModel::onPolarityChange,
                 onIconChange = viewModel::onIconChange,
                 rhythm =
                     RhythmCallbacks(
