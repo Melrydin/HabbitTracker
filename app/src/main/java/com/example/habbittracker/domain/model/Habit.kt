@@ -1,5 +1,6 @@
 package com.example.habbittracker.domain.model
 
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 /** How a habit is tracked (F1). */
@@ -103,6 +104,32 @@ data class Habit(
         require(type != HabitType.CHECK || target == 1) { "CHECK always has target = 1" }
         require((note?.length ?: 0) <= NOTE_MAX_LENGTH) { "note must be at most $NOTE_MAX_LENGTH characters" }
         require(assignedDows.all { it in 1..7 }) { "assignedDows holds weekdays 1..7" }
+        requireWeekly()
+        requireSub()
+    }
+
+    /** A week habit is bound to one calendar week, which starts on a Monday (F8). */
+    private fun requireWeekly() {
+        if (kind != HabitKind.WEEKLY) {
+            require(weekStart == null && weekSpan == null && recurrence == null) {
+                "only a WEEKLY habit is bound to a week"
+            }
+            return
+        }
+        require(weekStart != null && weekSpan != null && recurrence != null) {
+            "a WEEKLY habit needs a week, a span and a recurrence"
+        }
+        require(weekStart.dayOfWeek == DayOfWeek.MONDAY) { "weekStart is the Monday of its week" }
+    }
+
+    /** A sub habit hangs off a week habit and needs weekdays to appear on (F8). */
+    private fun requireSub() {
+        if (kind == HabitKind.SUB) {
+            require(parentId != null) { "a SUB habit needs its WEEKLY parent" }
+            require(assignedDows.isNotEmpty()) { "a SUB habit needs at least one weekday" }
+        } else {
+            require(parentId == null) { "only a SUB habit has a parent" }
+        }
     }
 
     companion object {

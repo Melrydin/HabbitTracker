@@ -217,6 +217,7 @@ class InMemoryHabitRepository(
      */
     private fun Store.entriesFor(date: LocalDate): List<HabitEntry> =
         DayHabits.entriesFor(
+            date = date,
             pausedHabits = Pauses.pausedHabits(pauses, date),
             habits = habits,
             // Only the rows of this day, so a missing row stays distinguishable

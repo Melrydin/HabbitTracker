@@ -59,6 +59,7 @@ class RoomHabitRepository(
                 day = (day?.toDomain() ?: defaultDay(date, current)).underCurrentGoal(current),
                 entries =
                     DayHabits.entriesFor(
+                        date = date,
                         habits = habits.map { it.toDomain() },
                         progressByHabitId = recorded.associate { it.habitId to it.progress },
                         pausedHabits = Pauses.pausedHabits(pauses, date),
@@ -115,12 +116,8 @@ class RoomHabitRepository(
                 days
                     .associate { it.date to recordedByDate[it.date].orEmpty() }
                     .mapValues { (_, rows) -> rows.associate { it.habitId to it.progress } }
-                    .filterValues { progress ->
-                        DayHabits.entriesFor(domainHabits, progress).any {
-                            it.habit.id ==
-                                habitId
-                        }
-                    }.mapValues { (_, progress) -> (progress[habitId] ?: 0) >= habit.target }
+                    .filterKeys { date -> domainHabits.appliedOn(date, recordedByDate, habitId) }
+                    .mapValues { (_, progress) -> (progress[habitId] ?: 0) >= habit.target }
             }
         }
 
@@ -260,12 +257,26 @@ class RoomHabitRepository(
             HabitType.COUNTER -> progress.coerceIn(0, PROGRESS_MAX)
         }
 
+    /** Whether one habit was part of that day at all, which is what a history maps (F4). */
+    private fun List<Habit>.appliedOn(
+        date: LocalDate,
+        recordedByDate: Map<LocalDate, List<DayHabitEntity>>,
+        habitId: Long,
+    ): Boolean =
+        DayHabits
+            .entriesFor(
+                date = date,
+                habits = this,
+                progressByHabitId = recordedByDate[date].orEmpty().associate { it.habitId to it.progress },
+            ).any { it.habit.id == habitId }
+
     private suspend fun recalculate(date: LocalDate) {
         val current = settings.first()
         val pauses = pauseDao.getAll().map { it.toDomain() }
         val day = (dayDao.get(date)?.toDomain() ?: defaultDay(date, current)).underCurrentGoal(current)
         val entries =
             DayHabits.entriesFor(
+                date = date,
                 habits = habitDao.getAll().map { it.toDomain() },
                 progressByHabitId = dayHabitDao.getForDate(date).associate { it.habitId to it.progress },
                 pausedHabits = Pauses.pausedHabits(pauses, date),
@@ -289,6 +300,7 @@ class RoomHabitRepository(
                 val day = entity.toDomain().underCurrentGoal(current)
                 val entries =
                     DayHabits.entriesFor(
+                        date = day.date,
                         habits = habits,
                         progressByHabitId = recordedByDate[day.date].orEmpty().associate { it.habitId to it.progress },
                         pausedHabits = Pauses.pausedHabits(pauses, day.date),
