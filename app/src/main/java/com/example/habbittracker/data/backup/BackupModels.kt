@@ -24,7 +24,6 @@ data class BackupManifest(
 data class BackupHabit(
     val id: Long,
     val name: String,
-    val type: String,
     val target: Int,
     val unit: String? = null,
     val points: Int = 1,

@@ -7,7 +7,6 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.HabitKind
-import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.domain.model.StreakRule
 import kotlinx.coroutines.runBlocking
@@ -77,7 +76,7 @@ class MigrationTest {
     private fun openMigrated(): HabitDatabase =
         Room
             .databaseBuilder(context, HabitDatabase::class.java, name)
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
             .allowMainThreadQueries()
             .build()
 
@@ -129,7 +128,7 @@ class MigrationTest {
         }
 
     @Test
-    fun `an amount habit becomes a counter`() =
+    fun `a habit survives the type column being dropped`() =
         runBlocking {
             createSchemaOne()
             // Schema 1 knew a third habit type that no longer exists.
@@ -145,7 +144,7 @@ class MigrationTest {
             val habit = db.habitDao().getById(2)!!.toDomain()
             db.close()
 
-            assertEquals(HabitType.COUNTER, habit.type)
+            assertEquals("Read", habit.name)
             assertEquals(30, habit.target)
             assertEquals("min", habit.unit)
         }

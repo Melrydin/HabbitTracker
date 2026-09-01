@@ -2,7 +2,6 @@ package com.example.habbittracker.ui.habit
 
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
 import com.example.habbittracker.domain.model.Habit
-import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.ui.icons.HabitIcons
 
 /** Reasons why the form cannot be saved yet. */
@@ -23,7 +22,6 @@ enum class HabitFormError {
 data class HabitFormState(
     val id: Long = NEW_HABIT_ID,
     val name: String = "",
-    val type: HabitType = HabitType.CHECK,
     val target: String = "1",
     val unit: String = "",
     val points: Int = 1,
@@ -34,17 +32,13 @@ data class HabitFormState(
 ) {
     val isNew: Boolean get() = id == NEW_HABIT_ID
 
-    /** Per the feature list CHECK always has target 1, so the field is hidden there. */
-    val showsTargetAndUnit: Boolean get() = type != HabitType.CHECK
-
-    private val parsedTarget: Int? get() = if (type == HabitType.CHECK) 1 else target.trim().toIntOrNull()
+    private val parsedTarget: Int? get() = target.trim().toIntOrNull()
 
     val nameError: HabitFormError?
         get() = if (name.isBlank()) HabitFormError.NAME_REQUIRED else null
 
     val targetError: HabitFormError?
         get() {
-            if (type == HabitType.CHECK) return null
             val value = parsedTarget ?: return HabitFormError.TARGET_REQUIRED
             return when {
                 value < 1 -> HabitFormError.TARGET_TOO_SMALL
@@ -68,25 +62,13 @@ data class HabitFormState(
 
     fun withPoints(value: Int) = copy(points = value.coerceIn(POINTS_MIN, POINTS_MAX))
 
-    /** Switching to CHECK makes target and unit meaningless. */
-    fun withType(value: HabitType): HabitFormState =
-        when {
-            value == type -> this
-
-            value == HabitType.CHECK -> copy(type = value, target = "1", unit = "")
-
-            // Coming from CHECK the target is "1", which is valid, so switching shows no error.
-            else -> copy(type = value)
-        }
-
     fun toHabit(): Habit {
         check(canSave) { "the form is incomplete" }
         return Habit(
             id = id,
             name = name.trim(),
-            type = type,
             target = parsedTarget ?: 1,
-            unit = if (type == HabitType.CHECK) null else unit.trim().ifBlank { null },
+            unit = unit.trim().ifBlank { null },
             points = points,
             required = required,
             icon = icon,
@@ -106,7 +88,6 @@ data class HabitFormState(
             HabitFormState(
                 id = habit.id,
                 name = habit.name,
-                type = habit.type,
                 target = habit.target.toString(),
                 unit = habit.unit.orEmpty(),
                 points = habit.points,

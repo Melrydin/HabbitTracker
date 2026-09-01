@@ -56,7 +56,6 @@
     <string name="habit_editor_name_error">Please enter a name</string>
     <string name="habit_editor_name_counter">%1$d/%2$d</string>
     <string name="habit_editor_icon_label">Icon</string>
-    <string name="habit_editor_type_label">Type</string>
     <string name="habit_editor_target_label">Target</string>
     <string name="habit_editor_target_error_required">Enter a number</string>
     <string name="habit_editor_target_error_min">At least 1</string>
@@ -129,9 +128,6 @@
     <string name="settings_backup_import_confirm">Restore</string>
     <string name="settings_threshold_increase">Raise the threshold</string>
 
-    <string name="habit_type_check">Yes/No</string>
-    <string name="habit_type_counter">Count / amount</string>
     <string name="habit_summary_target">Target %1$d %2$s</string>
     <string name="habit_summary_target_plain">Target %d</string>
-    <string name="habit_edit_action">Edit</string>
 </resources>

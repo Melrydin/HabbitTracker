@@ -178,7 +178,6 @@ fun HabitNavHost(
             HabitEditorScreen(
                 state = state,
                 onNameChange = viewModel::onNameChange,
-                onTypeChange = viewModel::onTypeChange,
                 onTargetChange = viewModel::onTargetChange,
                 onUnitChange = viewModel::onUnitChange,
                 onNoteChange = viewModel::onNoteChange,

@@ -11,7 +11,6 @@ import com.example.habbittracker.domain.model.Goal
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitKind
-import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.domain.model.Pause
 import com.example.habbittracker.domain.model.Polarity
 import com.example.habbittracker.domain.model.Recurrence
@@ -43,7 +42,6 @@ import java.time.LocalDate
 data class HabitEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
-    val type: HabitType,
     val target: Int,
     val unit: String?,
     val points: Int,
@@ -159,7 +157,6 @@ fun HabitEntity.toDomain() =
     Habit(
         id = id,
         name = name,
-        type = type,
         target = target,
         unit = unit,
         points = points,
@@ -188,7 +185,6 @@ fun Habit.toEntity() =
     HabitEntity(
         id = id,
         name = name,
-        type = type,
         target = target,
         unit = unit,
         points = points,

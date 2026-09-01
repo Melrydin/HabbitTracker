@@ -9,7 +9,6 @@ import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
-import com.example.habbittracker.domain.model.HabitType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
@@ -54,14 +53,9 @@ class InMemoryHabitRepository(
     override suspend fun setProgress(date: LocalDate, habitId: Long, progress: Int) =
         writeLock.withLock {
             val current = store.value
-            val habit = current.habits.firstOrNull { it.id == habitId } ?: return@withLock
-            val clamped =
-                when (habit.type) {
-                    // CHECK only knows 0 or 1, counters are allowed to exceed their target.
-                    HabitType.CHECK -> progress.coerceIn(0, 1)
-
-                    HabitType.COUNTER -> progress.coerceIn(0, PROGRESS_MAX)
-                }
+            current.habits.firstOrNull { it.id == habitId } ?: return@withLock
+            // Counts start at zero and are allowed to run past their target.
+            val clamped = progress.coerceIn(0, PROGRESS_MAX)
             val updated = current.copy(progress = current.progress + ((date to habitId) to clamped))
             store.value = updated.withRecalculatedDays()
         }
@@ -169,16 +163,15 @@ class InMemoryHabitRepository(
                 Habit(
                     id = 1,
                     name = "Drink water",
-                    type = HabitType.COUNTER,
                     target = 8,
                     unit = "glasses",
                     points = 2,
                     icon = "water_drop",
                 ),
-                Habit(2, "Exercise", HabitType.CHECK, target = 1, points = 3, required = true, icon = "directions_run"),
-                Habit(3, "Read", HabitType.COUNTER, target = 30, unit = "min", points = 2, icon = "menu_book"),
-                Habit(4, "Meditation", HabitType.CHECK, target = 1, points = 1, icon = "self_improvement"),
-                Habit(5, "Journal", HabitType.CHECK, target = 1, points = 1, icon = "edit_note"),
+                Habit(2, "Exercise", target = 1, points = 3, required = true, icon = "directions_run"),
+                Habit(3, "Read", target = 30, unit = "min", points = 2, icon = "menu_book"),
+                Habit(4, "Meditation", target = 1, points = 1, icon = "self_improvement"),
+                Habit(5, "Journal", target = 1, points = 1, icon = "edit_note"),
             )
         // Four passed days before today so the streak and history show something.
         val pastDays =

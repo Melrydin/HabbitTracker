@@ -2,15 +2,6 @@ package com.example.habbittracker.domain.model
 
 import java.time.LocalDate
 
-/** How a habit is tracked (F1). */
-enum class HabitType {
-    /** Yes/no. `target` is always 1. */
-    CHECK,
-
-    /** A count or amount, for example 8 glasses or 30 minutes. May exceed the target. */
-    COUNTER,
-}
-
 /** Place in the two-level habit hierarchy (F8). */
 enum class HabitKind {
     /** A normal template that stands on its own. */
@@ -69,7 +60,7 @@ enum class Polarity {
 data class Habit(
     val id: Long,
     val name: String,
-    val type: HabitType,
+    /** How far the count has to get. A plain done/not-done habit has a target of 1. */
     val target: Int,
     val unit: String? = null,
     val points: Int = 1,
@@ -100,7 +91,6 @@ data class Habit(
     init {
         require(name.length in 1..NAME_MAX_LENGTH) { "name must be between 1 and $NAME_MAX_LENGTH characters" }
         require(target >= 1) { "target must be at least 1" }
-        require(type != HabitType.CHECK || target == 1) { "CHECK always has target = 1" }
         require((note?.length ?: 0) <= NOTE_MAX_LENGTH) { "note must be at most $NOTE_MAX_LENGTH characters" }
         require(assignedDows.all { it in 1..7 }) { "assignedDows holds weekdays 1..7" }
     }

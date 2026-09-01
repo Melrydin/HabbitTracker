@@ -15,7 +15,6 @@ import com.example.habbittracker.domain.model.AppSettings
 import com.example.habbittracker.domain.model.Day
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.Habit
-import com.example.habbittracker.domain.model.HabitType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -66,8 +65,9 @@ class RoomHabitRepository(
 
     override suspend fun setProgress(date: LocalDate, habitId: Long, progress: Int) {
         database.withTransaction {
-            val habit = habitDao.getById(habitId)?.toDomain() ?: return@withTransaction
-            dayHabitDao.upsert(DayHabitEntity(date, habitId, habit.clamp(progress)))
+            // A value for a habit that no longer exists would be an orphan row.
+            habitDao.getById(habitId) ?: return@withTransaction
+            dayHabitDao.upsert(DayHabitEntity(date, habitId, clamp(progress)))
             recalculate(date)
         }
     }
@@ -156,19 +156,14 @@ class RoomHabitRepository(
         Habit(
             id = HabitRepository.NEW_HABIT_ID,
             name = name,
-            type = HabitType.CHECK,
             target = 1,
             icon = Habit.DEFAULT_ICON,
             givesTheme = true,
             isThemeGenerated = true,
         )
 
-    /** CHECK only knows 0 or 1, counters are allowed to exceed their target. */
-    private fun Habit.clamp(progress: Int): Int =
-        when (type) {
-            HabitType.CHECK -> progress.coerceIn(0, 1)
-            HabitType.COUNTER -> progress.coerceIn(0, PROGRESS_MAX)
-        }
+    /** Counts start at zero and are allowed to run past their target. */
+    private fun clamp(progress: Int): Int = progress.coerceIn(0, PROGRESS_MAX)
 
     private suspend fun recalculate(date: LocalDate) {
         val current = settings.first()

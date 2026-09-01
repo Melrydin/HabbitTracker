@@ -10,7 +10,6 @@ import com.example.habbittracker.data.local.DataStoreSettingsRepository
 import com.example.habbittracker.data.local.HabitDatabase
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
-import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.domain.model.ThemeMode
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -85,7 +84,6 @@ class ZipBackupRepositoryTest {
                 Habit(
                     id = NEW_HABIT_ID,
                     name = "Drink water",
-                    type = HabitType.COUNTER,
                     target = 8,
                     unit = "glasses",
                     points = 2,
@@ -159,7 +157,7 @@ class ZipBackupRepositoryTest {
             seed()
             val archive = exported()
 
-            habits.upsertHabit(Habit(NEW_HABIT_ID, "Added later", HabitType.CHECK, 1, icon = "task_alt"))
+            habits.upsertHabit(Habit(NEW_HABIT_ID, "Added later", 1, icon = "task_alt"))
             assertEquals(2, habits.observeHabits().first().size)
 
             backup.import(ByteArrayInputStream(archive))
@@ -219,7 +217,7 @@ class ZipBackupRepositoryTest {
         }
 
     @Test
-    fun `an older backup naming the removed amount type restores as a counter`() =
+    fun `an older backup that still names a habit type restores anyway`() =
         runBlocking {
             val withHabit = ByteArrayOutputStream()
             ZipOutputStream(withHabit).use { zip ->
@@ -236,8 +234,10 @@ class ZipBackupRepositoryTest {
 
             backup.import(ByteArrayInputStream(withHabit.toByteArray()))
 
+            // The type field is gone from the format; an old file still carrying it
+            // must not make the whole restore fail.
             val restored = habits.observeHabits().first().single()
-            assertEquals(HabitType.COUNTER, restored.type)
+            assertEquals("Read", restored.name)
             assertEquals(30, restored.target)
         }
 

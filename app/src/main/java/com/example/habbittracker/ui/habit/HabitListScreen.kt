@@ -36,7 +36,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.model.Habit
-import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.ui.icons.HabitIcons
 import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 
@@ -189,22 +188,19 @@ private fun HabitSummaryRow(
     }
 }
 
-/** Second line: type, target, points and required, exactly as set in the editor. */
+/** Second line: target, points and required, exactly as set in the editor. */
 @Composable
 private fun habitSummary(habit: Habit): String {
+    val unit = habit.unit
     val parts =
         buildList {
-            add(stringResource(habit.type.labelRes()))
-            if (habit.type != HabitType.CHECK) {
-                val unit = habit.unit
-                add(
-                    if (unit.isNullOrBlank()) {
-                        stringResource(R.string.habit_summary_target_plain, habit.target)
-                    } else {
-                        stringResource(R.string.habit_summary_target, habit.target, unit)
-                    },
-                )
-            }
+            add(
+                if (unit.isNullOrBlank()) {
+                    stringResource(R.string.habit_summary_target_plain, habit.target)
+                } else {
+                    stringResource(R.string.habit_summary_target, habit.target, unit)
+                },
+            )
             add(pluralStringResource(R.plurals.habit_points, habit.points, habit.points))
             if (habit.required) add(stringResource(R.string.habit_required))
         }
@@ -253,7 +249,6 @@ private fun HabitListPreview() {
                             Habit(
                                 1,
                                 "Drink water",
-                                HabitType.COUNTER,
                                 8,
                                 "glasses",
                                 points = 2,
@@ -262,7 +257,6 @@ private fun HabitListPreview() {
                             Habit(
                                 2,
                                 "Exercise",
-                                HabitType.CHECK,
                                 1,
                                 points = 3,
                                 required = true,
@@ -271,7 +265,7 @@ private fun HabitListPreview() {
                         ),
                     archived =
                         listOf(
-                            Habit(3, "Vocabulary", HabitType.COUNTER, 20, "min", icon = "menu_book", archived = true),
+                            Habit(3, "Vocabulary", 20, "min", icon = "menu_book", archived = true),
                         ),
                     loaded = true,
                 ),

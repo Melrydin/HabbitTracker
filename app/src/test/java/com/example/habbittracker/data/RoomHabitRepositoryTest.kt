@@ -10,7 +10,6 @@ import com.example.habbittracker.data.local.HabitDatabase
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
-import com.example.habbittracker.domain.model.HabitType
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -74,13 +73,12 @@ class RoomHabitRepositoryTest {
 
     private suspend fun addHabit(
         name: String,
-        type: HabitType = HabitType.CHECK,
         target: Int = 1,
         points: Int = 1,
         required: Boolean = false,
     ): Long =
         repository.upsertHabit(
-            Habit(NEW_HABIT_ID, name, type, target, points = points, required = required, icon = "task_alt"),
+            Habit(NEW_HABIT_ID, name, target, points = points, required = required, icon = "task_alt"),
         )
 
     private suspend fun habitIdsOn(day: LocalDate) =
@@ -134,12 +132,12 @@ class RoomHabitRepositoryTest {
         runBlocking {
             val id =
                 repository.upsertHabit(
-                    Habit(NEW_HABIT_ID, "Read", HabitType.COUNTER, target = 30, unit = "min", icon = "menu_book"),
+                    Habit(NEW_HABIT_ID, "Read", target = 30, unit = "min", icon = "menu_book"),
                 )
             repository.setProgress(date, id, 30)
 
             val stored = repository.getHabit(id)!!
-            assertEquals(HabitType.COUNTER, stored.type)
+            assertEquals(30, stored.target)
             assertEquals("min", stored.unit)
             assertEquals(
                 date,
@@ -151,14 +149,14 @@ class RoomHabitRepositoryTest {
         }
 
     @Test
-    fun `a check habit cannot be pushed beyond one`() =
+    fun `a count cannot go below zero`() =
         runBlocking {
             val id = addHabit("Exercise")
 
-            repository.setProgress(date, id, 7)
+            repository.setProgress(date, id, -5)
 
             assertEquals(
-                1,
+                0,
                 repository
                     .observeDay(date)
                     .first()
@@ -176,7 +174,6 @@ class RoomHabitRepositoryTest {
                     Habit(
                         NEW_HABIT_ID,
                         "Drink water",
-                        HabitType.COUNTER,
                         target = 8,
                         unit = "glasses",
                         icon = "water_drop",

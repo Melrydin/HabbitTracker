@@ -2,7 +2,6 @@ package com.example.habbittracker.ui.habit
 
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
 import com.example.habbittracker.domain.model.Habit
-import com.example.habbittracker.domain.model.HabitType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -33,38 +32,24 @@ class HabitFormStateTest {
     }
 
     @Test
-    fun `switching to yes no resets target and unit`() {
-        val form =
-            HabitFormState()
-                .withName("Water")
-                .withType(HabitType.COUNTER)
-                .withTarget("8")
-                .withUnit("glasses")
-                .withType(HabitType.CHECK)
+    fun `a fresh form starts at a target of one`() {
+        val form = HabitFormState().withName("Exercise")
 
         assertEquals("1", form.target)
-        assertEquals("", form.unit)
-        assertFalse(form.showsTargetAndUnit)
-    }
-
-    @Test
-    fun `switching from yes no to counter shows no error`() {
-        val form = HabitFormState().withName("Water").withType(HabitType.COUNTER)
-
         assertNull(form.targetError)
         assertTrue(form.canSave)
     }
 
     @Test
     fun `the target accepts digits only`() {
-        val form = HabitFormState().withType(HabitType.COUNTER).withTarget("-1a2,5")
+        val form = HabitFormState().withTarget("-1a2,5")
 
         assertEquals("125", form.target)
     }
 
     @Test
     fun `an empty target blocks saving`() {
-        val form = HabitFormState().withName("Read").withType(HabitType.COUNTER).withTarget("")
+        val form = HabitFormState().withName("Read").withTarget("")
 
         assertEquals(HabitFormError.TARGET_REQUIRED, form.targetError)
         assertFalse(form.canSave)
@@ -72,18 +57,9 @@ class HabitFormStateTest {
 
     @Test
     fun `a target of zero is too small`() {
-        val form = HabitFormState().withName("Read").withType(HabitType.COUNTER).withTarget("0")
+        val form = HabitFormState().withName("Read").withTarget("0")
 
         assertEquals(HabitFormError.TARGET_TOO_SMALL, form.targetError)
-    }
-
-    @Test
-    fun `a yes no habit needs no target in the form`() {
-        val form = HabitFormState().withName("Exercise").withTarget("")
-
-        assertNull(form.targetError)
-        assertTrue(form.canSave)
-        assertEquals(1, form.toHabit().target)
     }
 
     @Test
@@ -97,7 +73,6 @@ class HabitFormStateTest {
         val habit =
             HabitFormState()
                 .withName("  Drink water  ")
-                .withType(HabitType.COUNTER)
                 .withTarget("8")
                 .withUnit(" glasses ")
                 .withPoints(2)
@@ -134,8 +109,8 @@ class HabitFormStateTest {
     }
 
     @Test
-    fun `yes no stores no unit`() {
-        val habit = HabitFormState().withName("Exercise").withUnit("min").toHabit()
+    fun `a blank unit is stored as null rather than an empty string`() {
+        val habit = HabitFormState().withName("Exercise").withUnit("   ").toHabit()
 
         assertNull(habit.unit)
     }
@@ -146,7 +121,6 @@ class HabitFormStateTest {
             Habit(
                 id = 7,
                 name = "Read",
-                type = HabitType.COUNTER,
                 target = 30,
                 unit = "min",
                 points = 2,

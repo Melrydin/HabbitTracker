@@ -30,9 +30,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -54,7 +51,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.habbittracker.R
-import com.example.habbittracker.domain.model.HabitType
 import com.example.habbittracker.ui.icons.HabitIcons
 import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 
@@ -67,7 +63,6 @@ import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 fun HabitEditorScreen(
     state: HabitEditorUiState,
     onNameChange: (String) -> Unit,
-    onTypeChange: (HabitType) -> Unit,
     onTargetChange: (String) -> Unit,
     onUnitChange: (String) -> Unit,
     onNoteChange: (String) -> Unit,
@@ -135,17 +130,11 @@ fun HabitEditorScreen(
                 IconPicker(selected = form.icon, onIconChange = onIconChange)
             }
 
-            FormSection(label = stringResource(R.string.habit_editor_type_label)) {
-                TypeSelector(selected = form.type, onTypeChange = onTypeChange)
-            }
-
-            if (form.showsTargetAndUnit) {
-                TargetAndUnitFields(
-                    form = form,
-                    onTargetChange = onTargetChange,
-                    onUnitChange = onUnitChange,
-                )
-            }
+            TargetAndUnitFields(
+                form = form,
+                onTargetChange = onTargetChange,
+                onUnitChange = onUnitChange,
+            )
 
             PointsRow(points = form.points, onPointsChange = onPointsChange)
 
@@ -300,27 +289,6 @@ private fun IconPicker(
                         )
                     }
                 }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TypeSelector(
-    selected: HabitType,
-    onTypeChange: (HabitType) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val types = HabitType.entries
-    SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
-        types.forEachIndexed { index, type ->
-            SegmentedButton(
-                selected = type == selected,
-                onClick = { onTypeChange(type) },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = types.size),
-            ) {
-                Text(stringResource(type.labelRes()))
             }
         }
     }
@@ -566,7 +534,6 @@ private fun HabitEditorNewPreview() {
                 HabitEditorUiState(
                     HabitFormState(
                         name = "Drink water",
-                        type = HabitType.COUNTER,
                         target = "8",
                         unit = "glasses",
                         points = 2,
@@ -574,7 +541,6 @@ private fun HabitEditorNewPreview() {
                     ),
                 ),
             onNameChange = {},
-            onTypeChange = {},
             onTargetChange = {},
             onUnitChange = {},
             onNoteChange = {},
@@ -599,14 +565,12 @@ private fun HabitEditorEditPreview() {
                     HabitFormState(
                         id = 2,
                         name = "Exercise",
-                        type = HabitType.CHECK,
                         points = 3,
                         required = true,
                         icon = "directions_run",
                     ),
                 ),
             onNameChange = {},
-            onTypeChange = {},
             onTargetChange = {},
             onUnitChange = {},
             onNoteChange = {},

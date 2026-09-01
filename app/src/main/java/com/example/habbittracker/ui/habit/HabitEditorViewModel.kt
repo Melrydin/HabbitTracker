@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.habbittracker.data.HabitRepository
 import com.example.habbittracker.data.HabitRepository.Companion.NEW_HABIT_ID
-import com.example.habbittracker.domain.model.HabitType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,8 +49,6 @@ class HabitEditorViewModel(
     }
 
     fun onNameChange(value: String) = updateForm { it.withName(value) }
-
-    fun onTypeChange(value: HabitType) = updateForm { it.withType(value) }
 
     fun onTargetChange(value: String) = updateForm { it.withTarget(value) }
 
