@@ -8,9 +8,11 @@ enum class ThemeMode {
 }
 
 /**
- * App wide settings (F7). Defaults match the decisions in the feature list:
- * the daily goal counts points against a threshold of six, and the theme
- * follows the system.
+ * App wide settings (F7).
+ *
+ * [defaultGoalThreshold] applies to [GoalType.POINTS] only. The other rules derive
+ * their bar from the habits of the day, see
+ * [com.example.habbittracker.domain.DayEvaluator].
  */
 data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.SYSTEM,

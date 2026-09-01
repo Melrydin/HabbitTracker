@@ -38,37 +38,32 @@ object DayEvaluator {
 
     private fun evaluateAllRequired(day: Day, entries: List<HabitEntry>): DayGoalProgress {
         val required = entries.filter { it.habit.required }
-        return progress(
+        return progress(day, required.count { it.fulfilled }, required.size)
+    }
+
+    private fun evaluateMinCount(day: Day, entries: List<HabitEntry>): DayGoalProgress =
+        progress(day, entries.count { it.fulfilled }, entries.size)
+
+    private fun evaluatePoints(day: Day, entries: List<HabitEntry>): DayGoalProgress =
+        progress(
             day = day,
-            current = required.count { it.fulfilled },
-            threshold = required.size,
-            reached = required.isNotEmpty() && required.all { it.fulfilled },
+            current = entries.filter { it.fulfilled }.sumOf { it.habit.points },
+            // Capped at what the day holds: a threshold beyond that would make the
+            // day impossible to pass no matter what the user did.
+            threshold = day.goalThreshold.coerceAtMost(entries.sumOf { it.habit.points }),
         )
-    }
-
-    private fun evaluateMinCount(day: Day, entries: List<HabitEntry>): DayGoalProgress {
-        val fulfilled = entries.count { it.fulfilled }
-        val threshold = day.goalThreshold.coerceAtMost(entries.size)
-        return progress(day, fulfilled, threshold, fulfilled >= threshold)
-    }
-
-    private fun evaluatePoints(day: Day, entries: List<HabitEntry>): DayGoalProgress {
-        val points = entries.filter { it.fulfilled }.sumOf { it.habit.points }
-        val threshold = day.goalThreshold.coerceAtMost(entries.sumOf { it.habit.points })
-        return progress(day, points, threshold, points >= threshold)
-    }
 
     /**
+     * Points are the only rule with a threshold of its own; the other two derive
+     * theirs from the day. The count rule asks for all of its habits and the
+     * required rule for the ones marked as such, so neither can be set beyond
+     * reach.
+     *
      * A day is only judged once something was actually asked of it. Without a
      * reachable goal it stays [DayStatus.NEUTRAL] rather than counting as failed,
      * which is what keeps an empty day from breaking a streak.
-     *
-     * [threshold] is the effective one, capped at what the day can actually offer.
-     * A setting of six points means nothing on a day that holds a single one-point
-     * habit; taken literally it would make that day impossible to pass, so the goal
-     * becomes "everything this day asks of you" instead.
      */
-    private fun progress(day: Day, current: Int, threshold: Int, reached: Boolean) =
+    private fun progress(day: Day, current: Int, threshold: Int) =
         DayGoalProgress(
             goalType = day.goalType,
             current = current,
@@ -76,7 +71,7 @@ object DayEvaluator {
             status =
                 when {
                     threshold <= 0 -> DayStatus.NEUTRAL
-                    reached -> DayStatus.PASSED
+                    current >= threshold -> DayStatus.PASSED
                     else -> DayStatus.FAILED
                 },
         )

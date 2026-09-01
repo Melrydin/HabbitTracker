@@ -53,7 +53,7 @@ class DataStoreSettingsRepositoryTest {
         runBlocking {
             val repository = DataStoreSettingsRepository(newStore())
 
-            repository.setDefaultGoal(GoalType.MIN_COUNT, 4)
+            repository.setDefaultGoal(GoalType.MIN_COUNT, threshold = 4)
 
             val settings = repository.settings.first()
             assertEquals(GoalType.MIN_COUNT, settings.defaultGoalType)
@@ -61,15 +61,21 @@ class DataStoreSettingsRepositoryTest {
         }
 
     @Test
-    fun `the threshold stays within its range`() =
+    fun `the points threshold stays within its range`() =
         runBlocking {
             val repository = DataStoreSettingsRepository(newStore())
 
-            repository.setDefaultGoal(GoalType.POINTS, 0)
-            assertEquals(AppSettings.GOAL_THRESHOLD_MIN, repository.settings.first().defaultGoalThreshold)
+            repository.setDefaultGoal(GoalType.POINTS, threshold = 0)
+            assertEquals(
+                AppSettings.GOAL_THRESHOLD_MIN,
+                repository.settings.first().defaultGoalThreshold,
+            )
 
-            repository.setDefaultGoal(GoalType.POINTS, 500)
-            assertEquals(AppSettings.GOAL_THRESHOLD_MAX, repository.settings.first().defaultGoalThreshold)
+            repository.setDefaultGoal(GoalType.POINTS, threshold = 500)
+            assertEquals(
+                AppSettings.GOAL_THRESHOLD_MAX,
+                repository.settings.first().defaultGoalThreshold,
+            )
         }
 
     @Test

@@ -81,7 +81,7 @@ data class BackupGoal(
 data class BackupSettings(
     val themeMode: String,
     val defaultGoalType: String,
-    val defaultGoalThreshold: Int,
+    val defaultGoalThreshold: Int = 6,
 )
 
 /** Names of the entries inside the ZIP, fixed by the feature list. */

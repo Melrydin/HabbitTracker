@@ -172,11 +172,11 @@ class ZipBackupRepositoryTest {
         runBlocking {
             seed()
             settings.setThemeMode(ThemeMode.DARK)
-            settings.setDefaultGoal(GoalType.MIN_COUNT, 3)
+            settings.setDefaultGoal(GoalType.MIN_COUNT, threshold = 3)
             val archive = exported()
 
             settings.setThemeMode(ThemeMode.LIGHT)
-            settings.setDefaultGoal(GoalType.POINTS, 9)
+            settings.setDefaultGoal(GoalType.POINTS, threshold = 9)
             backup.import(ByteArrayInputStream(archive))
 
             val restored = settings.settings.first()

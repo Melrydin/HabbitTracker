@@ -108,8 +108,15 @@ fun SettingsScreen(
                 hint = stringResource(R.string.settings_goal_hint),
             ) {
                 GoalTypeSelector(selected = settings.defaultGoalType, onGoalTypeChange = onGoalTypeChange)
-                Spacer(Modifier.height(12.dp))
-                ThresholdRow(settings = settings, onThresholdChange = onThresholdChange)
+                // Only the points rule has a bar of its own; the others come from
+                // the habits of the day.
+                if (settings.defaultGoalType == GoalType.POINTS) {
+                    Spacer(Modifier.height(12.dp))
+                    ThresholdRow(
+                        threshold = settings.defaultGoalThreshold,
+                        onThresholdChange = onThresholdChange,
+                    )
+                }
             }
 
             SettingsSection(label = stringResource(R.string.settings_backup_label)) {
@@ -153,6 +160,63 @@ fun SettingsScreen(
             },
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
         )
+    }
+}
+
+/** How many points a day has to gather to count as finished (F2, POINTS). */
+@Composable
+private fun ThresholdRow(
+    threshold: Int,
+    onThresholdChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceContainer,
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 20.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.settings_goal_threshold_label),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.settings_goal_threshold_points, threshold),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            IconButton(
+                onClick = { onThresholdChange(threshold - 1) },
+                enabled = threshold > AppSettings.GOAL_THRESHOLD_MIN,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Remove,
+                    contentDescription = stringResource(R.string.settings_threshold_decrease),
+                )
+            }
+            Text(
+                text = threshold.toString(),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            IconButton(
+                onClick = { onThresholdChange(threshold + 1) },
+                enabled = threshold < AppSettings.GOAL_THRESHOLD_MAX,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Add,
+                    contentDescription = stringResource(R.string.settings_threshold_increase),
+                )
+            }
+        }
     }
 }
 
@@ -227,96 +291,6 @@ private fun GoalTypeSelector(
         }
     }
 }
-
-/**
- * ALL_REQUIRED derives its threshold from the required habits of the day, so the
- * stepper would have nothing to set and is replaced by an explanation.
- */
-@Composable
-private fun ThresholdRow(
-    settings: AppSettings,
-    onThresholdChange: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val threshold = settings.defaultGoalThreshold
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainer,
-    ) {
-        Row(
-            modifier = Modifier.padding(start = 20.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.settings_goal_threshold_label),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = thresholdSummary(settings),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            if (settings.defaultGoalType != GoalType.ALL_REQUIRED) {
-                Stepper(threshold = threshold, onThresholdChange = onThresholdChange)
-            }
-        }
-    }
-}
-
-@Composable
-private fun Stepper(
-    threshold: Int,
-    onThresholdChange: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        IconButton(
-            onClick = { onThresholdChange(threshold - 1) },
-            enabled = threshold > AppSettings.GOAL_THRESHOLD_MIN,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Remove,
-                contentDescription = stringResource(R.string.settings_threshold_decrease),
-            )
-        }
-        Text(
-            text = threshold.toString(),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        IconButton(
-            onClick = { onThresholdChange(threshold + 1) },
-            enabled = threshold < AppSettings.GOAL_THRESHOLD_MAX,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Add,
-                contentDescription = stringResource(R.string.settings_threshold_increase),
-            )
-        }
-    }
-}
-
-@Composable
-private fun thresholdSummary(settings: AppSettings): String =
-    when (settings.defaultGoalType) {
-        GoalType.ALL_REQUIRED -> {
-            stringResource(R.string.settings_goal_threshold_unused)
-        }
-
-        GoalType.MIN_COUNT -> {
-            stringResource(R.string.settings_goal_threshold_habits, settings.defaultGoalThreshold)
-        }
-
-        GoalType.POINTS -> {
-            stringResource(R.string.settings_goal_threshold_points, settings.defaultGoalThreshold)
-        }
-    }
 
 @Composable
 private fun SettingsSection(

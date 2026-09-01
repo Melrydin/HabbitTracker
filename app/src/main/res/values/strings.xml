@@ -104,15 +104,14 @@
     <string name="settings_theme_light">Light</string>
     <string name="settings_theme_dark">Dark</string>
     <string name="settings_goal_label">Default daily goal</string>
-    <string name="settings_goal_hint">Applies to today and the days ahead. Finished days keep the goal they were judged under.</string>
+    <string name="settings_goal_hint">What counts as a finished day. Habits and required ones ask for everything the day holds; only points carry a bar you set, and it never asks for more than the day offers.</string>
     <string name="settings_goal_rule_all_required">All required</string>
     <string name="settings_goal_rule_min_count">Habits</string>
     <string name="settings_goal_rule_points">Points</string>
-    <string name="settings_goal_threshold_label">Threshold</string>
-    <string name="settings_goal_threshold_points">%d points</string>
-    <string name="settings_goal_threshold_habits">%d habits</string>
-    <string name="settings_goal_threshold_unused">Set by the required habits of the day</string>
-    <string name="settings_threshold_decrease">Lower the threshold</string>
+    <string name="settings_goal_threshold_label">Points needed</string>
+    <string name="settings_goal_threshold_points">%d points finish the day</string>
+    <string name="settings_threshold_decrease">Lower the points needed</string>
+    <string name="settings_threshold_increase">Raise the points needed</string>
     <string name="settings_backup_label">Backup</string>
     <string name="settings_backup_export">Export a backup</string>
     <string name="settings_backup_export_hint">Writes a ZIP with all habits, days and settings.</string>
@@ -127,7 +126,6 @@
     <string name="settings_backup_import_title">Restore a backup?</string>
     <string name="settings_backup_import_message">Everything currently stored is replaced. Export first if you want to keep it.</string>
     <string name="settings_backup_import_confirm">Restore</string>
-    <string name="settings_threshold_increase">Raise the threshold</string>
 
     <string name="habit_type_check">Yes/No</string>
     <string name="habit_type_counter">Count / amount</string>

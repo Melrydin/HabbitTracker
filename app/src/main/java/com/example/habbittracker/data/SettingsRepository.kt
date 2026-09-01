@@ -14,7 +14,7 @@ interface SettingsRepository {
 
     suspend fun setThemeMode(mode: ThemeMode)
 
-    /** The rule and threshold new days start with; existing days keep their own. */
+    /** The rule today and the days ahead are judged by, plus the points bar. */
     suspend fun setDefaultGoal(type: GoalType, threshold: Int)
 
     /** Overwrites everything at once, used when a backup is restored (F6). */

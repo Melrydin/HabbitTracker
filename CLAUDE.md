@@ -161,6 +161,10 @@ Three behaviors that are not obvious from the code and are pinned down by tests:
   **neutral**, not failed, and the UI then shows no status marker at all.
 * A **neutral day is skipped** by the streak: it neither extends nor breaks a run. Only
   `FAILED` resets it.
+* **Only `POINTS` carries a threshold.** `MIN_COUNT` asks for every habit of the day and
+  `ALL_REQUIRED` for the ones marked as such, so neither can be set beyond reach. The points
+  threshold is capped at the points the day actually holds — a bar above that would make the
+  day impossible to pass.
 * A **today that is still open does not break the streak** — the run is counted up to
   yesterday. Otherwise the streak would read 0 every morning.
 * An **archived habit stays visible** on days that already have a value recorded. Archiving

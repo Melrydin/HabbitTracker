@@ -218,13 +218,12 @@ class RoomHabitRepositoryTest {
         }
 
     @Test
-    fun `changed points recompute the day status`() =
+    fun `a change to the habits recomputes the day status`() =
         runBlocking {
-            // A second habit keeps the day worth more than the threshold, so the
-            // threshold is not capped and the points actually decide the outcome.
             val exercise = addHabit("Exercise", points = 3)
-            addHabit("Read", points = 5)
+            val read = addHabit("Read", points = 5)
             repository.setProgress(date, exercise, 1)
+            // Three of eight points, so the day is still open.
             assertFalse(
                 repository
                     .observeDay(date)
@@ -232,7 +231,8 @@ class RoomHabitRepositoryTest {
                     .day.status == DayStatus.PASSED,
             )
 
-            repository.upsertHabit(repository.getHabit(exercise)!!.copy(points = 6))
+            // Archiving the untouched habit takes its points out of the goal.
+            repository.setArchived(read, archived = true)
 
             assertTrue(
                 repository
@@ -332,7 +332,7 @@ class RoomHabitRepositoryTest {
             val id = addHabit("Exercise", points = 1)
             // The day gets a stored row the moment anything is tracked on it.
             repository.setProgress(date, id, 1)
-            settings.setDefaultGoal(GoalType.MIN_COUNT, 1)
+            settings.setDefaultGoal(GoalType.MIN_COUNT, threshold = 1)
 
             val day = repository.observeDay(date).first().day
 
@@ -346,7 +346,7 @@ class RoomHabitRepositoryTest {
             val id = addHabit("Exercise", points = 1)
             repository.setProgress(yesterday, id, 1)
 
-            settings.setDefaultGoal(GoalType.MIN_COUNT, 1)
+            settings.setDefaultGoal(GoalType.MIN_COUNT, threshold = 1)
 
             // History must not move under the user.
             assertEquals(

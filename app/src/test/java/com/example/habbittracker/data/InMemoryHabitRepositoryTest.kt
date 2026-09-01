@@ -86,7 +86,7 @@ class InMemoryHabitRepositoryTest {
     fun `changed points recompute the day status`() =
         runBlocking {
             val repository = repository()
-            // Exercise contributes 3 of the 6 required points, so the day is still open.
+            // Exercise brings 3 of the 6 points needed, so the day is still open.
             repository.setProgress(today, habitId = 2, progress = 1)
             assertFalse(
                 repository
@@ -110,9 +110,11 @@ class InMemoryHabitRepositoryTest {
     fun `archiving does not take the result away from a passed day`() =
         runBlocking {
             val repository = repository()
+            repository.setProgress(today, habitId = 1, progress = 8)
             repository.setProgress(today, habitId = 2, progress = 1)
             repository.setProgress(today, habitId = 3, progress = 30)
             repository.setProgress(today, habitId = 4, progress = 1)
+            repository.setProgress(today, habitId = 5, progress = 1)
             assertTrue(
                 repository
                     .observeDay(today)
