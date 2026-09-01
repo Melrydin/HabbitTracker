@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.ui.components.BackTopAppBar
+import com.example.habbittracker.ui.components.EmptyState
 import com.example.habbittracker.ui.icons.HabitIcons
 import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 
@@ -57,27 +59,7 @@ fun HabitListScreen(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.habit_list_title),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = stringResource(R.string.habit_editor_back),
-                        )
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    ),
-            )
+            BackTopAppBar(title = stringResource(R.string.habit_list_title), onBack = onBack)
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -125,7 +107,12 @@ fun HabitListScreen(
             }
 
             if (state.loaded && state.isEmpty) {
-                item(key = "empty") { EmptyHabitList() }
+                item(key = "empty") {
+                    EmptyState(
+                        title = stringResource(R.string.habits_empty_title),
+                        body = stringResource(R.string.habits_empty_body),
+                    )
+                }
             }
         }
     }
@@ -209,36 +196,6 @@ private fun habitSummary(habit: Habit): String {
             if (habit.required) add(stringResource(R.string.habit_required))
         }
     return parts.joinToString(stringResource(R.string.today_subtitle_separator))
-}
-
-@Composable
-private fun EmptyHabitList(modifier: Modifier = Modifier) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(top = 64.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Icon(
-            imageVector = HabitIcons[HabitIcons.FALLBACK],
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(40.dp),
-        )
-        Spacer(Modifier.height(16.dp))
-        Text(
-            text = stringResource(R.string.habit_list_empty_title),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = stringResource(R.string.habit_list_empty_body),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
 }
 
 @Preview(name = "Habits", showBackground = true)

@@ -52,6 +52,7 @@ import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.Habit
 import com.example.habbittracker.domain.model.HabitEntry
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.ui.components.EmptyState
 import com.example.habbittracker.ui.icons.HabitIcons
 import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 import java.time.LocalDate
@@ -163,7 +164,14 @@ fun TodayScreen(
 
             if (state.habits.isEmpty()) {
                 if (state.loaded) {
-                    item(key = "empty") { EmptyHabits(onAddHabit = onAddHabit) }
+                    item(key = "empty") {
+                        EmptyState(
+                            title = stringResource(R.string.habits_empty_title),
+                            body = stringResource(R.string.habits_empty_body),
+                            actionLabel = stringResource(R.string.today_add_habit),
+                            onAction = onAddHabit,
+                        )
+                    }
                 }
             } else {
                 item(key = "habits_label") {
@@ -348,40 +356,6 @@ private fun ThemeField(
                 innerTextField()
             },
         )
-    }
-}
-
-@Composable
-private fun EmptyHabits(onAddHabit: () -> Unit, modifier: Modifier = Modifier) {
-    Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(top = 48.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Icon(
-            imageVector = HabitIcons[HabitIcons.FALLBACK],
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.outline,
-            modifier = Modifier.size(40.dp),
-        )
-        Spacer(Modifier.height(16.dp))
-        Text(
-            text = stringResource(R.string.today_empty_title),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = stringResource(R.string.today_empty_body),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(8.dp))
-        TextButton(onClick = onAddHabit) {
-            Text(stringResource(R.string.today_add_habit))
-        }
     }
 }
 

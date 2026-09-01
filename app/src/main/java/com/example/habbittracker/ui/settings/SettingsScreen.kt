@@ -44,6 +44,11 @@ import com.example.habbittracker.R
 import com.example.habbittracker.domain.model.AppSettings
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.ThemeMode
+import com.example.habbittracker.ui.components.BackTopAppBar
+import com.example.habbittracker.ui.components.LabeledSection
+import com.example.habbittracker.ui.components.SegmentedChoice
+import com.example.habbittracker.ui.components.SettingRow
+import com.example.habbittracker.ui.components.ValueStepper
 import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 
 /** App settings (F7): theme and the goal new days start with. */
@@ -67,27 +72,7 @@ fun SettingsScreen(
         containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.settings_title),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = stringResource(R.string.habit_editor_back),
-                        )
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    ),
-            )
+            BackTopAppBar(title = stringResource(R.string.settings_title), onBack = onBack)
         },
     ) { innerPadding ->
         Column(
@@ -99,34 +84,54 @@ fun SettingsScreen(
                     .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
-            SettingsSection(label = stringResource(R.string.settings_theme_label)) {
-                ThemeSelector(selected = settings.themeMode, onThemeModeChange = onThemeModeChange)
+            LabeledSection(label = stringResource(R.string.settings_theme_label)) {
+                SegmentedChoice(
+                    options = ThemeMode.entries,
+                    selected = settings.themeMode,
+                    onSelect = onThemeModeChange,
+                ) { stringResource(it.labelRes()) }
             }
 
-            SettingsSection(
+            LabeledSection(
                 label = stringResource(R.string.settings_goal_label),
                 hint = stringResource(R.string.settings_goal_hint),
             ) {
-                GoalTypeSelector(selected = settings.defaultGoalType, onGoalTypeChange = onGoalTypeChange)
+                SegmentedChoice(
+                    options = GoalType.entries,
+                    selected = settings.defaultGoalType,
+                    onSelect = onGoalTypeChange,
+                ) { stringResource(it.labelRes()) }
                 // Only the points rule has a bar of its own; the others come from
                 // the habits of the day.
                 if (settings.defaultGoalType == GoalType.POINTS) {
                     Spacer(Modifier.height(12.dp))
-                    ThresholdRow(
-                        threshold = settings.defaultGoalThreshold,
-                        onThresholdChange = onThresholdChange,
-                    )
+                    SettingRow(
+                        title = stringResource(R.string.settings_goal_threshold_label),
+                        subtitle =
+                            stringResource(
+                                R.string.settings_goal_threshold_points,
+                                settings.defaultGoalThreshold,
+                            ),
+                    ) {
+                        ValueStepper(
+                            value = settings.defaultGoalThreshold,
+                            onValueChange = onThresholdChange,
+                            decreaseLabel = stringResource(R.string.settings_threshold_decrease),
+                            increaseLabel = stringResource(R.string.settings_threshold_increase),
+                            range = AppSettings.GOAL_THRESHOLD_MIN..AppSettings.GOAL_THRESHOLD_MAX,
+                        )
+                    }
                 }
             }
 
-            SettingsSection(label = stringResource(R.string.settings_backup_label)) {
+            LabeledSection(label = stringResource(R.string.settings_backup_label)) {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    ActionRow(
+                    SettingRow(
                         title = stringResource(R.string.settings_backup_export),
                         subtitle = stringResource(R.string.settings_backup_export_hint),
                         onClick = onExport,
                     )
-                    ActionRow(
+                    SettingRow(
                         title = stringResource(R.string.settings_backup_import),
                         subtitle = stringResource(R.string.settings_backup_import_hint),
                         onClick = { confirmImport = true },
@@ -160,162 +165,6 @@ fun SettingsScreen(
             },
             containerColor = MaterialTheme.colorScheme.surfaceContainer,
         )
-    }
-}
-
-/** How many points a day has to gather to count as finished (F2, POINTS). */
-@Composable
-private fun ThresholdRow(
-    threshold: Int,
-    onThresholdChange: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainer,
-    ) {
-        Row(
-            modifier = Modifier.padding(start = 20.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.settings_goal_threshold_label),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = stringResource(R.string.settings_goal_threshold_points, threshold),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            IconButton(
-                onClick = { onThresholdChange(threshold - 1) },
-                enabled = threshold > AppSettings.GOAL_THRESHOLD_MIN,
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Remove,
-                    contentDescription = stringResource(R.string.settings_threshold_decrease),
-                )
-            }
-            Text(
-                text = threshold.toString(),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            IconButton(
-                onClick = { onThresholdChange(threshold + 1) },
-                enabled = threshold < AppSettings.GOAL_THRESHOLD_MAX,
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = stringResource(R.string.settings_threshold_increase),
-                )
-            }
-        }
-    }
-}
-
-/** A row that starts something when tapped, used for the two backup actions. */
-@Composable
-private fun ActionRow(
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        onClick = onClick,
-    ) {
-        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(Modifier.height(2.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ThemeSelector(
-    selected: ThemeMode,
-    onThemeModeChange: (ThemeMode) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val modes = ThemeMode.entries
-    SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
-        modes.forEachIndexed { index, mode ->
-            SegmentedButton(
-                selected = mode == selected,
-                onClick = { onThemeModeChange(mode) },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = modes.size),
-            ) {
-                Text(stringResource(mode.labelRes()))
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun GoalTypeSelector(
-    selected: GoalType,
-    onGoalTypeChange: (GoalType) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val types = GoalType.entries
-    SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
-        types.forEachIndexed { index, type ->
-            SegmentedButton(
-                selected = type == selected,
-                onClick = { onGoalTypeChange(type) },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = types.size),
-            ) {
-                Text(stringResource(type.labelRes()))
-            }
-        }
-    }
-}
-
-@Composable
-private fun SettingsSection(
-    label: String,
-    modifier: Modifier = Modifier,
-    hint: String? = null,
-    content: @Composable () -> Unit,
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
-        )
-        content()
-        if (hint != null) {
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = hint,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 4.dp),
-            )
-        }
     }
 }
 

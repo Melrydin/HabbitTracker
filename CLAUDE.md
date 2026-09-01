@@ -86,7 +86,8 @@ app/src/main/java/com/example/habbittracker/
 │   └── backup/       ZIP export and restore (F6)
 ├── ui/
 │   ├── theme/        colors, typography, shapes
-│   ├── components/   building blocks shared across screens (ProgressTrack, StatusPill)
+│   ├── components/   building blocks shared across screens (BackTopAppBar, EmptyState,
+│   │                 LabeledSection, SettingRow, ValueStepper, SegmentedChoice, …)
 │   ├── icons/        HabitIcons: name from Habit.icon → ImageVector
 │   ├── navigation/   HabitNavHost, Routes
 │   ├── today/        today screen (F2, F3)

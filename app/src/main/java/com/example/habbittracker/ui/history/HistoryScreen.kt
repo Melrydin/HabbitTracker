@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.CompletionRate
 import com.example.habbittracker.domain.model.DayStatus
+import com.example.habbittracker.ui.components.BackTopAppBar
 import com.example.habbittracker.ui.components.MonthHeatmap
 import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 import com.example.habbittracker.ui.theme.HabitTheme
@@ -60,27 +61,7 @@ fun HistoryScreen(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.history_title),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = stringResource(R.string.habit_editor_back),
-                        )
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    ),
-            )
+            BackTopAppBar(title = stringResource(R.string.history_title), onBack = onBack)
         },
     ) { innerPadding ->
         Column(

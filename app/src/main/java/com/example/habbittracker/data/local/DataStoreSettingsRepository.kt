@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.example.habbittracker.data.SettingsRepository
+import com.example.habbittracker.data.toEnumOr
 import com.example.habbittracker.domain.model.AppSettings
 import com.example.habbittracker.domain.model.GoalType
 import com.example.habbittracker.domain.model.ThemeMode
@@ -24,8 +25,8 @@ class DataStoreSettingsRepository(
     override val settings: Flow<AppSettings> =
         dataStore.data.map { preferences ->
             AppSettings(
-                themeMode = preferences[THEME_MODE].toEnum(ThemeMode.entries, AppSettings().themeMode),
-                defaultGoalType = preferences[GOAL_TYPE].toEnum(GoalType.entries, AppSettings().defaultGoalType),
+                themeMode = preferences[THEME_MODE].toEnumOr(AppSettings().themeMode),
+                defaultGoalType = preferences[GOAL_TYPE].toEnumOr(AppSettings().defaultGoalType),
                 defaultGoalThreshold = preferences[GOAL_THRESHOLD] ?: AppSettings.DEFAULT_GOAL_THRESHOLD,
             )
         }
@@ -56,9 +57,6 @@ class DataStoreSettingsRepository(
                 )
         }
     }
-
-    private fun <T : Enum<T>> String?.toEnum(values: List<T>, fallback: T): T =
-        values.firstOrNull { it.name == this } ?: fallback
 
     private companion object {
         val THEME_MODE = stringPreferencesKey("theme_mode")

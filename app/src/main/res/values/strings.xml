@@ -19,8 +19,8 @@
     <string name="today_open_history">History</string>
     <string name="today_open_settings">Settings</string>
     <string name="today_add_habit">Add habit</string>
-    <string name="today_empty_title">No habits yet</string>
-    <string name="today_empty_body">Add your first habit to start tracking the day.</string>
+    <string name="habits_empty_title">No habits yet</string>
+    <string name="habits_empty_body">Add your first habit to start tracking the day.</string>
 
     <plurals name="today_streak">
         <item quantity="one">%d day streak</item>
@@ -42,8 +42,6 @@
     <!-- Habit management -->
     <string name="habit_list_title">Habits</string>
     <string name="habit_list_archived">Archived</string>
-    <string name="habit_list_empty_title">No habits yet</string>
-    <string name="habit_list_empty_body">Add your first habit to start tracking the day.</string>
     <string name="today_open_habits">Manage habits</string>
 
     <!-- Habit editor -->

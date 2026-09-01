@@ -55,6 +55,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.habbittracker.R
 import com.example.habbittracker.domain.model.HabitType
+import com.example.habbittracker.ui.components.BackTopAppBar
+import com.example.habbittracker.ui.components.LabeledSection
+import com.example.habbittracker.ui.components.SegmentedChoice
+import com.example.habbittracker.ui.components.SettingRow
+import com.example.habbittracker.ui.components.ValueStepper
 import com.example.habbittracker.ui.icons.HabitIcons
 import com.example.habbittracker.ui.theme.HabbitTrackerTheme
 
@@ -87,35 +92,17 @@ fun HabitEditorScreen(
         modifier = modifier.imePadding(),
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text =
-                            stringResource(
-                                if (form.isNew) R.string.habit_editor_title_new else R.string.habit_editor_title_edit,
-                            ),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = stringResource(R.string.habit_editor_back),
-                        )
-                    }
-                },
-                actions = {
-                    TextButton(onClick = onSave, enabled = form.canSave && !state.loading) {
-                        Text(stringResource(R.string.habit_editor_save))
-                    }
-                },
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+            BackTopAppBar(
+                title =
+                    stringResource(
+                        if (form.isNew) R.string.habit_editor_title_new else R.string.habit_editor_title_edit,
                     ),
-            )
+                onBack = onBack,
+            ) {
+                TextButton(onClick = onSave, enabled = form.canSave && !state.loading) {
+                    Text(stringResource(R.string.habit_editor_save))
+                }
+            }
         },
     ) { innerPadding ->
         if (state.loading) return@Scaffold
@@ -131,12 +118,16 @@ fun HabitEditorScreen(
         ) {
             NameField(form = form, onNameChange = onNameChange)
 
-            FormSection(label = stringResource(R.string.habit_editor_icon_label)) {
+            LabeledSection(label = stringResource(R.string.habit_editor_icon_label)) {
                 IconPicker(selected = form.icon, onIconChange = onIconChange)
             }
 
-            FormSection(label = stringResource(R.string.habit_editor_type_label)) {
-                TypeSelector(selected = form.type, onTypeChange = onTypeChange)
+            LabeledSection(label = stringResource(R.string.habit_editor_type_label)) {
+                SegmentedChoice(
+                    options = HabitType.entries,
+                    selected = form.type,
+                    onSelect = onTypeChange,
+                ) { stringResource(it.labelRes()) }
             }
 
             if (form.showsTargetAndUnit) {
@@ -305,27 +296,6 @@ private fun IconPicker(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun TypeSelector(
-    selected: HabitType,
-    onTypeChange: (HabitType) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val types = HabitType.entries
-    SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
-        types.forEachIndexed { index, type ->
-            SegmentedButton(
-                selected = type == selected,
-                onClick = { onTypeChange(type) },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = types.size),
-            ) {
-                Text(stringResource(type.labelRes()))
-            }
-        }
-    }
-}
-
 @Composable
 private fun TargetAndUnitFields(
     form: HabitFormState,
@@ -395,36 +365,18 @@ private fun PointsRow(
     onPointsChange: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    SettingCard(
+    SettingRow(
         modifier = modifier,
         title = stringResource(R.string.habit_editor_points_label),
         subtitle = stringResource(R.string.habit_editor_points_hint),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(
-                onClick = { onPointsChange(points - 1) },
-                enabled = points > HabitFormState.POINTS_MIN,
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Remove,
-                    contentDescription = stringResource(R.string.habit_editor_points_decrease),
-                )
-            }
-            Text(
-                text = points.toString(),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            IconButton(
-                onClick = { onPointsChange(points + 1) },
-                enabled = points < HabitFormState.POINTS_MAX,
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = stringResource(R.string.habit_editor_points_increase),
-                )
-            }
-        }
+        ValueStepper(
+            value = points,
+            onValueChange = onPointsChange,
+            decreaseLabel = stringResource(R.string.habit_editor_points_decrease),
+            increaseLabel = stringResource(R.string.habit_editor_points_increase),
+            range = HabitFormState.POINTS_MIN..HabitFormState.POINTS_MAX,
+        )
     }
 }
 
@@ -434,7 +386,7 @@ private fun RequiredRow(
     onRequiredChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    SettingCard(
+    SettingRow(
         modifier = modifier,
         title = stringResource(R.string.habit_editor_required_label),
         subtitle = stringResource(R.string.habit_editor_required_hint),
@@ -499,59 +451,6 @@ private fun DangerZone(
                 color = MaterialTheme.colorScheme.error,
             )
         }
-    }
-}
-
-/** A labeled row with its control on the right, used for points and the required switch. */
-@Composable
-private fun SettingCard(
-    title: String,
-    subtitle: String,
-    modifier: Modifier = Modifier,
-    trailing: @Composable () -> Unit,
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainer,
-    ) {
-        Row(
-            modifier = Modifier.padding(start = 20.dp, end = 12.dp, top = 14.dp, bottom = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            trailing()
-        }
-    }
-}
-
-@Composable
-private fun FormSection(
-    label: String,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
-        )
-        content()
     }
 }
 

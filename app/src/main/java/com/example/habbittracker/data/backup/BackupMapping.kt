@@ -4,6 +4,7 @@ import com.example.habbittracker.data.local.DayEntity
 import com.example.habbittracker.data.local.DayHabitEntity
 import com.example.habbittracker.data.local.GoalEntity
 import com.example.habbittracker.data.local.HabitEntity
+import com.example.habbittracker.data.toEnumOr
 import com.example.habbittracker.domain.model.AppSettings
 import com.example.habbittracker.domain.model.DayStatus
 import com.example.habbittracker.domain.model.GoalType
@@ -16,20 +17,17 @@ import com.example.habbittracker.domain.model.ThemeMode
 import com.example.habbittracker.domain.model.WeekSpan
 import java.time.LocalDate
 
-/**
+/*
  * Translation between the stored entities and the backup format (F6).
  *
- * Enums are written by name and read back leniently: a value this build does not
- * know falls back to the default rather than failing the whole restore, so one
- * unexpected word cannot cost a user their history.
+ * Enums are written by name and read back leniently through toEnumOr: a value this
+ * build does not know falls back to the default rather than failing the whole
+ * restore, so one unexpected word cannot cost a user their history.
  */
-
-private inline fun <reified T : Enum<T>> String?.toEnum(fallback: T): T =
-    enumValues<T>().firstOrNull { it.name == this } ?: fallback
 
 /** Amount habits were merged into counters; older backups still name them. */
 private fun String?.toHabitType(): HabitType =
-    if (this == LEGACY_AMOUNT) HabitType.COUNTER else toEnum(HabitType.CHECK)
+    if (this == LEGACY_AMOUNT) HabitType.COUNTER else toEnumOr(HabitType.CHECK)
 
 private const val LEGACY_AMOUNT = "AMOUNT"
 
@@ -77,17 +75,17 @@ fun BackupHabit.toEntity() =
         colorTag = colorTag,
         note = note,
         archived = archived,
-        kind = kind.toEnum(HabitKind.SIMPLE),
+        kind = kind.toEnumOr(HabitKind.SIMPLE),
         parentId = parentId,
         weekStart = weekStart.toDate(),
-        weekSpan = weekSpan?.let { it.toEnum(WeekSpan.FULL) },
-        recurrence = recurrence?.let { it.toEnum(Recurrence.EVERY_DAY) },
+        weekSpan = weekSpan?.let { it.toEnumOr(WeekSpan.FULL) },
+        recurrence = recurrence?.let { it.toEnumOr(Recurrence.EVERY_DAY) },
         assignedDows = assignedDows.filter { it in 1..7 }.toSet(),
         givesTheme = givesTheme,
         isThemeGenerated = isThemeGenerated,
-        streakRule = streakRule.toEnum(StreakRule.DAILY),
+        streakRule = streakRule.toEnumOr(StreakRule.DAILY),
         perWeekTarget = perWeekTarget,
-        polarity = polarity.toEnum(Polarity.GOOD),
+        polarity = polarity.toEnumOr(Polarity.GOOD),
         category = category,
         tags = tags.toSet(),
         sortIndex = sortIndex,
@@ -108,9 +106,9 @@ fun BackupDay.toEntity() =
         date = LocalDate.parse(date),
         themeHabitId = themeHabitId,
         dayNote = dayNote,
-        goalType = goalType.toEnum(GoalType.POINTS),
+        goalType = goalType.toEnumOr(GoalType.POINTS),
         goalThreshold = goalThreshold,
-        status = status.toEnum(DayStatus.NEUTRAL),
+        status = status.toEnumOr(DayStatus.NEUTRAL),
     )
 
 fun DayHabitEntity.toBackup() =
@@ -158,7 +156,7 @@ fun AppSettings.toBackup() =
 
 fun BackupSettings.toDomain() =
     AppSettings(
-        themeMode = themeMode.toEnum(ThemeMode.SYSTEM),
-        defaultGoalType = defaultGoalType.toEnum(GoalType.POINTS),
+        themeMode = themeMode.toEnumOr(ThemeMode.SYSTEM),
+        defaultGoalType = defaultGoalType.toEnumOr(GoalType.POINTS),
         defaultGoalThreshold = defaultGoalThreshold,
     )
