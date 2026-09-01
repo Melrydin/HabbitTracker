@@ -137,9 +137,12 @@ class InMemoryHabitRepository(
      *
      */
     private fun Store.entriesFor(date: LocalDate): List<HabitEntry> =
-        habits
-            .filter { !it.archived || (progress[date to it.id] ?: 0) > 0 }
-            .map { habit -> HabitEntry(habit, progress[date to habit.id] ?: 0) }
+        DayHabits.entriesFor(
+            habits = habits,
+            // Only the rows of this day, so a missing row stays distinguishable
+            // from a recorded zero.
+            progressByHabitId = progress.filterKeys { it.first == date }.mapKeys { it.key.second },
+        )
 
     /**
      * Carries `Day.status` forward. Recorded values are not the only thing that

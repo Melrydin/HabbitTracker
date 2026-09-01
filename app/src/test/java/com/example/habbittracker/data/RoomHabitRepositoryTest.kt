@@ -276,6 +276,39 @@ class RoomHabitRepositoryTest {
         }
 
     @Test
+    fun `a theme habit belongs to its own day only`() =
+        runBlocking {
+            repository.setDayTheme(date, "Deep work")
+
+            assertEquals(1, habitIdsOn(date).size)
+            // The generated habit is day-local: another day must not inherit it.
+            assertTrue(habitIdsOn(date.minusDays(1)).isEmpty())
+            assertTrue(habitIdsOn(date.plusDays(1)).isEmpty())
+        }
+
+    @Test
+    fun `a theme habit counts towards its own day`() =
+        runBlocking {
+            repository.setDayTheme(date, "Deep work")
+            val themeHabit = habitIdsOn(date).single()
+
+            repository.setProgress(date, themeHabit, 1)
+
+            val snapshot = repository.observeDay(date).first()
+            assertEquals("Deep work", snapshot.themeName)
+            assertEquals(DayStatus.PASSED, snapshot.day.status)
+        }
+
+    @Test
+    fun `a normal habit still shows on every day`() =
+        runBlocking {
+            val id = addHabit("Exercise")
+
+            assertTrue(habitIdsOn(date.minusDays(3)).contains(id))
+            assertTrue(habitIdsOn(date).contains(id))
+        }
+
+    @Test
     fun `the theme is stored and an empty theme clears it`() =
         runBlocking {
             repository.setDayTheme(date, "  Calm focus  ")
